@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
-// 1. Configuración de Rate Limit (Upstash)
+// 1. Configuración de Rate Limit
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
@@ -17,14 +17,14 @@ const ratelimit = new Ratelimit({
   prefix: '@upstash/ratelimit',
 });
 
-export async function middleware(request: NextRequest) {
+// CAMBIO AQUÍ: La función ahora debe llamarse 'proxy' o ser 'export default'
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
 
-  // 2. Inicialización del Cliente Supabase (Versión SSR)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -57,26 +57,20 @@ export async function middleware(request: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  // 3. Lógica de Rate Limit para APIs
+  // Lógica de Rate Limit para APIs
   if (request.nextUrl.pathname.startsWith('/api/')) {
     const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
-    const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+    const { success } = await ratelimit.limit(ip);
 
     if (!success) {
       return new NextResponse(
-        JSON.stringify({
-          error: 'El obrero debe ser paciente.',
-          message: 'Límite excedido.',
-        }),
-        {
-          status: 429,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        JSON.stringify({ error: 'El obrero debe ser paciente.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
       );
     }
   }
 
-  // 4. Protección de Rutas
+  // Protección de Rutas
   const isChatRoute = request.nextUrl.pathname.startsWith('/chat');
   const isLoginRoute = request.nextUrl.pathname.startsWith('/login');
 
@@ -91,10 +85,7 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
+// El matcher se mantiene igual
 export const config = {
-  matcher: [
-    '/api/:path*',
-    '/chat/:path*',
-    '/login' // <--- Asegúrate de que esto esté aquí
-  ],
+  matcher: ['/api/:path*', '/chat/:path*', '/login'],
 };
