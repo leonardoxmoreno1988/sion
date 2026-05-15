@@ -2,14 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tus otros estilos si los hay... */
-
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
-}
-
+/* El resto de tu CSS aquí abajo */
 body {
-  margin: 0;
-  padding: 0;
+  background-color: #050505;
+  color: white;
 }
