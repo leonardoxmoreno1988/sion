@@ -70,25 +70,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden">
+    <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden text-black">
       
-      {/* SECCIÓN IZQUIERDA: IMAGEN ORNAMENTAL (50% en Desktop, Background en Mobile) */}
-      <div 
-        className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] transition-all duration-500 bg-cover bg-center"
-        style={{
-          // Puedes reemplazar esta URL de Unsplash por tu JPG local cuando lo tengas, ej: backgroundImage: "url('/tu-imagen.jpg')"
-          backgroundImage: "url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1200')",
-        }}
-      >
-        {/* Capa de superposición para mejorar el contraste en móviles */}
-        <div className="absolute inset-0 bg-white/80 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none" />
+      {/* SECCIÓN IZQUIERDA: CONTENEDOR DE LA IMAGEN */}
+      <div className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] bg-cover bg-center">
+        {/* Usamos una imagen HTML nativa optimizada por CSS para evitar conflictos de comillas en Turbopack */}
+        <img 
+          src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1200" 
+          alt="Archive Ornament" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Capa de contraste para móvil */}
+        <div className="absolute inset-0 bg-white/90 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none" />
       </div>
 
-      {/* SECCIÓN DERECHA: CAJA DE LOGIN (50% en Desktop, Centrado flotante en Mobile) */}
+      {/* SECCIÓN DERECHA: CAJA DE LOGIN */}
       <div className="relative z-10 w-full md:w-1/2 flex items-center justify-center px-6 sm:px-12 lg:px-20">
-        <div className="w-full max-w-[400px] space-y-8 border border-black/5 bg-white/90 md:bg-white p-10 shadow-xl md:shadow-none backdrop-blur-md md:backdrop-blur-none rounded-xl md:rounded-none">
+        <div className="w-full max-w-[400px] space-y-8 border border-black/5 bg-white/95 md:bg-white p-10 shadow-xl md:shadow-none backdrop-blur-md md:backdrop-blur-none rounded-xl md:rounded-none">
           
-          {/* Cabecera Solemne - Modo Claro */}
+          {/* Cabecera Solemne */}
           <div className="text-center">
             <h1 className="text-4xl font-light tracking-[0.25em] text-black font-serif">
               PATMOS
@@ -102,7 +102,7 @@ export default function LoginPage() {
           {/* Formulario */}
           <form className="mt-8 space-y-6" onSubmit={handleLogin}>
             <div className="space-y-4">
-              <div className="relative">
+              <div>
                 <input
                   type="email"
                   placeholder="EMAIL ADDRESS"
@@ -112,7 +112,7 @@ export default function LoginPage() {
                   className="w-full border-b border-black/10 bg-transparent py-3 text-sm text-black outline-none focus:border-black/50 transition-colors placeholder:text-gray-300 tracking-wider"
                 />
               </div>
-              <div className="relative">
+              <div>
                 <input
                   type="password"
                   placeholder="PASSWORD"
@@ -152,7 +152,7 @@ export default function LoginPage() {
             </div>
           </form>
 
-          {/* Cita en Serif Oscura */}
+          {/* Cita */}
           <footer className="pt-8 text-center">
             <p className="text-[10px] italic text-gray-500 font-serif leading-relaxed">
               "Procura con diligencia presentarte a Dios aprobado, como obrero que no tiene de qué avergonzarse..."
