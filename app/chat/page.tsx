@@ -243,4 +243,43 @@ export default function PatmosChat() {
               fontFamily: theme.fontSans,
               transition: 'all 0.3s ease'
             }}
-            placeholder="
+            placeholder="Search the scriptures..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={isLoading}
+          />
+          <button 
+            type="submit"
+            disabled={isLoading}
+            style={{
+              position: 'absolute',
+              right: '10px',
+              backgroundColor: isLoading ? '#475569' : theme.textMain,
+              color: isDarkMode ? '#020617' : '#fff',
+              border: 'none',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+            →
+          </button>
+        </form>
+        <p style={{
+          textAlign: 'center',
+          fontSize: '11px',
+          color: theme.textMuted,
+          marginTop: '15px',
+          textTransform: 'uppercase',
+          letterSpacing: '1.5px',
+          fontFamily: 'serif',
+        }}>
+          Based on Rightly Dividing the Word of Truth
+        </p>
+      </div>
+    </main>
+  );
+}
