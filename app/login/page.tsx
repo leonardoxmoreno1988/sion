@@ -12,7 +12,6 @@ export default function LoginPage() {
   
   const router = useRouter();
 
-  // Inicializamos el cliente de navegador para manejar cookies automáticamente
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -21,7 +20,6 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validación para evitar envíos vacíos (causa del error Anonymous)
     if (!email || !password) {
       setMessage("Please enter both email and password.");
       return;
@@ -39,14 +37,13 @@ export default function LoginPage() {
       setMessage(`Error: ${error.message}`);
       setLoading(false);
     } else {
-      // Forzamos el refresco para que el proxy/middleware lea la nueva cookie
       router.push('/chat');
       router.refresh();
     }
   };
 
   const handleSignUp = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Detiene la propagación al formulario
+    e.preventDefault();
     
     if (!email || !password) {
       setMessage("Email and password are required for registry.");
@@ -60,7 +57,6 @@ export default function LoginPage() {
       email,
       password,
       options: {
-        // Asegura que el enlace de confirmación use el dominio actual
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
@@ -74,80 +70,97 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#050505] px-6">
-      <div className="w-full max-w-[400px] space-y-8 border border-white/5 bg-[#0a0a0a] p-10 shadow-2xl">
-        
-        {/* Cabecera Solemne */}
-        <div className="text-center">
-          <h1 className="text-4xl font-light tracking-[0.25em] text-white font-serif">
-            PATMOS
-          </h1>
-          <div className="mt-2 h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-gray-500">
-            The Watchman of Final Authority
-          </p>
-        </div>
-
-        {/* Formulario de Acceso */}
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="space-y-4">
-            <div className="relative">
-              <input
-                type="email"
-                placeholder="EMAIL ADDRESS"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border-b border-white/10 bg-transparent py-3 text-sm text-white outline-none focus:border-white/40 transition-colors placeholder:text-gray-700"
-              />
-            </div>
-            <div className="relative">
-              <input
-                type="password"
-                placeholder="PASSWORD"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border-b border-white/10 bg-transparent py-3 text-sm text-white outline-none focus:border-white/40 transition-colors placeholder:text-gray-700"
-              />
-            </div>
-          </div>
-
-          {/* Mensajes de Error o Estado */}
-          {message && (
-            <div className="bg-red-900/10 border border-red-900/20 py-2 text-[10px] text-red-400 text-center uppercase tracking-widest leading-relaxed px-2">
-              {message}
-            </div>
-          )}
-
-          {/* Acciones */}
-          <div className="flex flex-col gap-4 pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-white py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-black transition-all hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              {loading ? 'AUTHENTICATING...' : 'ACCESS THE ARCHIVE'}
-            </button>
-            
-            <button
-              type="button"
-              onClick={handleSignUp}
-              disabled={loading}
-              className="text-[9px] uppercase tracking-[0.2em] text-gray-600 hover:text-white transition-colors disabled:opacity-30"
-            >
-              Request New Registry
-            </button>
-          </div>
-        </form>
-
-        {/* Cita Final */}
-        <footer className="pt-8 text-center">
-          <p className="text-[10px] italic text-gray-700 font-serif leading-relaxed">
-            "Procura con diligencia presentarte a Dios aprobado, como obrero que no tiene de qué avergonzarse..."
-          </p>
-        </footer>
+    <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden">
+      
+      {/* SECCIÓN IZQUIERDA: IMAGEN ORNAMENTAL (50% en Desktop, Background en Mobile) */}
+      <div 
+        className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] transition-all duration-500 bg-cover bg-center"
+        style={{
+          // Puedes reemplazar esta URL de Unsplash por tu JPG local cuando lo tengas, ej: backgroundImage: "url('/tu-imagen.jpg')"
+          backgroundImage: "url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1200')",
+        }}
+      >
+        {/* Capa de superposición para mejorar el contraste en móviles */}
+        <div className="absolute inset-0 bg-white/80 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none" />
       </div>
+
+      {/* SECCIÓN DERECHA: CAJA DE LOGIN (50% en Desktop, Centrado flotante en Mobile) */}
+      <div className="relative z-10 w-full md:w-1/2 flex items-center justify-center px-6 sm:px-12 lg:px-20">
+        <div className="w-full max-w-[400px] space-y-8 border border-black/5 bg-white/90 md:bg-white p-10 shadow-xl md:shadow-none backdrop-blur-md md:backdrop-blur-none rounded-xl md:rounded-none">
+          
+          {/* Cabecera Solemne - Modo Claro */}
+          <div className="text-center">
+            <h1 className="text-4xl font-light tracking-[0.25em] text-black font-serif">
+              PATMOS
+            </h1>
+            <div className="mt-2 h-[1px] w-full bg-gradient-to-r from-transparent via-black/20 to-transparent" />
+            <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-gray-400">
+              The Watchman of Final Authority
+            </p>
+          </div>
+
+          {/* Formulario */}
+          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+            <div className="space-y-4">
+              <div className="relative">
+                <input
+                  type="email"
+                  placeholder="EMAIL ADDRESS"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full border-b border-black/10 bg-transparent py-3 text-sm text-black outline-none focus:border-black/50 transition-colors placeholder:text-gray-300 tracking-wider"
+                />
+              </div>
+              <div className="relative">
+                <input
+                  type="password"
+                  placeholder="PASSWORD"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border-b border-black/10 bg-transparent py-3 text-sm text-black outline-none focus:border-black/50 transition-colors placeholder:text-gray-300 tracking-wider"
+                />
+              </div>
+            </div>
+
+            {/* Mensajes de Alerta */}
+            {message && (
+              <div className="bg-black/5 border border-black/10 py-2 text-[10px] text-black text-center uppercase tracking-widest leading-relaxed px-2 font-medium">
+                {message}
+              </div>
+            )}
+
+            {/* Botones de Acción */}
+            <div className="flex flex-col gap-4 pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-black py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                {loading ? 'AUTHENTICATING...' : 'ACCESS THE ARCHIVE'}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleSignUp}
+                disabled={loading}
+                className="text-[9px] uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors disabled:opacity-30 font-medium"
+              >
+                Request New Registry
+              </button>
+            </div>
+          </form>
+
+          {/* Cita en Serif Oscura */}
+          <footer className="pt-8 text-center">
+            <p className="text-[10px] italic text-gray-500 font-serif leading-relaxed">
+              "Procura con diligencia presentarte a Dios aprobado, como obrero que no tiene de qué avergonzarse..."
+            </p>
+          </footer>
+        </div>
+      </div>
+
     </div>
   );
 }
