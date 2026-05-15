@@ -1,7 +1,7 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script"; // Importación obligatoria para scripts externos
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,17 +33,18 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* El contenido de la aplicación */}
         {children}
         
-        {/* Fathom - Beautiful, simple website analytics */}
+        {/* Fathom Analytics - Inyectado de forma eficiente */}
         <Script
           src="https://cdn.usefathom.com/script.js"
           data-site="UXLJGDOS"
-          strategy="afterInteractive" // Se carga automáticamente después de que la página sea interactiva
+          strategy="afterInteractive"
+          // Esto asegura que Fathom ignore tus visitas locales si estás en localhost
+          data-spa="auto" 
         />
       </body>
     </html>
   );
 }
-
-
