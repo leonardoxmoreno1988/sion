@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
-export const maxDuration = 60; // Solo funciona en planes Pro o Hobby de Vercel (hasta 10-60s)
-// Inicializamos los clientes con las llaves de tu archivo .env.local
+export const maxDuration = 60;
+
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
 });
@@ -19,32 +19,26 @@ export async function POST(req: Request) {
     // 1. Tomamos la última pregunta del usuario
     const lastMessage = messages[messages.length - 1].content;
 
-    // 2. Convertimos la pregunta en un "vector" (embedding)
+    // 2. Convertimos la pregunta en un "vector"
     const embeddingResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: lastMessage,
-      
     });
     
     const [{ embedding }] = embeddingResponse.data;
-    
 
-    // 3. Buscamos en Supabase los fragmentos más parecidos
-    const { data: documents, error } = await supabase.rpc('match_documents', {
+    // 3. Buscamos en Supabase
+    const { data: documents, error: matchError } = await supabase.rpc('match_documents', {
       query_embedding: embedding,
-      match_threshold: 0.2, // Umbral de similitud
-      match_count: 25,       // Traer los 5 fragmentos más relevantes
+      match_threshold: 0.2,
+      match_count: 25,
     });
 
-    if (error) {
-      console.error("Error en match_documents:", error);
-      throw error;
-    }
+    if (matchError) throw matchError;
 
-    // 4. Unimos los fragmentos encontrados para darle contexto a la IA
     const contextText = documents?.map((doc: any) => doc.content).join('\n\n') || '';
 
-   // 5. LLAMADA A OPENAI: EL DEFENSOR CON REFERENCIAS CRUZADAS
+    // 5. LLAMADA A OPENAI
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -109,8 +103,32 @@ CONTEXT: ${contextText}
       max_tokens: 1200,
     });
 
+    const aiResponse = response.choices[0].message.content;
+
+    // --- NUEVO: GUARDADO EN CHAT_HISTORY ---
+    // Guardamos la interacción en Supabase antes de retornar la respuesta
+    const { error: historyError } = await supabase
+      .from('chat_history')
+      .insert([
+        { 
+          user_query: lastMessage, 
+          bot_response: aiResponse,
+          metadata: { 
+            model: 'gpt-4o-mini',
+            match_count: documents?.length || 0,
+            has_context: contextText.length > 0
+          }
+        }
+      ]);
+
+    if (historyError) {
+      console.error("Error saving chat history:", historyError.message);
+      // No lanzamos error para no romper la experiencia del usuario si falla el log
+    }
+    // ---------------------------------------
+
     // 6. Enviamos la respuesta de vuelta al chat
-    return new Response(JSON.stringify({ content: response.choices[0].message.content }), {
+    return new Response(JSON.stringify({ content: aiResponse }), {
       headers: { 'Content-Type': 'application/json' },
     });
 
