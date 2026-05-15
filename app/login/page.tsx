@@ -1,5 +1,6 @@
 'use client';
 
+import "./globals.css";
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr'; 
 import { useRouter } from 'next/navigation';
@@ -58,80 +59,76 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  return (
-    <div className="flex min-h-screen flex-col justify-center bg-[#0a0a0a] px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-center text-4xl font-bold tracking-tighter text-white font-serif">
+  // Reemplaza el bloque de retorno en app/login/page.tsx con este diseño pulido:
+
+return (
+  <div className="flex min-h-screen items-center justify-center bg-[#050505] px-6">
+    <div className="w-full max-w-[400px] space-y-8 border border-white/5 bg-[#0a0a0a] p-10 shadow-2xl">
+      <div className="text-center">
+        <h2 className="text-4xl font-light tracking-[0.25em] text-white font-serif">
           PATMOS
         </h2>
-        <p className="mt-2 text-center text-xs uppercase tracking-[0.2em] text-gray-500">
+        <div className="mt-2 h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-gray-500">
           The Watchman of Final Authority
         </p>
       </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6" onSubmit={handleLogin}>
+      <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+        <div className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-xs font-semibold uppercase text-gray-400">
-              Email
-            </label>
-            <div className="mt-2">
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="block w-full border-0 bg-white/5 py-2 text-white ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-gray-500 sm:text-sm px-3 outline-none transition-all"
-              />
-            </div>
+            <input
+              type="email"
+              placeholder="EMAIL ADDRESS"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border-b border-white/10 bg-transparent py-3 text-sm text-white outline-none focus:border-white/40 transition-colors placeholder:text-gray-700"
+            />
           </div>
-
           <div>
-            <label htmlFor="password" className="block text-xs font-semibold uppercase text-gray-400">
-              Password
-            </label>
-            <div className="mt-2">
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="block w-full border-0 bg-white/5 py-2 text-white ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-gray-500 sm:text-sm px-3 outline-none transition-all"
-              />
-            </div>
+            <input
+              type="password"
+              placeholder="PASSWORD"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border-b border-white/10 bg-transparent py-3 text-sm text-white outline-none focus:border-white/40 transition-colors placeholder:text-gray-700"
+            />
           </div>
+        </div>
 
-          {message && (
-            <div className="text-[10px] text-gray-400 border border-white/10 p-3 rounded bg-white/5 text-center leading-tight">
-              {message}
-            </div>
-          )}
-
-          <div className="flex flex-col gap-3">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-white px-3 py-2 text-sm font-bold text-black hover:bg-gray-200 disabled:opacity-50 transition-colors"
-            >
-              {loading ? 'PROCESSING...' : 'ENTER THE ARCHIVE'}
-            </button>
-            <button
-              type="button"
-              onClick={handleSignUp}
-              disabled={loading}
-              className="w-full border border-white/20 px-3 py-2 text-sm font-bold text-white hover:bg-white/5 disabled:opacity-50 transition-colors"
-            >
-              REGISTER
-            </button>
+        {message && (
+          <div className="bg-red-900/10 border border-red-900/20 py-2 text-[10px] text-red-500 text-center uppercase tracking-widest">
+            {message}
           </div>
-        </form>
+        )}
 
-        <p className="mt-12 text-center text-[10px] text-gray-600 italic font-serif">
-          "Procura con diligencia presentarte a Dios aprobado, como obrero que no tiene de qué avergonzarse..."
+        <div className="flex flex-col gap-4 pt-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-white py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-black transition-all hover:bg-gray-200 disabled:opacity-30"
+          >
+            {loading ? 'AUTHENTICATING...' : 'ACCESS THE ARCHIVE'}
+          </button>
+          
+          <button
+            type="button"
+            onClick={handleSignUp}
+            className="text-[9px] uppercase tracking-[0.2em] text-gray-600 hover:text-white transition-colors"
+          >
+            Request New Registry
+          </button>
+        </div>
+      </form>
+
+      <footer className="pt-8 text-center">
+        <p className="text-[10px] italic text-gray-700 font-serif leading-relaxed">
+          "Procura con diligencia presentarte a Dios aprobado..."
         </p>
-      </div>
+      </footer>
     </div>
-  );
+  </div>
+);
 }
