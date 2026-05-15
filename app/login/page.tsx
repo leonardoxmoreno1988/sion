@@ -91,7 +91,7 @@ export default function LoginPage() {
           {/* Cabecera Solemne */}
           <div className="text-center">
             <h1 className="text-4xl font-light tracking-[0.25em] text-black font-serif">
-              PATMOS
+               PATMOS
             </h1>
             <div className="mt-2 h-[1px] w-full bg-gradient-to-r from-transparent via-black/20 to-transparent" />
             <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-gray-400">
