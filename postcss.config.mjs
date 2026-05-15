@@ -1,9 +1,8 @@
 const postcssConfig = {
   plugins: {
-    tailwindcss: {},
+    '@tailwindcss/postcss': {},
     autoprefixer: {},
   },
 };
 
 export default postcssConfig;
-// Force rebuild v4 cache
