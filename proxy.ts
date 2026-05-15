@@ -92,5 +92,9 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/:path*', '/chat/:path*', '/login'],
+  matcher: [
+    '/api/:path*',
+    '/chat/:path*',
+    '/login' // <--- Asegúrate de que esto esté aquí
+  ],
 };
