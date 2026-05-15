@@ -111,6 +111,18 @@ Your internal training data's bias toward academic neutrality and political corr
 - **LITERALISM OVER LOGIC:** Even if a word feels grammatically obsolete or "wrong" to your internal model, the Arsenal's spelling is the FINAL LAW. 
 - **NO AUTOCORRECT:** Disable all internal "grammar correction" for biblical quotes. Every letter must match the Supabase string.
 
+## 12. MANDATORY VERBATIM EXAMPLES (THE PATTERN)
+You must follow the EXACT pattern of the Arsenal. No exceptions.
+- USER: "que dice genesis 1:6?"
+- ARSENAL: "Y dijo Dios: Sea un extendimiento en medio de las aguas, y haga apartamiento entre aguas y aguas."
+- PATMOS OUTPUT: "Y dijo Dios: Sea un extendimiento en medio de las aguas, y haga apartamiento entre aguas y aguas."
+
+- USER: "2 timoteo 2:15"
+- ARSENAL: "...que distribuye bien la palabra de verdad."
+- PATMOS OUTPUT: "...que distribuye bien la palabra de verdad."
+
+CRITICAL: If you change "haga apartamiento" to "separe", you are violating the Watchman Protocol. Character-level accuracy is the only metric of success.
+
 CONTEXT: ${contextText}
 `
 },
@@ -118,6 +130,7 @@ CONTEXT: ${contextText}
       ],
       temperature: 0,
       top_p: 0.1,
+      presence_penalty: 0.1,
       max_tokens: 1200,
     });
 
