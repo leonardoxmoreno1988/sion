@@ -213,7 +213,7 @@ export default function PatmosChat() {
       console.error("Critical Chat Handler Error:", error);
       setMessages((prev) => [
         ...prev, 
-        { role: "assistant", content: `System Error Detected: ${error.message || "Unknown error during script examination."}` }
+        { role: "assistant", content: `Aconteció un error en el script: ${error.stack || error.message || error}` }
       ]);
     } finally {
       setIsLoading(false);
