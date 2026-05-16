@@ -135,40 +135,56 @@ export default function PatmosChat() {
     try {
       let contextText = "";
 
-      // 1. ANÁLISIS POR PALABRAS CLAVE DIRECTAS (Evita colapsos de PostgREST)
-      const coreWords = currentInput.split(" ").filter(w => w.length > 4).slice(0, 2);
+      // 1. EXTRACCIÓN DINÁMICA POR METADATOS (Estructura limpia basada en tus capturas)
+      // Captura patrones como "2 Timoteo 2:15", "Génesis 1:6", "Genesis 1:6"
+      const match = currentInput.match(/(\d?\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s*(\d+):(\d+)/);
       
-      if (coreWords.length > 0) {
-        const { data: textFragments, error: textError } = await supabase
-          .from('documents')
-          .select('content, metadata')
-          .ilike('content', `%${coreWords[0]}%`)
-          .limit(15);
+      if (match) {
+        // Normalizamos el nombre del libro quitándole las tildes para que haga match con tu DB
+        let bookName = match[1].trim();
+        bookName = bookName.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // "Génesis" -> "Genesis"
+        
+        // Capitalizamos la primera letra (ej: "genesis" -> "Genesis") por si el usuario escribe en minúsculas
+        bookName = bookName.charAt(0).toUpperCase() + bookName.slice(1);
 
-        if (!textError && textFragments && textFragments.length > 0) {
-          const filtered = textFragments.filter(f => 
-            f.metadata?.version === 'RV1865' || f.metadata?.version === 'KJV'
-          );
-          contextText = filtered.map(f => f.content).join("\n\n");
+        const chapterNum = parseInt(match[2], 10);
+        const verseNum = parseInt(match[3], 10);
+
+        // Búsqueda quirúrgica usando las llaves exactas del JSONB que vimos en tu captura
+        const { data: exactVerses, error: dbError } = await supabase
+          .from('documents')
+          .select('content')
+          .eq('metadata->>book', bookName)
+          .eq('metadata->>chapter', chapterNum.toString())
+          .eq('metadata->>verse', verseNum.toString())
+          .eq('metadata->>version', 'RV1865');
+
+        if (!dbError && exactVerses && exactVerses.length > 0) {
+          contextText = exactVerses.map(f => f.content).join("\n\n");
         }
       }
 
-      // 2. CONTENCIÓN DE SEGURIDAD GENERAL: Evita el bloqueo del prompt cargando fragmentos base
+      // 2. CONTENCIÓN DE RESPALDO (Búsqueda por palabra clave si no se detectó una cita numérica)
       if (!contextText) {
-        const { data: baseline } = await supabase
-          .from('documents')
-          .select('content, metadata')
-          .limit(10);
-          
-        if (baseline) {
-          const filteredBaseline = baseline.filter(f => 
-            f.metadata?.version === 'RV1865' || f.metadata?.version === 'KJV'
-          ).slice(0, 4);
-          contextText = filteredBaseline.map(f => f.content).join("\n\n");
+        // Limpiamos también la palabra clave de tildes para la búsqueda de texto
+        const cleanInput = currentInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const coreWords = cleanInput.split(" ").filter(w => w.length > 5).slice(0, 1);
+        
+        if (coreWords.length > 0) {
+          const { data: keywordFragments } = await supabase
+            .from('documents')
+            .select('content')
+            .ilike('content', `%${coreWords[0]}%`)
+            .eq('metadata->>version', 'RV1865')
+            .limit(4);
+
+          if (keywordFragments && keywordFragments.length > 0) {
+            contextText = keywordFragments.map(f => f.content).join("\n\n");
+          }
         }
       }
 
-      // 3. DISPARO A LA API DOGMÁTICA
+      // 3. ENVÍO DEL CONTEXTO REAL A LA API DE PATMOS
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
