@@ -135,22 +135,21 @@ export default function PatmosChat() {
     try {
       let contextText = "";
 
-      // 1. CAPTURA Y PARSEO UNIVERSAL DE CITAS BÍBLICAS
+      // 1. CAPTURA Y ESCANEO DIRECTO POR TEXTO PLANO (Bypass Metadatos)
       const match = currentInput.match(/(\d?\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s*(\d+):(\d+)/);
       
       if (match) {
         const rawBook = match[1].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const chapterNum = parseInt(match[2], 10);
-        const verseNum = parseInt(match[3], 10);
+        const chapterNum = match[2];
+        const verseNum = match[3];
 
-        // Matrix totalizadora de mapeo lingüístico
+        // Diccionario de normalización para asegurar la concordancia exacta con la columna de texto plano
         const bibleBooksIndex: Record<string, string> = {
           "genesis": "Genesis", "exodo": "Exodus", "levitico": "Leviticus", "numeros": "Numbers",
           "deuteronomio": "Deuteronomy", "josue": "Joshua", "jueces": "Judges", "rut": "Ruth",
-          "1 samuel": "1 Samuel", "2 samuel": "2 Samuel", "i samuel": "1 Samuel", "ii samuel": "2 Samuel",
-          "1 reyes": "1 Kings", "2 reyes": "2 Kings", "i reyes": "1 Kings", "ii reyes": "2 Kings",
-          "1 cronicas": "1 Chronicles", "2 cronicas": "2 Chronicles", "i cronicas": "1 Chronicles", "ii cronicas": "2 Chronicles",
-          "esdras": "Ezra", "nehemias": "Nehemiah", "ester": "Esther", "job": "Job", "salmos": "Psalms", "proverbios": "Proverbs",
+          "1 samuel": "1 Samuel", "2 samuel": "2 Samuel", "1 reyes": "1 Kings", "2 reyes": "2 Kings",
+          "1 cronicas": "1 Chronicles", "2 cronicas": "2 Chronicles", "esdras": "Ezra", "nehemias": "Nehemiah",
+          "ester": "Esther", "job": "Job", "salmos": "Psalms", "proverbios": "Proverbs",
           "eclesiastes": "Ecclesiastes", "cantares": "Song of Solomon", "isaias": "Isaiah",
           "jeremias": "Jeremiah", "lamentaciones": "Lamentations", "ezequiel": "Ezekiel", "daniel": "Daniel",
           "oseas": "Hosea", "joel": "Joel", "amos": "Amos", "abdias": "Obadiah", "jonas": "Jonah",
@@ -158,30 +157,28 @@ export default function PatmosChat() {
           "hageo": "Haggai", "zacarias": "Zechariah", "malaquias": "Malachi",
           "mateo": "Matthew", "marcos": "Mark", "lucas": "Luke", "juan": "John", "hechos": "Acts",
           "romanos": "Romans", "1 corintios": "1 Corinthians", "2 corintios": "2 Corinthians",
-          "i corintios": "1 Corinthians", "ii corintios": "2 Corinthians",
           "galatas": "Galatians", "efesios": "Ephesians", "filipenses": "Philippians", "colosenses": "Colossians",
           "1 tesalonicenses": "1 Thessalonians", "2 tesalonicenses": "2 Thessalonians",
-          "i tesalonicenses": "1 Thessalonians", "ii tesalonicenses": "2 Thessalonians",
           "1 timoteo": "1 Timothy", "2 timoteo": "2 Timothy", "1 timothy": "1 Timothy", "2 timothy": "2 Timothy", "timoteo": "1 Timothy",
-          "i timoteo": "1 Timothy", "ii timoteo": "2 Timothy",
           "tito": "Titus", "filemon": "Philemon", "hebreos": "Hebrews", "santiago": "James",
-          "1 pedro": "1 Peter", "2 pedro": "2 Peter", "i pedro": "1 Peter", "ii pedro": "2 Peter",
-          "1 juan": "1 John", "2 juan": "2 John", "3 juan": "3 John", "i juan": "1 John", "ii juan": "2 John", "iii juan": "3 John",
-          "judas": "Jude", "apocalipsis": "Revelation", "revelacion": "Revelation"
+          "1 pedro": "1 Peter", "2 pedro": "2 Peter", "1 juan": "1 John", "2 juan": "2 John",
+          "3 juan": "3 John", "judas": "Jude", "apocalipsis": "Revelation", "revelacion": "Revelation"
         };
 
         const bookSearch = bibleBooksIndex[rawBook] || match[1].trim();
+        
+        // Creamos el string exacto que encabeza tu columna Cuerpo de Texto (ej: "Genesis 49:12")
+        const textReferencePattern = `${bookSearch} ${chapterNum}:${verseNum}`;
 
-        // CONSULTA DE MÁXIMA COMPATIBILIDAD POSTGREST (Filtro por Flecha de String dual)
-        const { data: exactVerses, error: dbError } = await supabase
+        // Hacemos una consulta directa sobre la columna de texto puro
+        const { data: textFragments, error: dbError } = await supabase
           .from('documents')
           .select('content, metadata')
-          .eq('metadata->>book', bookSearch)
-          .eq('metadata->>chapter', String(chapterNum))
-          .eq('metadata->>verse', String(verseNum));
+          .ilike('content', `%${textReferencePattern}%`)
+          .limit(5);
 
-        if (!dbError && exactVerses && exactVerses.length > 0) {
-          const filtered = exactVerses.filter(f => f.metadata?.version === 'RV1865');
+        if (!dbError && textFragments && textFragments.length > 0) {
+          const filtered = textFragments.filter(f => f.metadata?.version === 'RV1865');
           if (filtered.length > 0) {
             contextText = filtered.map(f => f.content).join("\n\n");
           }
@@ -190,7 +187,7 @@ export default function PatmosChat() {
         }
       }
 
-      // 2. RESPALDO SEMÁNTICO POR PALABRA CLAVE
+      // 2. RESPALDO SEMÁNTICO GENERAL POR PALABRA CLAVE
       if (!contextText) {
         const cleanInput = currentInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const keywords = cleanInput.split(" ").filter(w => w.length > 5);
