@@ -3,18 +3,24 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Inicializamos OpenAI (Asegúrate de tener la API Key en tu .env)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// EL CORAZÓN DOCTRINAL DE PATMOS (Inalterable en el Servidor)
+const PATMOS_SYSTEM_PROMPT = `You are Patmos, a solemn, academic, and authoritative biblical theologist. 
+Your analysis is strictly grounded in the principle of "Rightly Dividing the Word of Truth" (2 Timothy 2:15). You must critically distinguish between different dispensations, administrations, covenants, and specifically to whom a scripture is addressed (Israel, the Gentiles, or the Church of God).
+Maintain a reverent, precise, and deeply focused tone. Avoid generic AI pleasantries, conversational filler, modern theological bias, or emotional coddling. Deliver execution with pure biblical authority.`;
+
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
-    const { messages } = await req.json(); // Recibimos los mensajes del frontend
+    const { messages } = await req.json(); 
+    
+    // Capturamos el último mensaje puro del usuario para el registro histórico
     const lastMessage = messages[messages.length - 1].content;
 
-    // 1. Crear el cliente de Supabase (SSR)
+    // 1. Conexión con Supabase (SSR)
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -27,32 +33,34 @@ export async function POST(req: Request) {
       }
     );
 
-    // 2. Obtener el usuario autenticado
+    // 2. Verificación de Identidad (Filtro de Seguridad)
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return new NextResponse('No autorizado. Por favor, inicia sesión.', { status: 401 });
+      return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // 3. Llamada a OpenAI (Arsenal 1865)
-    // Aquí puedes añadir tu lógica de RAG o System Prompt solemne
+    // 3. Inyección del Prompt de Sistema e Historial Completo
+    const fullPayload = [
+      { role: 'system', content: PATMOS_SYSTEM_PROMPT },
+      ...messages
+    ];
+
+    // 4. Consulta al Arsenal 1865 (OpenAI)
     const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo', // O el modelo que prefieras
-      messages: [
-        { role: 'system', content: 'Eres Patmos, el Vigilante de la Autoridad Final. Respondes con sabiduría, rigor académico y tono solemne.' },
-        ...messages
-      ],
+      model: 'gpt-4-turbo', 
+      messages: fullPayload,
+      temperature: 0.3, // Temperatura baja para evitar alucinaciones y garantizar rigor académico
     });
 
     const aiResponse = response.choices[0].message.content;
 
-    // 4. GUARDAR EN EL HISTORIAL (Persistencia)
-    // Asumimos que tu tabla se llama 'chat_history' y tiene las columnas: user_id, user_query, bot_response
+    // 5. Registro en la Memoria Histórica (Persistencia)
     const { error: dbError } = await supabase
       .from('chat_history')
       .insert([
         {
-          user_id: user.id, // Vínculo sagrado con el usuario
+          user_id: user.id, 
           user_query: lastMessage,
           bot_response: aiResponse,
           metadata: { source: 'Arsenal 1865', timestamp: new Date().toISOString() }
@@ -60,13 +68,14 @@ export async function POST(req: Request) {
       ]);
 
     if (dbError) {
-      console.error('Error guardando en historial:', dbError);
+      console.error('Database history logging failure:', dbError);
     }
 
+    // Retornamos la estructura limpia al frontend
     return NextResponse.json({ role: 'assistant', content: aiResponse });
 
   } catch (error) {
-    console.error('Chat Error:', error);
-    return new NextResponse('Error interno en el Arsenal.', { status: 500 });
+    console.error('Patmos Core Chat Error:', error);
+    return new NextResponse('Internal Error within the Arsenal.', { status: 500 });
   }
 }
