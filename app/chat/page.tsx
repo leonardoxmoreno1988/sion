@@ -135,27 +135,37 @@ export default function PatmosChat() {
     try {
       let contextText = "";
 
-      // 1. PARSER DE CITAS BÍBLICAS TRADICIONALES
+      // 1. PARSER QUIRÚRGICO DE CITAS BÍBLICAS
       const match = currentInput.match(/(\d?\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s*(\d+):(\d+)/);
       
       if (match) {
+        const rawBook = match[1].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const chapterNum = match[2];
         const verseNum = match[3];
-        
-        // Extramos las primeras 3 letras del libro ingresado (ej: "2 Timoteo" -> "2 Ti", "Génesis" -> "Gén")
-        // Y normalizamos limpiando tildes para que haga match con tu DB ("Gén" -> "Gen")
-        let bookSnippet = match[1].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").slice(0, 3);
 
-        // CONSULTA DE PRECISIÓN EN SERVIDOR: Filtramos por capítulo y una aproximación del libro
-        // Esto reduce el set de datos de 62,000 filas a solo 20 o 30 registros, burlando el límite de Supabase
-        const { data: verses, error: dbError } = await supabase
+        const bookMap: Record<string, string> = {
+          "2 timoteo": "2 Tim",
+          "2 timothy": "2 Tim",
+          "timoteo": "1 Tim",
+          "1 timoteo": "1 Tim",
+          "genesis": "Gen",
+          "exodo": "Exo",
+          "juan": "Joh",
+          "romanos": "Rom",
+          "apocalipsis": "Rev"
+        };
+
+        const bookSearch = bookMap[rawBook] || match[1].trim();
+
+        // Ejecutamos la consulta unificada aislando el capítulo en PostgREST
+        const { data: exactVerses, error: dbError } = await supabase
           .from('documents')
           .select('content, metadata')
-          .eq('metadata->>chapter', chapterNum)
-          .ilike('metadata->>book', `%${bookSnippet}%`);
+          .eq('metadata->>book', bookSearch)
+          .or(`metadata->>chapter.eq.${chapterNum},metadata->chapter.eq.${chapterNum}`);
 
-        if (!dbError && verses && verses.length > 0) {
-          const matched = verses.filter(f => {
+        if (!dbError && exactVerses && exactVerses.length > 0) {
+          const filtered = exactVerses.filter(f => {
             const meta = f.metadata;
             if (!meta) return false;
 
@@ -165,15 +175,15 @@ export default function PatmosChat() {
             return isCorrectVersion && matchesVerse;
           });
 
-          if (matched.length > 0) {
-            contextText = matched.map(f => f.content).join("\n\n");
+          if (filtered.length > 0) {
+            contextText = filtered.map(f => f.content).join("\n\n");
           }
         } else if (dbError) {
           console.error("Supabase Database Query Error:", dbError.message);
         }
       }
 
-      // 2. RESPALDO LOGÍSTICO POR CONTENIDO (Si la metadata exacta no arrojó resultados)
+      // 2. RESPALDO LOGÍSTICO POR PALABRA CLAVE
       if (!contextText) {
         const cleanInput = currentInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const keywords = cleanInput.split(" ").filter(w => w.length > 5);
@@ -183,10 +193,9 @@ export default function PatmosChat() {
             .from('documents')
             .select('content, metadata')
             .ilike('content', `%${keywords[0]}%`)
-            .limit(10);
+            .limit(15);
 
           if (keywordFragments && keywordFragments.length > 0) {
-            // Filtramos en caliente para asegurar la soberanía de las versiones elegidas
             const filteredKeywords = keywordFragments.filter(f => 
               f.metadata?.version === 'RV1865' || f.metadata?.version === 'KJV'
             ).slice(0, 4);
@@ -214,7 +223,7 @@ export default function PatmosChat() {
       console.error("Critical Chat Handler Error:", error);
       setMessages((prev) => [
         ...prev, 
-        { role: "assistant", content: `Aconteció un error en el script: ${error.stack || error.message || error}` }
+        { role: "assistant", content: `Aconteció un error en el script: ${error.message || error}` }
       ]);
     } finally {
       setIsLoading(false);
