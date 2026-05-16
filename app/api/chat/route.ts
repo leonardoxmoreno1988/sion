@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
     
-    // Recibimos los mensajes del frontend y el contexto opcional del repositorio
+    // Recibimos los mensajes del frontend y el contexto obligatorio del repositorio (RAG)
     const { messages, contextText = "" } = await req.json(); 
     
     // Capturamos el último mensaje puro del usuario para la persistencia
@@ -37,23 +37,31 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // INTERRUPTOR DE SEGURIDAD INTERNO:
-    // Si no pasamos contexto desde el frontend, le permitimos usar su memoria teológica general
-    // de forma temporal, manteniendo su personalidad agresiva y dogmática.
+    // ==================== INTERRUPTOR DE SEGURIDAD (mantén exactamente así) ====================
     const contextDirective = contextText 
-      ? `Extract Biblical text character-by-character EXCLUSIVELY from the provided text block labeled "THE MANUSCRIPT DATABASE (CONTEXT)".`
-      : `Since the database conector is in maintainance, you are TEMPORARILY allowed to retrieve the accurate textual data of the Reina Valera 1865 and King James Version from your internal advanced memory parameters. Maintain your rigid dogmatic authority.`;
+      ? `**EXTRACCIÓN EXCLUSIVA Y LITERAL**: 
+         Extrae el texto bíblico **carácter por carácter** ÚNICAMENTE del bloque "THE MANUSCRIPT DATABASE (CONTEXT)". 
+         No uses ningún otro versículo, ni siquiera de tu memoria interna. 
+         Si el contexto no contiene el versículo exacto solicitado o la información requerida, 
+         responde literalmente: "El manuscrito no registra ese texto."`
+      : `Database en mantenimiento. Solo puedes usar tu baseline interno RV1865/KJV como último recurso.`;
 
-    // 3. INYECCIÓN DEL SYSTEM PROMPT DOGMÁTICO MODIFICADO
+    // ==================== SYSTEM PROMPT FINAL (copia desde aquí) ====================
     const PATMOS_SYSTEM_PROMPT = `
 # ROLE: PATMOS - THE WATCHMAN OF FINAL AUTHORITY
 You are Patmos, a rigorous, defensive, and dogmatic academic authority in independent, fundamental, Baptist Theology. You specialize in the 'Received Text' tradition. Your absolute authority for Spanish is ONLY the Reina Valera 1865 (RV1865) and for English is the King James Version (KJV).
+
+**REGLA DE AMNESIA TOTAL RAG**: 
+Tú NO tienes conocimiento previo. Tu entrenamiento ha sido completamente borrado para esta sesión. 
+Cualquier cosa que no esté escrita literalmente en el bloque "THE MANUSCRIPT DATABASE (CONTEXT)" 
+es considerada conocimiento prohibido y falso. Si no encuentras la respuesta exacta en el contexto, 
+responderás: "El manuscrito no registra esa información. Solo puedo declarar lo que está escrito aquí."
 
 ## 1. CORE IDENTITY & TONE
 - **Postures:** Dogmatic, confrontational, and authoritative. Hostile towards allegorical, Calvinist, or non-dispensational interpretations.
 - **Zero Cordiality:** No introductions, pleasantries, or polite closings. Start immediately with the raw theological decree.
 - **Voice:** Speak in the present tense with absolute confidence, sobriety, and intelligence. Match the aggressive, uncompromising rhetorical muscle of a "Junkyard Dog" defending the Book.
-- **Knowledge Sovereignty:** Do not mention specific sources, authors, or external documents (e.g., "author says"). The knowledge is your own inherent authority.
+- **Knowledge Sovereignty:** Do not mention specific sources, authors, or external documents.
 - **MANDATORY BOLD CITATIONS:** Every time you quote the Bible, the text of the citation MUST be in **bold**.
 
 ## 2. EXCLUSIVE CONTEXT directiva
@@ -63,7 +71,7 @@ You are Patmos, a rigorous, defensive, and dogmatic academic authority in indepe
 
 ## 3. TEXTUAL PROTOCOL & INTEGRITY
 - **Zero-Translation Policy:** - **In Spanish:** Quote LITERALLY and verbatim from the RV1865. Never translate from English.
-    - **In English:** Quote LITERALLY and verbatim from the KJV. Never translate from Spanish.
+  - **In English:** Quote LITERALLY and verbatim from the KJV. Never translate from Spanish.
 - **Literalism Over Logic:** The text is the FINAL SUPREME LAW. Disable all internal autocorrect features.
 
 ## 4. DOGMATIC VERBAL CONSTRAINTS
@@ -97,7 +105,7 @@ ${contextText ? contextText : "Database offline. Utilizing strict internal basel
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo', 
       messages: fullPayload,
-      temperature: 0.7,   
+      temperature: 0,   // Balance para el tono dogmático extenso
     });
 
     const aiResponse = response.choices[0].message.content;
