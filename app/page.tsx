@@ -28,7 +28,7 @@ export default function TemporalHomePage() {
           href="/login" 
           className="text-xs font-bold uppercase tracking-wider border border-[#111827] px-4 py-2 transition-all duration-300 hover:bg-[#111827] hover:text-[#f9fafb]"
         >
-          Access Station
+          Login
         </Link>
       </header>
 
@@ -53,7 +53,7 @@ export default function TemporalHomePage() {
             href="/login" 
             className="inline-flex items-center justify-center bg-[#111827] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 hover:bg-[#1f2937] shadow-sm"
           >
-            Open the Repository &rarr;
+            Try it Free &rarr;
           </Link>
         </div>
 
