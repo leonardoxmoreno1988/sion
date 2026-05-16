@@ -12,6 +12,11 @@ export async function POST(req: Request) {
     const cookieStore = await cookies();
     
     const { messages, contextText = "" } = await req.json(); 
+    
+    // ==================== DEBUG RAG ====================
+    console.log("🔍 DEBUG RAG - Longitud del contexto recibido:", contextText.length);
+    console.log("🔍 DEBUG RAG - Primeros 300 caracteres del contexto:", contextText.substring(0, 300));
+
     const lastMessage = messages[messages.length - 1].content;
 
     const supabase = createServerClient(
