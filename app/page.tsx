@@ -54,7 +54,7 @@ export default function TemporalHomePage() {
             href="/login" 
             className="inline-flex items-center justify-center bg-[#111827] text-[#f9fafb] text-13 font-700 uppercase tracking-1.5 px-8 py-4 rounded-30 transition-all duration-300 hover:bg-[#1f2937] shadow-sm"
           >
-            Open the Arsenal &rarr;
+            Open the Repository &rarr;
           </Link>
         </div>
 
@@ -69,7 +69,7 @@ export default function TemporalHomePage() {
             {/* PILLAR 1 */}
             <div className="flex flex-col gap-2">
               <h4 className="text-14 font-700 uppercase tracking-0.5 text-[#111827]">
-                01 / The Arsenal Integration
+                01 / Manuscript Database Integration
               </h4>
               <p className="text-13 leading-relaxed text-[#6b7280] text-justify">
                 High-fidelity data retrieval directly anchored to recovered textual fragments. Advanced source integrity controls eliminate general artificial intelligence neutrality, delivering dogmatic, absolute certainty.
