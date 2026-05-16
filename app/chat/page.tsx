@@ -133,9 +133,78 @@ export default function PatmosChat() {
     setIsLoading(true);
 
     try {
-      // Dejamos el contexto vacío temporalmente para que tu API responda con su conocimiento general
-      const contextText = "";
+      let contextText = "";
 
+      // 1. CAPTURA Y PARSEO UNIVERSAL DE CITAS BÍBLICAS
+      const match = currentInput.match(/(\d?\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s*(\d+):(\d+)/);
+      
+      if (match) {
+        const rawBook = match[1].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const chapterNum = parseInt(match[2], 10);
+        const verseNum = parseInt(match[3], 10);
+
+        // Diccionario de traducción estricto para emparejar el input en español con tu columna JSONB (en inglés)
+        const bibleBooksIndex: Record<string, string> = {
+          "genesis": "Genesis", "exodo": "Exodus", "levitico": "Leviticus", "numeros": "Numbers",
+          "deuteronomio": "Deuteronomy", "josue": "Joshua", "jueces": "Judges", "rut": "Ruth",
+          "1 samuel": "1 Samuel", "2 samuel": "2 Samuel", "1 reyes": "1 Kings", "2 reyes": "2 Kings",
+          "1 cronicas": "1 Chronicles", "2 cronicas": "2 Chronicles", "esdras": "Ezra", "nehemias": "Nehemiah",
+          "ester": "Esther", "job": "Job", "salmos": "Psalms", "proverbios": "Proverbs",
+          "eclesiastes": "Ecclesiastes", "cantares": "Song of Solomon", "isaias": "Isaiah",
+          "jeremias": "Jeremiah", "lamentaciones": "Lamentations", "ezequiel": "Ezekiel", "daniel": "Daniel",
+          "oseas": "Hosea", "joel": "Joel", "amos": "Amos", "abdias": "Obadiah", "jonas": "Jonah",
+          "miqueas": "Micah", "nahum": "Nahum", "habacuc": "Habakuk", "sofonias": "Zephaniah",
+          "hageo": "Haggai", "zacarias": "Zechariah", "malaquias": "Malachi",
+          "mateo": "Matthew", "marcos": "Mark", "lucas": "Luke", "juan": "John", "hechos": "Acts",
+          "romanos": "Romans", "1 corintios": "1 Corinthians", "2 corintios": "2 Corinthians",
+          "galatas": "Galatians", "efesios": "Ephesians", "filipenses": "Philippians", "colosenses": "Colossians",
+          "1 tesalonicenses": "1 Thessalonians", "2 tesalonicenses": "2 Thessalonians",
+          "1 timoteo": "1 Timothy", "2 timoteo": "2 Timothy", "1 timothy": "1 Timothy", "2 timothy": "2 Timothy", "timoteo": "1 Timothy",
+          "tito": "Titus", "filemon": "Philemon", "hebreos": "Hebrews", "santiago": "James",
+          "1 pedro": "1 Peter", "2 pedro": "2 Peter", "1 juan": "1 John", "2 juan": "2 John",
+          "3 juan": "3 John", "judas": "Jude", "apocalipsis": "Revelation", "revelacion": "Revelation"
+        };
+
+        const bookSearch = bibleBooksIndex[rawBook] || match[1].trim();
+
+        // CONSULTA DE PRECISIÓN ABSOLUTA PARA ENTEROS:
+        // Usamos .contains() pasando el objeto numérico nativo para hacer match directo con tus enteros en la DB
+        const { data: exactVerses, error: dbError } = await supabase
+          .from('documents')
+          .select('content, metadata')
+          .eq('metadata->>book', bookSearch)
+          .contains('metadata', { chapter: chapterNum, verse: verseNum });
+
+        if (!dbError && exactVerses && exactVerses.length > 0) {
+          const filtered = exactVerses.filter(f => f.metadata?.version === 'RV1865');
+          if (filtered.length > 0) {
+            contextText = filtered.map(f => f.content).join("\n\n");
+          }
+        } else if (dbError) {
+          console.error("Supabase Database Query Error:", dbError.message);
+        }
+      }
+
+      // 2. RESPALDO SEMÁNTICO POR PALABRA CLAVE
+      if (!contextText) {
+        const cleanInput = currentInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const keywords = cleanInput.split(" ").filter(w => w.length > 5);
+        
+        if (keywords.length > 0) {
+          const { data: keywordFragments } = await supabase
+            .from('documents')
+            .select('content, metadata')
+            .ilike('content', `%${keywords[0]}%`)
+            .limit(10);
+
+          if (keywordFragments && keywordFragments.length > 0) {
+            const filteredKeywords = keywordFragments.filter(f => f.metadata?.version === 'RV1865').slice(0, 3);
+            contextText = filteredKeywords.map(f => f.content).join("\n\n");
+          }
+        }
+      }
+
+      // 3. ENVÍO SEGURO DEL CONTEXTO REAL A LA API
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -151,10 +220,10 @@ export default function PatmosChat() {
       setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
       fetchHistory(); 
     } catch (error: any) {
-      console.error("Critical Chat Handler Error:", error);
+      console.error("Patmos Pipeline Error:", error);
       setMessages((prev) => [
         ...prev, 
-        { role: "assistant", content: `System Error: ${error.message || error}` }
+        { role: "assistant", content: `Aconteció un error en el script: ${error.message || error}` }
       ]);
     } finally {
       setIsLoading(false);
