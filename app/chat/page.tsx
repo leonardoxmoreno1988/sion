@@ -141,38 +141,39 @@ export default function PatmosChat() {
       if (match) {
         const chapterNum = match[2];
         const verseNum = match[3];
+        
+        // Extramos las primeras 3 letras del libro ingresado (ej: "2 Timoteo" -> "2 Ti", "Génesis" -> "Gén")
+        // Y normalizamos limpiando tildes para que haga match con tu DB ("Gén" -> "Gen")
+        let bookSnippet = match[1].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").slice(0, 3);
 
-        // CONDICIÓN CRÍTICA DE PAGINACIÓN: Forzamos el filtrado del capítulo en el servidor de Supabase
-        // Esto reduce drásticamente el tamaño de la respuesta y evita el truncado de los 1,000 registros
+        // CONSULTA DE PRECISIÓN EN SERVIDOR: Filtramos por capítulo y una aproximación del libro
+        // Esto reduce el set de datos de 62,000 filas a solo 20 o 30 registros, burlando el límite de Supabase
         const { data: verses, error: dbError } = await supabase
           .from('documents')
           .select('content, metadata')
           .eq('metadata->>chapter', chapterNum)
-          .or('metadata->>version.eq.RV1865,metadata->>version.eq.KJV');
+          .ilike('metadata->>book', `%${bookSnippet}%`);
 
         if (!dbError && verses && verses.length > 0) {
-          // Filtramos con tolerancia el libro y el versículo exacto directamente en la memoria del cliente
           const matched = verses.filter(f => {
             const meta = f.metadata;
             if (!meta) return false;
 
+            const isCorrectVersion = meta.version === 'RV1865' || meta.version === 'KJV';
             const matchesVerse = String(meta.verse || meta.versiculo || "") === String(verseNum);
-            
-            // Analizamos si la cita del input se asemeja al identificador o abreviatura de tu base de datos
-            const inputLower = currentInput.toLowerCase();
-            const metaBook = String(meta.book || meta.libro || "").toLowerCase();
-            const matchesBook = inputLower.includes(metaBook) || metaBook.includes(inputLower.split(" ")[0]);
 
-            return matchesVerse && matchesBook;
+            return isCorrectVersion && matchesVerse;
           });
 
           if (matched.length > 0) {
             contextText = matched.map(f => f.content).join("\n\n");
           }
+        } else if (dbError) {
+          console.error("Supabase Database Query Error:", dbError.message);
         }
       }
 
-      // 2. SEGUNDA LÍNEA DE DEFENSA: Extracción por términos clave si falla la metadata estructurada
+      // 2. RESPALDO LOGÍSTICO POR CONTENIDO (Si la metadata exacta no arrojó resultados)
       if (!contextText) {
         const cleanInput = currentInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const keywords = cleanInput.split(" ").filter(w => w.length > 5);
@@ -180,13 +181,16 @@ export default function PatmosChat() {
         if (keywords.length > 0) {
           const { data: keywordFragments } = await supabase
             .from('documents')
-            .select('content')
+            .select('content, metadata')
             .ilike('content', `%${keywords[0]}%`)
-            .or('metadata->>version.eq.RV1865,metadata->>version.eq.KJV')
-            .limit(5);
+            .limit(10);
 
           if (keywordFragments && keywordFragments.length > 0) {
-            contextText = keywordFragments.map(f => f.content).join("\n\n");
+            // Filtramos en caliente para asegurar la soberanía de las versiones elegidas
+            const filteredKeywords = keywordFragments.filter(f => 
+              f.metadata?.version === 'RV1865' || f.metadata?.version === 'KJV'
+            ).slice(0, 4);
+            contextText = filteredKeywords.map(f => f.content).join("\n\n");
           }
         }
       }
