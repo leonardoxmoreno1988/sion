@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         {
           // Aquí pones el ID del precio que creaste en tu catálogo de Stripe
           // Ej: 'price_1Qxyz...' (puedes crear uno rápido en tu panel de Stripe)
-          price: 'TU_STRIPE_PRICE_ID_AQUÍ', 
+          price: 'price_1TXptyRb2cKRI6uDvDzc6n7i', 
           quantity: 1,
         },
       ],
