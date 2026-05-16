@@ -143,13 +143,14 @@ export default function PatmosChat() {
         const chapterNum = parseInt(match[2], 10);
         const verseNum = parseInt(match[3], 10);
 
-        // Diccionario de traducción estricto para emparejar el input en español con tu columna JSONB (en inglés)
+        // Diccionario completo extendido para mapear el input en español con las cadenas en inglés de tu JSONB
         const bibleBooksIndex: Record<string, string> = {
           "genesis": "Genesis", "exodo": "Exodus", "levitico": "Leviticus", "numeros": "Numbers",
           "deuteronomio": "Deuteronomy", "josue": "Joshua", "jueces": "Judges", "rut": "Ruth",
-          "1 samuel": "1 Samuel", "2 samuel": "2 Samuel", "1 reyes": "1 Kings", "2 reyes": "2 Kings",
-          "1 cronicas": "1 Chronicles", "2 cronicas": "2 Chronicles", "esdras": "Ezra", "nehemias": "Nehemiah",
-          "ester": "Esther", "job": "Job", "salmos": "Psalms", "proverbios": "Proverbs",
+          "1 samuel": "1 Samuel", "2 samuel": "2 Samuel", "i samuel": "1 Samuel", "ii samuel": "2 Samuel",
+          "1 reyes": "1 Kings", "2 reyes": "2 Kings", "i reyes": "1 Kings", "ii reyes": "2 Kings",
+          "1 cronicas": "1 Chronicles", "2 cronicas": "2 Chronicles", "i cronicas": "1 Chronicles", "ii cronicas": "2 Chronicles",
+          "esdras": "Ezra", "nehemias": "Nehemiah", "ester": "Esther", "job": "Job", "salmos": "Psalms", "proverbios": "Proverbs",
           "eclesiastes": "Ecclesiastes", "cantares": "Song of Solomon", "isaias": "Isaiah",
           "jeremias": "Jeremiah", "lamentaciones": "Lamentations", "ezequiel": "Ezekiel", "daniel": "Daniel",
           "oseas": "Hosea", "joel": "Joel", "amos": "Amos", "abdias": "Obadiah", "jonas": "Jonah",
@@ -157,18 +158,22 @@ export default function PatmosChat() {
           "hageo": "Haggai", "zacarias": "Zechariah", "malaquias": "Malachi",
           "mateo": "Matthew", "marcos": "Mark", "lucas": "Luke", "juan": "John", "hechos": "Acts",
           "romanos": "Romans", "1 corintios": "1 Corinthians", "2 corintios": "2 Corinthians",
+          "i corintios": "1 Corinthians", "ii corintios": "2 Corinthians",
           "galatas": "Galatians", "efesios": "Ephesians", "filipenses": "Philippians", "colosenses": "Colossians",
           "1 tesalonicenses": "1 Thessalonians", "2 tesalonicenses": "2 Thessalonians",
+          "i tesalonicenses": "1 Thessalonians", "ii tesalonicenses": "2 Thessalonians",
           "1 timoteo": "1 Timothy", "2 timoteo": "2 Timothy", "1 timothy": "1 Timothy", "2 timothy": "2 Timothy", "timoteo": "1 Timothy",
+          "i timoteo": "1 Timothy", "ii timoteo": "2 Timothy",
           "tito": "Titus", "filemon": "Philemon", "hebreos": "Hebrews", "santiago": "James",
-          "1 pedro": "1 Peter", "2 pedro": "2 Peter", "1 juan": "1 John", "2 juan": "2 John",
-          "3 juan": "3 John", "judas": "Jude", "apocalipsis": "Revelation", "revelacion": "Revelation"
+          "1 pedro": "1 Peter", "2 pedro": "2 Peter", "i pedro": "1 Peter", "ii pedro": "2 Peter",
+          "1 juan": "1 John", "2 juan": "2 John", "3 juan": "3 John", "i juan": "1 John", "ii juan": "2 John", "iii juan": "3 John",
+          "judas": "Jude", "apocalipsis": "Revelation", "revelacion": "Revelation"
         };
 
         const bookSearch = bibleBooksIndex[rawBook] || match[1].trim();
 
         // CONSULTA DE PRECISIÓN ABSOLUTA PARA ENTEROS:
-        // Usamos .contains() pasando el objeto numérico nativo para hacer match directo con tus enteros en la DB
+        // El operador .contains() mapea el objeto JSON nativo garantizando la comparación numérica limpia en Postgres
         const { data: exactVerses, error: dbError } = await supabase
           .from('documents')
           .select('content, metadata')
@@ -225,7 +230,7 @@ export default function PatmosChat() {
         ...prev, 
         { role: "assistant", content: `Aconteció un error en el script: ${error.message || error}` }
       ]);
-    } finally {
+    } military finally { 
       setIsLoading(false);
       setTimeout(scrollToBottom, 100);
     }
