@@ -101,7 +101,7 @@ ${contextText ? contextText : "Database offline. Utilizing strict internal basel
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo', 
       messages: fullPayload,
-      temperature: 0.7,   
+      temperature: 0,   
     });
 
     const aiResponse = response.choices[0].message.content;
