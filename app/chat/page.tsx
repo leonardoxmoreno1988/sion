@@ -135,58 +135,55 @@ export default function PatmosChat() {
     try {
       let contextText = "";
 
-      // 1. PARSER QUIRÚRGICO DE CITAS BÍBLICAS
+      // 1. PARSER DE CITAS BÍBLICAS TRADICIONALES
       const match = currentInput.match(/(\d?\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s*(\d+):(\d+)/);
       
       if (match) {
-        const rawBook = match[1].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const chapterNum = match[2];
         const verseNum = match[3];
 
-        // DICCIONARIO CON TIPADO INDEXADO SEGURO
-        const bookMap: Record<string, string> = {
-          "2 timoteo": "2 Tim",
-          "2 timothy": "2 Tim",
-          "timoteo": "1 Tim",
-          "1 timoteo": "1 Tim",
-          "genesis": "Gen",
-          "exodo": "Exo",
-          "juan": "Joh",
-          "romanos": "Rom",
-          "apocalipsis": "Rev"
-        };
-
-        // Si el libro existe en el mapa lo usamos, si no, dejamos el string original limpio
-        const bookSearch = bookMap[rawBook] || match[1].trim();
-
-        // Consulta directa a las llaves JSONB de Supabase
-        const { data: exactVerses, error: dbError } = await supabase
+        // CONDICIÓN CRÍTICA DE PAGINACIÓN: Forzamos el filtrado del capítulo en el servidor de Supabase
+        // Esto reduce drásticamente el tamaño de la respuesta y evita el truncado de los 1,000 registros
+        const { data: verses, error: dbError } = await supabase
           .from('documents')
-          .select('content')
-          .eq('metadata->>book', bookSearch)
+          .select('content, metadata')
           .eq('metadata->>chapter', chapterNum)
-          .eq('metadata->>verse', verseNum)
-          .eq('metadata->>version', 'RV1865');
+          .or('metadata->>version.eq.RV1865,metadata->>version.eq.KJV');
 
-        if (!dbError && exactVerses && exactVerses.length > 0) {
-          contextText = exactVerses.map(f => f.content).join("\n\n");
-        } else if (dbError) {
-          console.error("Supabase Database Query Error:", dbError.message);
+        if (!dbError && verses && verses.length > 0) {
+          // Filtramos con tolerancia el libro y el versículo exacto directamente en la memoria del cliente
+          const matched = verses.filter(f => {
+            const meta = f.metadata;
+            if (!meta) return false;
+
+            const matchesVerse = String(meta.verse || meta.versiculo || "") === String(verseNum);
+            
+            // Analizamos si la cita del input se asemeja al identificador o abreviatura de tu base de datos
+            const inputLower = currentInput.toLowerCase();
+            const metaBook = String(meta.book || meta.libro || "").toLowerCase();
+            const matchesBook = inputLower.includes(metaBook) || metaBook.includes(inputLower.split(" ")[0]);
+
+            return matchesVerse && matchesBook;
+          });
+
+          if (matched.length > 0) {
+            contextText = matched.map(f => f.content).join("\n\n");
+          }
         }
       }
 
-      // 2. RESPALDO LOGÍSTICO POR CONTENIDO (Si falla la metadata o es una pregunta abierta)
+      // 2. SEGUNDA LÍNEA DE DEFENSA: Extracción por términos clave si falla la metadata estructurada
       if (!contextText) {
         const cleanInput = currentInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const coreWords = cleanInput.split(" ").filter(w => w.length > 5).slice(0, 1);
+        const keywords = cleanInput.split(" ").filter(w => w.length > 5);
         
-        if (coreWords.length > 0) {
+        if (keywords.length > 0) {
           const { data: keywordFragments } = await supabase
             .from('documents')
             .select('content')
-            .ilike('content', `%${coreWords[0]}%`)
-            .eq('metadata->>version', 'RV1865')
-            .limit(4);
+            .ilike('content', `%${keywords[0]}%`)
+            .or('metadata->>version.eq.RV1865,metadata->>version.eq.KJV')
+            .limit(5);
 
           if (keywordFragments && keywordFragments.length > 0) {
             contextText = keywordFragments.map(f => f.content).join("\n\n");
