@@ -396,4 +396,4 @@ export default function PatmosChat() {
       </main>
     </div>
   );
-}
+} 
