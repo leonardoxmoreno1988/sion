@@ -139,12 +139,12 @@ export default function PatmosChat() {
       const match = currentInput.match(/(\d?\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s*(\d+):(\d+)/);
       
       if (match) {
-        let rawBook = match[1].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const rawBook = match[1].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const chapterNum = match[2];
         const verseNum = match[3];
 
-        // DICCIONARIO DE TRADUCCIÓN: Mapea lo que escribe el usuario a tus llaves exactas de Supabase
-        const bookMap: { [key: string]: string } = {
+        // DICCIONARIO CON TIPADO INDEXADO SEGURO
+        const bookMap: Record<string, string> = {
           "2 timoteo": "2 Tim",
           "2 timothy": "2 Tim",
           "timoteo": "1 Tim",
@@ -154,13 +154,12 @@ export default function PatmosChat() {
           "juan": "Joh",
           "romanos": "Rom",
           "apocalipsis": "Rev"
-          // Puedes seguir mapeando más libros aquí si lo requieres en el futuro
         };
 
-        // Si el libro existe en tu DB abreviado, lo usamos, si no, capitalizamos por defecto
-        let bookSearch = bookMap[rawBook] || match[1].trim();
+        // Si el libro existe en el mapa lo usamos, si no, dejamos el string original limpio
+        const bookSearch = bookMap[rawBook] || match[1].trim();
 
-        // Consulta directa usando las llaves exactas detectadas en tus registros ("2 Tim", "Gen")
+        // Consulta directa a las llaves JSONB de Supabase
         const { data: exactVerses, error: dbError } = await supabase
           .from('documents')
           .select('content')
@@ -171,6 +170,8 @@ export default function PatmosChat() {
 
         if (!dbError && exactVerses && exactVerses.length > 0) {
           contextText = exactVerses.map(f => f.content).join("\n\n");
+        } else if (dbError) {
+          console.error("Supabase Database Query Error:", dbError.message);
         }
       }
 
@@ -204,12 +205,16 @@ export default function PatmosChat() {
       });
       
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "An error occurred.");
+      if (!res.ok) throw new Error(data.error || `HTTP Error ${res.status}`);
       
       setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
       fetchHistory(); 
     } catch (error: any) {
-      setMessages((prev) => [...prev, { role: "assistant", content: `System Error: ${error.message}` }]);
+      console.error("Critical Chat Handler Error:", error);
+      setMessages((prev) => [
+        ...prev, 
+        { role: "assistant", content: `System Error Detected: ${error.message || "Unknown error during script examination."}` }
+      ]);
     } finally {
       setIsLoading(false);
       setTimeout(scrollToBottom, 100);
