@@ -143,7 +143,7 @@ export default function PatmosChat() {
         const chapterNum = parseInt(match[2], 10);
         const verseNum = parseInt(match[3], 10);
 
-        // Diccionario de traducción estricto para emparejar el input en español con tu columna JSONB (en inglés)
+        // Matrix totalizadora de mapeo lingüístico
         const bibleBooksIndex: Record<string, string> = {
           "genesis": "Genesis", "exodo": "Exodus", "levitico": "Leviticus", "numeros": "Numbers",
           "deuteronomio": "Deuteronomy", "josue": "Joshua", "jueces": "Judges", "rut": "Ruth",
@@ -172,12 +172,13 @@ export default function PatmosChat() {
 
         const bookSearch = bibleBooksIndex[rawBook] || match[1].trim();
 
-        // CONSULTA DE PRECISIÓN ABSOLUTA PARA ENTEROS NATIVOS
+        // CONSULTA DE MÁXIMA COMPATIBILIDAD POSTGREST (Filtro por Flecha de String dual)
         const { data: exactVerses, error: dbError } = await supabase
           .from('documents')
           .select('content, metadata')
           .eq('metadata->>book', bookSearch)
-          .contains('metadata', { chapter: chapterNum, verse: verseNum });
+          .eq('metadata->>chapter', String(chapterNum))
+          .eq('metadata->>verse', String(verseNum));
 
         if (!dbError && exactVerses && exactVerses.length > 0) {
           const filtered = exactVerses.filter(f => f.metadata?.version === 'RV1865');
