@@ -44,7 +44,7 @@ export default function TemporalHomePage() {
         </div>
 
         <p className="text-base leading-relaxed text-[#6b7280] text-left max-w-2xl mb-12">
-          Patmos operates under absolute textual sovereignty. Designed for deep academic inquiry, the core system process extracts, dissects, and evaluates theological context utilizing strictly the Textus Receptus lineage through the **Reina Valera 1865** and the **King James Version (KJV)**. Every query is filtered under unwavering dispensational mechanics.
+          Patmos operates under absolute textual sovereignty. Designed for deep academic inquiry, the core system process extracts, dissects, and evaluates theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV) and the Reina Valera 1865. Every query is filtered under unwavering dispensational mechanics.
         </p>
 
         {/* PRIMARY CALL TO ACTION */}
@@ -81,7 +81,7 @@ export default function TemporalHomePage() {
                 02 / Textual Inerrancy
               </h4>
               <p className="text-xs leading-relaxed text-[#6b7280] text-left">
-                Zero lexical modification. Systems strictly maintain archaic grammar and literal spellings (**"distinga"**, **"extendimiento"**), fully bypassing modern ecumenical translations or standard market alterations.
+                Zero lexical modification. Systems strictly maintain archaic grammar and literal spellings, fully bypassing modern ecumenical translations or standard market alterations.
               </p>
             </div>
 
