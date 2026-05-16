@@ -2,20 +2,21 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-// Inicialización defensiva: Si la clave no existe (como en el build de Vercel), pasa un string vacío temporal
-// Esto evita que el constructor de Stripe tire un error fatal durante la compilación
-const stripeKey = process.env.STRIPE_SECRET_KEY || '';
-const stripe = new Stripe(stripeKey, {
-  apiVersion: '2025-01-27' as any,
-});
-
-// Inicializamos el cliente de Supabase con la misma lógica defensiva
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder_key'
-);
+// Forzamos a Next.js a tratar esta ruta como 100% dinámica
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
+  // Inicializamos Stripe DENTRO de la función para que no explote en el build estático
+  const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
+  const stripe = new Stripe(stripeKey, {
+    apiVersion: '2025-01-27' as any,
+  });
+
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+    process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder_key'
+  );
+
   const body = await req.text();
   const signature = req.headers.get('Stripe-Signature');
 
@@ -23,11 +24,11 @@ export async function POST(req: Request) {
 
   try {
     if (!signature) throw new Error('Missing Stripe signature');
-    // Verificamos que el evento realmente venga de Stripe y no sea un ataque simulado
+    
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder'
     );
   } catch (err: any) {
     console.error(`❌ Webhook signature verification failed:`, err.message);
@@ -36,28 +37,22 @@ export async function POST(req: Request) {
 
   const session = event.data.object as any;
 
-  // Manejamos los eventos vitales de la suscripción
   try {
     switch (event.type) {
       case 'checkout.session.completed':
-        // El usuario completó el pago por primera vez
         if (session.mode === 'subscription') {
           const subscriptionId = session.subscription;
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-          
-          // Guardamos o actualizamos la suscripción en Supabase
-          await upsertSubscription(subscription, session.client_reference_id);
+          await upsertSubscription(supabaseAdmin, subscription, session.client_reference_id);
         }
         break;
 
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
-        // El usuario renovó, cambió de plan, entró en impago o canceló
         const subscription = event.data.object as any;
-        // En estos eventos, buscamos al usuario por su stripe_customer_id
-        const userId = await getUserIdByCustomerId(subscription.customer as string);
+        const userId = await getUserIdByCustomerId(supabaseAdmin, subscription.customer as string);
         if (userId) {
-          await upsertSubscription(subscription, userId);
+          await upsertSubscription(supabaseAdmin, subscription, userId);
         }
         break;
 
@@ -72,9 +67,9 @@ export async function POST(req: Request) {
   return NextResponse.json({ received: true });
 }
 
-// --- FUNCIONES AUXILIARES PARA MAPEAR LOS DATOS ---
+// --- FUNCIONES AUXILIARES PASANDO EL CLIENTE ADMIN ---
 
-async function upsertSubscription(subscription: any, userId: string) {
+async function upsertSubscription(supabaseAdmin: any, subscription: any, userId: string) {
   const subscriptionData = {
     id: subscription.id,
     user_id: userId,
@@ -94,7 +89,7 @@ async function upsertSubscription(subscription: any, userId: string) {
   console.log(`✅ Suscripción ${subscription.id} actualizada para el usuario ${userId}`);
 }
 
-async function getUserIdByCustomerId(customerId: string): Promise<string | null> {
+async function getUserIdByCustomerId(supabaseAdmin: any, customerId: string): Promise<string | null> {
   const { data, error } = await supabaseAdmin
     .from('customers')
     .select('id')
