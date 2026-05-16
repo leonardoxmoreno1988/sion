@@ -143,7 +143,7 @@ export default function PatmosChat() {
         const chapterNum = parseInt(match[2], 10);
         const verseNum = parseInt(match[3], 10);
 
-        // Diccionario completo extendido para mapear el input en español con las cadenas en inglés de tu JSONB
+        // Diccionario de traducción estricto para emparejar el input en español con tu columna JSONB (en inglés)
         const bibleBooksIndex: Record<string, string> = {
           "genesis": "Genesis", "exodo": "Exodus", "levitico": "Leviticus", "numeros": "Numbers",
           "deuteronomio": "Deuteronomy", "josue": "Joshua", "jueces": "Judges", "rut": "Ruth",
@@ -172,8 +172,7 @@ export default function PatmosChat() {
 
         const bookSearch = bibleBooksIndex[rawBook] || match[1].trim();
 
-        // CONSULTA DE PRECISIÓN ABSOLUTA PARA ENTEROS:
-        // El operador .contains() mapea el objeto JSON nativo garantizando la comparación numérica limpia en Postgres
+        // CONSULTA DE PRECISIÓN ABSOLUTA PARA ENTEROS NATIVOS
         const { data: exactVerses, error: dbError } = await supabase
           .from('documents')
           .select('content, metadata')
@@ -230,7 +229,7 @@ export default function PatmosChat() {
         ...prev, 
         { role: "assistant", content: `Aconteció un error en el script: ${error.message || error}` }
       ]);
-    } military finally { 
+    } finally { 
       setIsLoading(false);
       setTimeout(scrollToBottom, 100);
     }
