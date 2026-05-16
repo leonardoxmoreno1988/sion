@@ -135,7 +135,7 @@ export default function PatmosChat() {
     try {
       let contextText = "";
 
-      // 1. CAPTURA Y ESCANEO DIRECTO POR TEXTO PLANO (Bypass Metadatos)
+      // 1. CAPTURA Y PARSEO DE CITAS BÍBLICAS
       const match = currentInput.match(/(\d?\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s*(\d+):(\d+)/);
       
       if (match) {
@@ -143,12 +143,12 @@ export default function PatmosChat() {
         const chapterNum = match[2];
         const verseNum = match[3];
 
-        // Diccionario de normalización para asegurar la concordancia exacta con la columna de texto plano
+        // Diccionario alineado milimétricamente con los nombres reales de tu consulta SQL de Supabase
         const bibleBooksIndex: Record<string, string> = {
-          "genesis": "Genesis", "exodo": "Exodus", "levitico": "Leviticus", "numeros": "Numbers",
+          "genesis": "Genesis", "exodo": "Exodus", "levitico": "Levítico", "numeros": "Numbers",
           "deuteronomio": "Deuteronomy", "josue": "Joshua", "jueces": "Judges", "rut": "Ruth",
           "1 samuel": "1 Samuel", "2 samuel": "2 Samuel", "1 reyes": "1 Kings", "2 reyes": "2 Kings",
-          "1 cronicas": "1 Chronicles", "2 cronicas": "2 Chronicles", "esdras": "Ezra", "nehemias": "Nehemiah",
+          "1 cronicas": "2 Chronicles", "2 cronicas": "2 Chronicles", "esdras": "Ezra", "nehemias": "Nehemiah",
           "ester": "Esther", "job": "Job", "salmos": "Psalms", "proverbios": "Proverbs",
           "eclesiastes": "Ecclesiastes", "cantares": "Song of Solomon", "isaias": "Isaiah",
           "jeremias": "Jeremiah", "lamentaciones": "Lamentations", "ezequiel": "Ezekiel", "daniel": "Daniel",
@@ -159,26 +159,25 @@ export default function PatmosChat() {
           "romanos": "Romans", "1 corintios": "1 Corinthians", "2 corintios": "2 Corinthians",
           "galatas": "Galatians", "efesios": "Ephesians", "filipenses": "Philippians", "colosenses": "Colossians",
           "1 tesalonicenses": "1 Thessalonians", "2 tesalonicenses": "2 Thessalonians",
-          "1 timoteo": "1 Timothy", "2 timoteo": "2 Timothy", "1 timothy": "1 Timothy", "2 timothy": "2 Timothy", "timoteo": "1 Timothy",
-          "tito": "Titus", "filemon": "Philemon", "hebreos": "Hebrews", "santiago": "James",
+          "1 timoteo": "1 Timoteo", "2 timoteo": "2 Timoteo", "1 timothy": "1 Timoteo", "2 timothy": "2 Timoteo", "timoteo": "1 Timoteo",
+          "tito": "Titus", "filemon": "Philemon", "hebreos": "Hebreos", "santiago": "James",
           "1 pedro": "1 Peter", "2 pedro": "2 Peter", "1 juan": "1 John", "2 juan": "2 John",
           "3 juan": "3 John", "judas": "Jude", "apocalipsis": "Revelation", "revelacion": "Revelation"
         };
 
         const bookSearch = bibleBooksIndex[rawBook] || match[1].trim();
-        
-        // Creamos el string exacto que encabeza tu columna Cuerpo de Texto (ej: "Genesis 49:12")
-        const textReferencePattern = `${bookSearch} ${chapterNum}:${verseNum}`;
 
-        // Hacemos una consulta directa sobre la columna de texto puro
-        const { data: textFragments, error: dbError } = await supabase
+        // RETORNO A LA EXTRACCIÓN DE METADATOS COMPATIBLE CON EL RLS ABIERTO
+        // Extraemos los valores como strings planos para romper bloqueos de tipado numérico
+        const { data: exactVerses, error: dbError } = await supabase
           .from('documents')
           .select('content, metadata')
-          .ilike('content', `%${textReferencePattern}%`)
-          .limit(5);
+          .eq('metadata->>book', bookSearch)
+          .eq('metadata->>chapter', String(chapterNum))
+          .eq('metadata->>verse', String(verseNum));
 
-        if (!dbError && textFragments && textFragments.length > 0) {
-          const filtered = textFragments.filter(f => f.metadata?.version === 'RV1865');
+        if (!dbError && exactVerses && exactVerses.length > 0) {
+          const filtered = exactVerses.filter(f => f.metadata?.version === 'RV1865');
           if (filtered.length > 0) {
             contextText = filtered.map(f => f.content).join("\n\n");
           }
@@ -187,7 +186,7 @@ export default function PatmosChat() {
         }
       }
 
-      // 2. RESPALDO SEMÁNTICO GENERAL POR PALABRA CLAVE
+      // 2. RESPALDO SEMÁNTICO POR PALABRA CLAVE
       if (!contextText) {
         const cleanInput = currentInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const keywords = cleanInput.split(" ").filter(w => w.length > 5);
