@@ -126,33 +126,57 @@ export default function PatmosChat() {
   };
 
   const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  e.preventDefault();
+  if (!input.trim() || isLoading) return;
 
-    const userMessage = { role: "user", content: input };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setInput("");
-    setIsLoading(true);
+  const userMessage = { role: "user", content: input };
+  const updatedMessages = [...messages, userMessage];
+  setMessages(updatedMessages);
+  setInput("");
+  setIsLoading(true);
 
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: updatedMessages }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "An error occurred.");
-      
-      setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
-      fetchHistory(); // Refrescar la barra lateral para añadir la nueva entrada
-    } catch (error: any) {
-      setMessages((prev) => [...prev, { role: "assistant", content: `System Error: ${error.message}` }]);
-    } finally {
-      setIsLoading(false);
-      setTimeout(scrollToBottom, 100);
+  try {
+    let contextText = "";
+
+    // 1. ESCANEO DEL REPOSITORIO (RAG): Buscamos fragmentos en la tabla 'documents'
+    // Filtramos los metadatos JSONB para asegurarnos de traer solo manuscritos RV1865 o KJV
+    const { data: fragments, error: ragError } = await supabase
+      .from('documents')
+      .select('content, metadata')
+      // Esta línea busca dentro del JSONB de metadata que la versión sea RV1865 o KJV
+      // Si tu usuario escribe en español, priorizará la RV1865
+      .or(`metadata->>version.eq.RV1865,metadata->>version.eq.KJV`)
+      .limit(4); // Extraemos los 4 fragmentos más relevantes basados en la sesión
+
+    if (!ragError && fragments && fragments.length > 0) {
+      // Unimos los contenidos de los fragmentos recuperados
+      contextText = fragments.map(f => f.content).join("\n\n");
+    } else if (ragError) {
+      console.error("RAG Retrieval Error:", ragError);
     }
-  };
+
+    // 2. DISPARO A LA API: Enviamos el historial junto con el contexto recuperado
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        messages: updatedMessages, 
+        contextText: contextText // <-- Aquí viajan los versículos reales al prompt de control
+      }),
+    });
+    
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "An error occurred.");
+    
+    setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
+    fetchHistory(); 
+  } catch (error: any) {
+    setMessages((prev) => [...prev, { role: "assistant", content: `System Error: ${error.message}` }]);
+  } finally {
+    setIsLoading(false);
+    setTimeout(scrollToBottom, 100);
+  }
+};
 
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: theme.bg, transition: 'all 0.4s ease' }}>
