@@ -135,28 +135,38 @@ export default function PatmosChat() {
     try {
       let contextText = "";
 
-      // 1. EXTRACCIÓN DINÁMICA POR METADATOS (Estructura limpia basada en tus capturas)
-      // Captura patrones como "2 Timoteo 2:15", "Génesis 1:6", "Genesis 1:6"
+      // 1. PARSER QUIRÚRGICO DE CITAS BÍBLICAS
       const match = currentInput.match(/(\d?\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s*(\d+):(\d+)/);
       
       if (match) {
-        // Normalizamos el nombre del libro quitándole las tildes para que haga match con tu DB
-        let bookName = match[1].trim();
-        bookName = bookName.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // "Génesis" -> "Genesis"
-        
-        // Capitalizamos la primera letra (ej: "genesis" -> "Genesis") por si el usuario escribe en minúsculas
-        bookName = bookName.charAt(0).toUpperCase() + bookName.slice(1);
+        let rawBook = match[1].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const chapterNum = match[2];
+        const verseNum = match[3];
 
-        const chapterNum = parseInt(match[2], 10);
-        const verseNum = parseInt(match[3], 10);
+        // DICCIONARIO DE TRADUCCIÓN: Mapea lo que escribe el usuario a tus llaves exactas de Supabase
+        const bookMap: { [key: string]: string } = {
+          "2 timoteo": "2 Tim",
+          "2 timothy": "2 Tim",
+          "timoteo": "1 Tim",
+          "1 timoteo": "1 Tim",
+          "genesis": "Gen",
+          "exodo": "Exo",
+          "juan": "Joh",
+          "romanos": "Rom",
+          "apocalipsis": "Rev"
+          // Puedes seguir mapeando más libros aquí si lo requieres en el futuro
+        };
 
-        // Búsqueda quirúrgica usando las llaves exactas del JSONB que vimos en tu captura
+        // Si el libro existe en tu DB abreviado, lo usamos, si no, capitalizamos por defecto
+        let bookSearch = bookMap[rawBook] || match[1].trim();
+
+        // Consulta directa usando las llaves exactas detectadas en tus registros ("2 Tim", "Gen")
         const { data: exactVerses, error: dbError } = await supabase
           .from('documents')
           .select('content')
-          .eq('metadata->>book', bookName)
-          .eq('metadata->>chapter', chapterNum.toString())
-          .eq('metadata->>verse', verseNum.toString())
+          .eq('metadata->>book', bookSearch)
+          .eq('metadata->>chapter', chapterNum)
+          .eq('metadata->>verse', verseNum)
           .eq('metadata->>version', 'RV1865');
 
         if (!dbError && exactVerses && exactVerses.length > 0) {
@@ -164,9 +174,8 @@ export default function PatmosChat() {
         }
       }
 
-      // 2. CONTENCIÓN DE RESPALDO (Búsqueda por palabra clave si no se detectó una cita numérica)
+      // 2. RESPALDO LOGÍSTICO POR CONTENIDO (Si falla la metadata o es una pregunta abierta)
       if (!contextText) {
-        // Limpiamos también la palabra clave de tildes para la búsqueda de texto
         const cleanInput = currentInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const coreWords = cleanInput.split(" ").filter(w => w.length > 5).slice(0, 1);
         
