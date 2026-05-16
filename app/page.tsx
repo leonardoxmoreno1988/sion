@@ -1,282 +1,125 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-export default function PatmosChat() {
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false); // Estado para el modo oscuro
-  const [messages, setMessages] = useState([
-    { 
-      role: "assistant", 
-      content: "Welcome. How may I assist your Bible inquiry today?" 
-    }
-  ]);
+export default function TemporalHomePage() {
+  const [isMounted, setIsMounted] = useState(false);
 
-  
-  // Paleta de colores dinámica
-  const theme = {
-    bg: isDarkMode ? '#020617' : '#f9fafb',        // Slate 950 : Gray 50
-    headerLine: isDarkMode ? '#1e293b' : '#1f2937',
-    textMain: isDarkMode ? '#f1f5f9' : '#111827',
-    textMuted: isDarkMode ? '#94a3b8' : '#6b7280',
-    bubbleUser: isDarkMode ? '#273c5a' : '#1f2937', // Slate 700 : Gray 800
-    bubbleSion: isDarkMode ? '#0f172a' : '#fff',    // Slate 900 : White
-    borderSion: isDarkMode ? '#1e293b' : '#e5e7eb',
-    inputBg: isDarkMode ? '#0f172a' : '#fff',
-    inputText: isDarkMode ? '#f8fafc' : '#111827',
-    fontSans: '"Inter", sans-serif', // Nueva variable para Inter
-  };
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
+  // Asegura la carga limpia de la fuente Inter
   useEffect(() => {
-    // Carga de la fuente Inter
+    setIsMounted(true);
     const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
-
-    // Detectar si el sistema del usuario prefiere modo oscuro
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const savedTheme = localStorage.getItem('theme');
-    
-    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-      setIsDarkMode(true);
-    }
-    scrollToBottom();
   }, []);
 
-  // Actualizar el localStorage cada vez que cambies el tema
-  useEffect(() => {
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    
-    if (isDarkMode) {
-      document.body.style.backgroundColor = '#020617'; 
-    } else {
-      document.body.style.backgroundColor = '#f9fafb'; 
-    }
-  }, [isDarkMode]);
-
-  const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userMessage = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "An error occurred.");
-      setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
-    } catch (error: any) {
-      setMessages((prev) => [...prev, { role: "assistant", content: `System Error: ${error.message}` }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (!isMounted) return <div className="min-h-screen bg-[#f9fafb]" />;
 
   return (
-    <main style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: theme.bg,
-      fontFamily: 'serif', // Mantiene serif para la estructura base
-      alignItems: 'center',
-      padding: '0 20px',
-      transition: 'background-color 0.4s ease' 
-    }}>
-      {/* Header */}
-      <div style={{
-        width: '100%',
-        maxWidth: '600px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottom: `1.5px solid ${theme.headerLine}`,
-        padding: '30px 0',
-        marginBottom: '10px'
-      }}>
-        <h1 style={{ 
-          fontSize: '20px', 
-          fontWeight: '700', 
-          margin: 0, 
-          letterSpacing: '1px',
-          color: theme.textMain
-        }}>
-          PATMOS <span style={{ color: theme.textMuted, fontWeight: '300' }}>/ BIBLE RESEARCH</span>
-        </h1>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <button 
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '5px',
-              color: theme.textMuted, 
-              transition: 'color 0.3s ease'
-            }}
-            aria-label="Toggle dark mode"
-          >
-            {isDarkMode ? (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-              </svg>
-            )}
-          </button>
+    <div className="min-h-screen bg-[#f9fafb] text-[#111827] flex flex-col items-center justify-between antialiased selection:bg-[#e5e7eb]" style={{ fontFamily: '"Inter", sans-serif' }}>
+      
+      {/* MINIMALIST HEADER */}
+      <header className="w-full max-w-650 border-b border-[#1f2937] py-6 px-6 md:px-0 flex justify-between items-center mt-4">
+        <span className="text-18 font-700 tracking-1 uppercase text-[#111827]">
+          PATMOS
+        </span>
+        <Link 
+          href="/login" 
+          className="text-11 font-700 uppercase tracking-1 border border-[#111827] px-4 py-2 transition-all duration-300 hover:bg-[#111827] hover:text-[#f9fafb]"
+        >
+          Access Station
+        </Link>
+      </header>
 
-          <div style={{ 
-            fontSize: '10px', 
-            color: theme.textMain, 
-            fontWeight: '700',
-            textTransform: 'uppercase',
-            border: `1px solid ${theme.textMain}`,
-            padding: '2px 6px',
-            fontFamily: theme.fontSans // Inter para el badge
-          }}>
-            KJV / Authorized Version
-          </div>
+      {/* HERO SECTION */}
+      <main className="flex-1 w-full max-w-650 px-6 md:px-0 flex flex-col justify-center py-16">
+        <div className="border-l-2 border-[#1f2937] pl-6 mb-12">
+          <p className="text-11 font-600 uppercase tracking-2 text-[#6b7280] mb-3 font-serif">
+            The Watchman of Final Authority
+          </p>
+          <h2 className="text-32 md:text-40 font-700 tracking-tight leading-tight text-[#111827] max-w-xl">
+            Rigorous Theological Execution & Scripture Verification.
+          </h2>
         </div>
-      </div>
 
-      {/* Chat Container */}
-      <div style={{
-        flex: 1,
-        width: '100%',
-        maxWidth: '600px',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-        padding: '20px 0'
-      }}>
-        {messages.map((m, i) => (
-          <div key={i} style={{
-            display: 'flex',
-            justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start'
-          }}>
-            <div style={{
-              maxWidth: '90%',
-              padding: '12px 20px',
-              borderRadius: m.role === 'user' ? '16px 16px 0 16px' : '16px 16px 16px 0',
-              fontSize: '15px', // Ajustado ligeramente para Inter
-              lineHeight: '1.6',
-              fontFamily: theme.fontSans, // Inter aplicado aquí
-              backgroundColor: m.role === 'user' ? theme.bubbleUser : theme.bubbleSion,
-              color: m.role === 'user' ? '#fff' : theme.textMain,
-              border: m.role === 'user' ? 'none' : `1px solid ${theme.borderSion}`,
-              boxShadow: isDarkMode ? 'none' : '0 2px 4px rgba(0,0,0,0.02)',
-              transition: 'all 0.3s ease'
-            }}>
-              <ReactMarkdown 
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  p: ({node, ...props}: any) => {
-                    const isLast = node?.position?.end.offset === m.content.length;
-                    return (
-                      <p style={{ margin: 0, padding: 0, marginBottom: isLast ? '0px' : '1em' }} {...props} />
-                    );
-                  }
-                }}
-              >
-                {m.content}
-              </ReactMarkdown>
-            </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-            <div style={{ color: theme.textMuted, fontSize: '14px', fontStyle: 'italic', marginLeft: '10px', fontFamily: theme.fontSans }}>
-              Examining the scriptures...
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+        <p className="text-15 leading-relaxed text-[#6b7280] text-justify max-w-2xl mb-12">
+          Patmos operates under absolute textual sovereignty. Designed for deep academic inquiry, the core system process extracts, dissects, and evaluates theological context utilizing strictly the Textus Receptus lineage through the **Reina Valera 1865** and the **King James Version (KJV)**. Every query is filtered under unwavering dispensational mechanics.
+        </p>
 
-      {/* Input Area */}
-      <div style={{ width: '100%', maxWidth: '600px', padding: '20px 0 40px 0' }}>
-        <form onSubmit={sendMessage} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <input
-            style={{
-              width: '100%',
-              padding: '16px 60px 16px 25px',
-              borderRadius: '30px',
-              border: `1px solid ${isDarkMode ? '#334155' : '#9ca3af'}`,
-              fontSize: '15px',
-              outline: 'none',
-              backgroundColor: theme.inputBg,
-              color: theme.inputText,
-              fontFamily: theme.fontSans, // Inter aplicado aquí
-              transition: 'all 0.3s ease'
-            }}
-            placeholder="Search the scriptures..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={isLoading}
-          />
-          <button 
-            type="submit"
-            disabled={isLoading}
-            style={{
-              position: 'absolute',
-              right: '10px',
-              backgroundColor: isLoading ? '#475569' : theme.textMain,
-              color: isDarkMode ? '#020617' : '#fff',
-              border: 'none',
-              borderRadius: '50%',
-              width: '40px',
-              height: '40px',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-            →
-          </button>
-        </form>
-        <p style={{
-          textAlign: 'center',
-          fontSize: '11px',
-          color: theme.textMuted,
-          marginTop: '15px',
-          textTransform: 'uppercase',
-          letterSpacing: '1.5px',
-          fontFamily: 'serif',
-        }}>
+        {/* PRIMARY CALL TO ACTION */}
+        <div className="mb-16">
+          <Link 
+            href="/login" 
+            className="inline-flex items-center justify-center bg-[#111827] text-[#f9fafb] text-13 font-700 uppercase tracking-1.5 px-8 py-4 rounded-30 transition-all duration-300 hover:bg-[#1f2937] shadow-sm"
+          >
+            Open the Arsenal &rarr;
+          </Link>
+        </div>
+
+        {/* PRODUCT BENEFITS / SYSTEM PILLARS */}
+        <section className="border-t border-[#e5e7eb] pt-12">
+          <h3 className="text-11 font-700 uppercase tracking-2 text-[#6b7280] mb-8 font-serif">
+            Core Architecture Pillars
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
+            
+            {/* PILLAR 1 */}
+            <div className="flex flex-col gap-2">
+              <h4 className="text-14 font-700 uppercase tracking-0.5 text-[#111827]">
+                01 / The Arsenal Integration
+              </h4>
+              <p className="text-13 leading-relaxed text-[#6b7280] text-justify">
+                High-fidelity data retrieval directly anchored to recovered textual fragments. Advanced source integrity controls eliminate general artificial intelligence neutrality, delivering dogmatic, absolute certainty.
+              </p>
+            </div>
+
+            {/* PILLAR 2 */}
+            <div className="flex flex-col gap-2">
+              <h4 className="text-14 font-700 uppercase tracking-0.5 text-[#111827]">
+                02 / Textual Inerrancy
+              </h4>
+              <p className="text-13 leading-relaxed text-[#6b7280] text-justify">
+                Zero lexical modification. Systems strictly maintain archaic grammar and literal spellings (**"distinga"**, **"extendimiento"**), fully bypassing modern ecumenical translations or standard market alterations.
+              </p>
+            </div>
+
+            {/* PILLAR 3 */}
+            <div className="flex flex-col gap-2">
+              <h4 className="text-14 font-700 uppercase tracking-0.5 text-[#111827]">
+                03 / Dispensational Mechanics
+              </h4>
+              <p className="text-13 leading-relaxed text-[#6b7280] text-justify">
+                Mathematical textual division. Complete algorithmic focus mapping out Biblical boundaries, structural typology, and specific target audience separation (Israel, Gentiles, and the Church of God).
+              </p>
+            </div>
+
+            {/* PILLAR 4 */}
+            <div className="flex flex-col gap-2">
+              <h4 className="text-14 font-700 uppercase tracking-0.5 text-[#111827]">
+                04 / Strict Cessationism
+              </h4>
+              <p className="text-13 leading-relaxed text-[#6b7280] text-justify">
+                Absolute defensive stance evaluating sign gifts under the strict completion of the Canon. Academic analysis running structural cross-references to expose contemporary charismatic vulnerabilities.
+              </p>
+            </div>
+
+          </div>
+        </section>
+      </main>
+
+      {/* FOOTER */}
+      <footer className="w-full max-w-650 border-t border-[#e5e7eb] py-8 px-6 md:px-0 flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+        <p className="text-11 text-[#6b7280] tracking-1.5 uppercase font-serif text-center md:text-left">
           Based on Rightly Dividing the Word of Truth
         </p>
-      </div>
-    </main>
+        <p className="text-10 text-[#94a3b8] uppercase tracking-1">
+          &copy; {new Date().getFullYear()} Patmos Research. All Rights Reserved.
+        </p>
+      </footer>
+
+    </div>
   );
 }
