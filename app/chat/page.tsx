@@ -335,22 +335,22 @@ export default function PatmosChat() {
                 <ReactMarkdown 
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    // INTERCEPCIÓN DE PÁRRAFOS: Fuerza la separación vertical en las respuestas teológicas
+                    // ALINEACIÓN IZQUIERDA Y SALTO ENTRE PÁRRAFOS
                     p: ({ children }) => (
                       <p style={{ 
                         marginBottom: '16px', 
                         marginTop: '0px',
-                        textAlign: 'justify',
+                        textAlign: 'left',
                         whiteSpace: 'pre-wrap'
                       }} className="last:mb-0">
                         {children}
                       </p>
                     ),
-                    // INTERCEPCIÓN DE CITAS OBLIGATORIAS: Realce estético a las citas en negrita
+                    // RESALTADO MONOCROMÁTICO PROFESIONAL (Hereda el color de la burbuja sin amarillos)
                     strong: ({ children }) => (
                       <strong style={{ 
                         fontWeight: '700', 
-                        color: isDarkMode ? '#fbbf24' : '#d97706' // Ámbar/Dorado adaptativo al tema
+                        color: 'inherit' 
                       }}>
                         {children}
                       </strong>
