@@ -126,57 +126,75 @@ export default function PatmosChat() {
   };
 
   const sendMessage = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!input.trim() || isLoading) return;
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
 
-  const userMessage = { role: "user", content: input };
-  const updatedMessages = [...messages, userMessage];
-  setMessages(updatedMessages);
-  setInput("");
-  setIsLoading(true);
+    const userMessage = { role: "user", content: input };
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    const currentInput = input; // Captura para el query de búsqueda
+    setInput("");
+    setIsLoading(true);
 
-  try {
-    let contextText = "";
+    try {
+      let contextText = "";
 
-    // 1. ESCANEO DEL REPOSITORIO (RAG): Buscamos fragmentos en la tabla 'documents'
-    // Filtramos los metadatos JSONB para asegurarnos de traer solo manuscritos RV1865 o KJV
-    const { data: fragments, error: ragError } = await supabase
-      .from('documents')
-      .select('content, metadata')
-      // Esta línea busca dentro del JSONB de metadata que la versión sea RV1865 o KJV
-      // Si tu usuario escribe en español, priorizará la RV1865
-      .or(`metadata->>version.eq.RV1865,metadata->>version.eq.KJV`)
-      .limit(4); // Extraemos los 4 fragmentos más relevantes basados en la sesión
+      // 1. ESCANEO DEL REPOSITORIO (RAG TEXT-BASED): Extracción limpia con JSONB .contains()
+      // Buscamos concordancia de texto y filtramos de manera segura la metadata de manuscritos
+      const { data: fragments, error: ragError } = await supabase
+        .from('documents')
+        .select('content, metadata')
+        .ilike('content', `%${currentInput.trim()}%`)
+        .limit(5);
 
-    if (!ragError && fragments && fragments.length > 0) {
-      // Unimos los contenidos de los fragmentos recuperados
-      contextText = fragments.map(f => f.content).join("\n\n");
-    } else if (ragError) {
-      console.error("RAG Retrieval Error:", ragError);
+      if (!ragError && fragments && fragments.length > 0) {
+        // Filtramos programáticamente en memoria para asegurar que correspondan a RV1865 o KJV
+        const filtered = fragments.filter(f => 
+          f.metadata?.version === 'RV1865' || f.metadata?.version === 'KJV'
+        );
+        contextText = filtered.map(f => f.content).join("\n\n");
+      }
+
+      // Si la búsqueda textual exacta fue muy específica o no arrojó resultados inmediatos, 
+      // enviamos un set de manuscritos base de respaldo para no dejar vacío el prompt
+      if (!contextText) {
+        const { data: fallbackFragments } = await supabase
+          .from('documents')
+          .select('content, metadata')
+          .limit(10);
+          
+        if (fallbackFragments) {
+          const filteredFallback = fallbackFragments.filter(f => 
+            f.metadata?.version === 'RV1865' || f.metadata?.version === 'KJV'
+          ).slice(0, 4);
+          contextText = filteredFallback.map(f => f.content).join("\n\n");
+        }
+      }
+
+      if (ragError) console.error("RAG Repositorio Error:", ragError);
+
+      // 2. DISPARO A LA API DOGMÁTICA DE PATMOS
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          messages: updatedMessages, 
+          contextText: contextText 
+        }),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "An error occurred.");
+      
+      setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
+      fetchHistory(); 
+    } catch (error: any) {
+      setMessages((prev) => [...prev, { role: "assistant", content: `System Error: ${error.message}` }]);
+    } finally {
+      setIsLoading(false);
+      setTimeout(scrollToBottom, 100);
     }
-
-    // 2. DISPARO A LA API: Enviamos el historial junto con el contexto recuperado
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        messages: updatedMessages, 
-        contextText: contextText // <-- Aquí viajan los versículos reales al prompt de control
-      }),
-    });
-    
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "An error occurred.");
-    
-    setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
-    fetchHistory(); 
-  } catch (error: any) {
-    setMessages((prev) => [...prev, { role: "assistant", content: `System Error: ${error.message}` }]);
-  } finally {
-    setIsLoading(false);
-    setTimeout(scrollToBottom, 100);
-  }
-};
+  };
 
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: theme.bg, transition: 'all 0.4s ease' }}>
@@ -359,7 +377,6 @@ export default function PatmosChat() {
                 <ReactMarkdown 
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    // ALINEACIÓN IZQUIERDA Y SALTO ENTRE PÁRRAFOS
                     p: ({ children }) => (
                       <p style={{ 
                         marginBottom: '16px', 
@@ -370,7 +387,6 @@ export default function PatmosChat() {
                         {children}
                       </p>
                     ),
-                    // RESALTADO MONOCROMÁTICO PROFESIONAL (Hereda el color de la burbuja sin amarillos)
                     strong: ({ children }) => (
                       <strong style={{ 
                         fontWeight: '700', 
