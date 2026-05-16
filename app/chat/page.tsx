@@ -70,7 +70,7 @@ export default function PatmosChat() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserEmail(user.email ?? 'Vigilante');
-        fetchHistory(); // Traer historial de la base de datos
+        fetchHistory(); 
       }
 
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -132,48 +132,65 @@ export default function PatmosChat() {
     const userMessage = { role: "user", content: input };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
-    const currentInput = input; // Captura para el query de búsqueda
+    const currentInput = input; 
     setInput("");
     setIsLoading(true);
 
     try {
       let contextText = "";
 
-      // 1. ESCANEO DEL REPOSITORIO (RAG TEXT-BASED): Extracción limpia con JSONB .contains()
-      // Buscamos concordancia de texto y filtramos de manera segura la metadata de manuscritos
-      const { data: fragments, error: ragError } = await supabase
-        .from('documents')
-        .select('content, metadata')
-        .ilike('content', `%${currentInput.trim()}%`)
-        .limit(5);
+      // PARSER QUIRÚRGICO DE CITAS (Ej: "2 Timoteo 2:15" -> libro: "2 Timoteo", capitulo: 2, versiculo: 15)
+      const match = currentInput.match(/(\d?\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s*(\d+):(\d+)/);
+      
+      if (match) {
+        const bookName = match[1].trim();
+        const chapterNum = match[2];
+        const verseNum = match[3];
 
-      if (!ragError && fragments && fragments.length > 0) {
-        // Filtramos programáticamente en memoria para asegurar que correspondan a RV1865 o KJV
-        const filtered = fragments.filter(f => 
-          f.metadata?.version === 'RV1865' || f.metadata?.version === 'KJV'
-        );
-        contextText = filtered.map(f => f.content).join("\n\n");
-      }
-
-      // Si la búsqueda textual exacta fue muy específica o no arrojó resultados inmediatos, 
-      // enviamos un set de manuscritos base de respaldo para no dejar vacío el prompt
-      if (!contextText) {
-        const { data: fallbackFragments } = await supabase
+        // 1. EXTRACTOR EXHAUSTIVO POR METADATOS JSONB DIRECTO EN EL SERVIDOR
+        // Buscamos de forma paralela en la base de datos mapeando el formato de almacenamiento JSON
+        const { data: exactFragments, error: exactError } = await supabase
           .from('documents')
           .select('content, metadata')
-          .limit(10);
-          
-        if (fallbackFragments) {
-          const filteredFallback = fallbackFragments.filter(f => 
-            f.metadata?.version === 'RV1865' || f.metadata?.version === 'KJV'
-          ).slice(0, 4);
-          contextText = filteredFallback.map(f => f.content).join("\n\n");
+          .or(`metadata->>version.eq.RV1865,metadata->>version.eq.KJV`)
+          .or(`metadata->>chapter.eq.${chapterNum},metadata->>capitulo.eq.${chapterNum}`)
+          .or(`metadata->>verse.eq.${verseNum},metadata->>versiculo.eq.${verseNum}`)
+          .limit(20);
+
+        if (!exactError && exactFragments && exactFragments.length > 0) {
+          // Filtramos el nombre del libro en memoria para limpiar falsos positivos de otros libros con mismo cap/ver
+          const matchedVerses = exactFragments.filter(f => {
+            const meta = f.metadata;
+            if (!meta) return false;
+            const metaBook = String(meta.book || meta.libro || "").toLowerCase();
+            return metaBook.includes(bookName.toLowerCase()) || bookName.toLowerCase().includes(metaBook);
+          });
+
+          if (matchedVerses.length > 0) {
+            contextText = matchedVerses.map(f => f.content).join("\n\n");
+          }
         }
       }
 
-      if (ragError) console.error("RAG Repositorio Error:", ragError);
+      // 2. RESPALDO TEÓRICO (Si es una pregunta de concepto abierto sin formato "Libro X:Y")
+      if (!contextText) {
+        const words = currentInput.split(" ").filter(w => w.length > 4).slice(0, 2);
+        
+        if (words.length > 0) {
+          const { data: textFragments } = await supabase
+            .from('documents')
+            .select('content, metadata')
+            .or(`metadata->>version.eq.RV1865,metadata->>version.eq.KJV`)
+            .ilike('content', `%${words[0]}%`)
+            .limit(5);
 
-      // 2. DISPARO A LA API DOGMÁTICA DE PATMOS
+          if (textFragments && textFragments.length > 0) {
+            contextText = textFragments.map(f => f.content).join("\n\n");
+          }
+        }
+      }
+
+      // 3. DISPARO A LA API DOGMÁTICA DE PATMOS
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -300,7 +317,6 @@ export default function PatmosChat() {
           marginBottom: '10px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            {/* Botón para abrir/cerrar menú */}
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.textMain, fontSize: '18px', padding: 0 }}
