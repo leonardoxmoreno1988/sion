@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-// Inicializamos Stripe con tu clave secreta
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-01-27' as any, // Mantiene la compatibilidad con el SDK de Next.js
+// Inicialización defensiva: Si la clave no existe (como en el build de Vercel), pasa un string vacío temporal
+// Esto evita que el constructor de Stripe tire un error fatal durante la compilación
+const stripeKey = process.env.STRIPE_SECRET_KEY || '';
+const stripe = new Stripe(stripeKey, {
+  apiVersion: '2025-01-27' as any,
 });
 
-// Inicializamos un cliente de Supabase con la clave de administración (service_role)
-// Esto es vital porque el webhook corre en segundo plano sin un usuario logueado
+// Inicializamos el cliente de Supabase con la misma lógica defensiva
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder_key'
 );
 
 export async function POST(req: Request) {
