@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
         // El usuario renovó, cambió de plan, entró en impago o canceló
-        const subscription = event.data.object as Stripe.Subscription;
+        const subscription = event.data.object as any;
         // En estos eventos, buscamos al usuario por su stripe_customer_id
         const userId = await getUserIdByCustomerId(subscription.customer as string);
         if (userId) {
