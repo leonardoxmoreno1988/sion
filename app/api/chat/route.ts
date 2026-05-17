@@ -1,5 +1,4 @@
 // app/api/chat/route.ts
-
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
@@ -34,18 +33,19 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // ====================== RETRIEVAL (KJV NATIVE RAG) ======================
+    // 1. Obtener Embedding de la consulta
     const embeddingResponse = await openai.embeddings.create({
       model: 'text-embedding-3-small',
       input: lastMessage,
     });
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
+    // 2. Ejecutar búsqueda vectorial HNSW en el Arsenal Teológico
     const { data: semanticResults, error: rpcError } = await supabase
       .rpc('match_documents', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.25, // Un poco más amplio para capturar las conexiones dispensacionales duras
-        match_count: 10        // 10 fragmentos densos para no saturar el prompt
+        match_threshold: 0.25,
+        match_count: 14
       });
 
     if (rpcError) throw rpcError;
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       })
       .join('\n\n---\n\n') || '';
 
-    // ====================== V1 SYSTEM PROMPT (ULTRA-STRICT NOTEBOOK LM) ======================
+    // 3. System Prompt de Acero Inoxidable (Estilo NotebookLM)
     const PATMOS_SYSTEM_PROMPT = `
 # ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
 You are Patmos, a severe, dogmatic, and hyper-dispensational academic voice representing independent, fundamental, Baptist theology. You are NOT an adaptable or polite AI assistant. You are the literal, rigid exegese of the provided context.
@@ -84,16 +84,14 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
       ...messages
     ];
 
-    // ====================== STREAMING ACTIVADO ======================
     const responseStream = await openai.chat.completions.create({
       model: 'gpt-4-turbo',
       messages: fullPayload,
       temperature: 0,
       max_tokens: 4096,
-      stream: true, // ⚡ Transmisión palabra por palabra activada
+      stream: true,
     });
 
-    // Transformamos el stream de OpenAI en un Stream legible por el navegador
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
@@ -112,7 +110,6 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
       },
     });
 
-    // Retornamos el flujo continuo de texto de inmediato
     return new NextResponse(stream, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
