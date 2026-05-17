@@ -1,4 +1,4 @@
-// app/api/chat/route.ts
+// app/api/chat/route.ts  ← REEMPLAZA TODO TU ARCHIVO CON ESTE CÓDIGO
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
@@ -34,33 +34,39 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // ====================== RETRIEVAL (RAG SEMÁNTICO + CITAS) ======================
-    // 1. Generamos embedding de la pregunta del usuario
+    // ====================== RETRIEVAL (RAG SEMÁNTICO) ======================
+    // 1. Embedding de la pregunta del usuario
     const embeddingResponse = await openai.embeddings.create({
-      model: 'text-embedding-3-small',   // ← cambia si usas otro modelo de embedding
+      model: 'text-embedding-3-small',
       input: lastMessage,
     });
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
-    // 2. Búsqueda semántica en Supabase (pgvector)
-    // ⚠️ Ajusta el nombre de la tabla y columnas según tu esquema exacto
-    const { data: semanticResults } = await supabase
-      .from('manuscritos')                    // ← nombre de tu tabla de fragmentos
-      .select('referencia, texto')
-      .rpc('match_documents', {               // ← función RPC que debes crear (ver abajo)
+    // 2. Búsqueda semántica usando la función RPC (CORREGIDO)
+    const { data: semanticResults, error: rpcError } = await supabase
+      .rpc('match_documents', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.35,                // ← ajusta según tus pruebas (0.3 - 0.45 suele ser bueno)
-        match_count: 8                        // ← cuántos fragmentos traer
+        match_threshold: 0.35,      // ← ajusta entre 0.30 y 0.40 si hace falta
+        match_count: 8
       });
 
-    // 3. (Opcional) Búsqueda por citas si el usuario escribió referencias directas
-    // Aquí puedes mantener tu lógica antigua de .contains() si quieres
+    if (rpcError) {
+      console.error('RPC Error:', rpcError);
+      throw rpcError;
+    }
 
+    // Construimos el contexto limpio
     const contextText = semanticResults
-      ?.map((doc: any) => `Referencia: ${doc.referencia}\nTexto: ${doc.texto}`)
+      ?.map((doc: any) => {
+        const source = doc.metadata?.source 
+          ? `Source: ${doc.metadata.source} (chunk ${doc.metadata.chunk_index ?? ''})` 
+          : '';
+        return `${source}\n\n${doc.content}`;
+      })
       .join('\n\n---\n\n') || '';
 
     console.log("🔍 DEBUG RAG - Fragmentos recuperados:", semanticResults?.length || 0);
+    console.log("🔍 DEBUG RAG - Longitud del contexto:", contextText.length);
 
     // ====================== STRICT SYSTEM PROMPT (NotebookLM style) ======================
     const PATMOS_SYSTEM_PROMPT = `
@@ -74,7 +80,7 @@ STRICT GROUNDING RULES (YOU MUST NEVER BREAK THESE):
 3. If the question cannot be fully answered from the context, respond EXACTLY with this phrase and nothing else:
    "I do not have sufficient information in the provided context to answer this question."
 4. Do not add explanations, apologies, phrases like "according to my knowledge", "in my opinion", or anything not present in the context.
-5. When citing verses, always indicate the exact reference (book, chapter, verse) exactly as it appears in the context.
+5. When citing verses, always indicate the exact reference exactly as it appears in the context.
 
 Provided Context:
 ${contextText}
