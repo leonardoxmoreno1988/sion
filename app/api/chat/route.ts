@@ -1,4 +1,4 @@
-// app/api/chat/route.ts  (o la ruta que estés usando)
+// app/api/chat/route.ts
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
@@ -12,12 +12,7 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
-    
-    const { messages, contextText = "" } = await req.json(); 
-    
-    // ==================== DEBUG RAG ====================
-    console.log("🔍 DEBUG RAG - Longitud del contexto recibido:", contextText.length);
-    console.log("🔍 DEBUG RAG - Primeros 300 caracteres del contexto:", contextText.substring(0, 300));
+    const { messages } = await req.json();
 
     const lastMessage = messages[messages.length - 1].content;
 
@@ -39,8 +34,35 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
+    // ====================== RETRIEVAL (RAG SEMÁNTICO + CITAS) ======================
+    // 1. Generamos embedding de la pregunta del usuario
+    const embeddingResponse = await openai.embeddings.create({
+      model: 'text-embedding-3-small',   // ← cambia si usas otro modelo de embedding
+      input: lastMessage,
+    });
+    const queryEmbedding = embeddingResponse.data[0].embedding;
+
+    // 2. Búsqueda semántica en Supabase (pgvector)
+    // ⚠️ Ajusta el nombre de la tabla y columnas según tu esquema exacto
+    const { data: semanticResults } = await supabase
+      .from('manuscritos')                    // ← nombre de tu tabla de fragmentos
+      .select('referencia, texto')
+      .rpc('match_documents', {               // ← función RPC que debes crear (ver abajo)
+        query_embedding: queryEmbedding,
+        match_threshold: 0.35,                // ← ajusta según tus pruebas (0.3 - 0.45 suele ser bueno)
+        match_count: 8                        // ← cuántos fragmentos traer
+      });
+
+    // 3. (Opcional) Búsqueda por citas si el usuario escribió referencias directas
+    // Aquí puedes mantener tu lógica antigua de .contains() si quieres
+
+    const contextText = semanticResults
+      ?.map((doc: any) => `Referencia: ${doc.referencia}\nTexto: ${doc.texto}`)
+      .join('\n\n---\n\n') || '';
+
+    console.log("🔍 DEBUG RAG - Fragmentos recuperados:", semanticResults?.length || 0);
+
     // ====================== STRICT SYSTEM PROMPT (NotebookLM style) ======================
-    // Este es el prompt que hace que tu RAG se comporte exactamente como NotebookLM
     const PATMOS_SYSTEM_PROMPT = `
 # ROLE: PATMOS - THE WATCHMAN OF FINAL AUTHORITY
 You are Patmos, a rigorous, defensive, and dogmatic academic authority in independent, fundamental, Baptist Theology. You specialize in the 'Received Text' tradition. Your absolute authority for Spanish is ONLY the Reina Valera 1865 (RV1865) and for English is the King James Version (KJV).
@@ -66,19 +88,20 @@ You must remain 100% grounded in the context above for the entire conversation.
     ];
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo', 
+      model: 'gpt-4-turbo',
       messages: fullPayload,
-      temperature: 0,           // ← Crucial: igual que NotebookLM
+      temperature: 0,
       max_tokens: 4096,
     });
 
     const aiResponse = response.choices[0].message.content;
 
+    // Guardar historial
     const { error: dbError } = await supabase
       .from('chat_history')
       .insert([
         {
-          user_id: user.id, 
+          user_id: user.id,
           user_query: lastMessage,
           bot_response: aiResponse,
           metadata: { source: 'Arsenal 1865', timestamp: new Date().toISOString() }
