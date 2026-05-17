@@ -7,8 +7,11 @@ import remarkGfm from "remark-gfm";
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 
-// @ts-ignore
-import { useChat } from 'ai/react'; // Ruta nativa universal compatible con el empaquetador
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 interface ChatSession {
   id: string;
@@ -27,8 +30,12 @@ export default function PatmosChat() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
-  // ⚡ Control manual e infalible del texto del teclado
+  // Estados nativos para controlar el chat y el input
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { id: 'welcome', role: 'assistant', content: "Welcome. How may I assist your Bible inquiry today?" }
+  ]);
   const [customInput, setCustomInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -37,19 +44,6 @@ export default function PatmosChat() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
-
-  // ⚡ Motor de streaming oficial adaptado
-  const { 
-    messages, 
-    append, // Usamos append para enviar el mensaje manualmente sin usar las funciones rotas del formulario
-    isLoading, 
-    setMessages 
-  } = useChat({
-    api: '/api/chat',
-    initialMessages: [
-      { id: 'welcome', role: 'assistant', content: "Welcome. How may I assist your Bible inquiry today?" }
-    ]
-  } as any) as any;
 
   const theme = {
     bg: isDarkMode ? '#020617' : '#f9fafb',
@@ -133,18 +127,80 @@ export default function PatmosChat() {
     ]);
   };
 
-  // ⚡ Manejador personalizado del envío para disparar el stream sin usar handleSubmit roto
-  const handleCustomSubmit = (e: React.FormEvent) => {
+  // ⚡ PROCESADOR NATIVO DE STREAMING (Consumo directo de la API Route sin SDK)
+  const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customInput.trim() || isLoading) return;
 
-    // Disparamos el mensaje directamente al hook de streaming
-    append({
-      role: 'user',
-      content: customInput
-    });
+    const userQuery = customInput;
+    setCustomInput("");
+    setIsLoading(true);
 
-    setCustomInput(""); // Limpiamos la caja de texto
+    // 1. Añadir mensaje del usuario en pantalla
+    const userMessageId = Math.random().toString();
+    const assistantMessageId = Math.random().toString();
+    
+    const updatedMessages: ChatMessage[] = [
+      ...messages,
+      { id: userMessageId, role: 'user', content: userQuery }
+    ];
+    
+    setMessages(updatedMessages);
+
+    // 2. Preparar el espacio del bot vacío para el stream
+    setMessages((prev) => [
+      ...prev,
+      { id: assistantMessageId, role: 'assistant', content: "" }
+    ]);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: updatedMessages.map(m => ({ role: m.role, content: m.content })) })
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error("Failed to contact the Dogmatic Arsenal.");
+      }
+
+      // 3. Lector nativo del flujo de bits continuo
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let accumulatedText = "";
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        
+        if (value) {
+          const chunk = decoder.decode(value, { stream: !done });
+          accumulatedText += chunk;
+
+          // Actualizamos progresivamente el contenido del último mensaje
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId ? { ...m, content: accumulatedText } : m
+            )
+          );
+        }
+      }
+
+      fetchHistory(); // Actualizar el historial al concluir el flujo completo
+
+    } catch (error) {
+      console.error("Patmos Pipeline Native Error:", error);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantMessageId 
+            ? { ...m, content: "Aconteció un error en el flujo de transmisión del Arsenal." } 
+            : m
+        )
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -307,7 +363,7 @@ export default function PatmosChat() {
           gap: '20px',
           padding: '20px 0'
         }}>
-          {messages.map((m: any) => (
+          {messages.map((m) => (
             <div key={m.id} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
               <div style={{
                 maxWidth: '90%',
@@ -337,7 +393,7 @@ export default function PatmosChat() {
                     )
                   }}
                 >
-                  {m.content || (m.parts && m.parts[0]?.text) || ""}
+                  {m.content}
                 </ReactMarkdown>
               </div>
             </div>
@@ -354,7 +410,6 @@ export default function PatmosChat() {
 
         {/* Caja de Input */}
         <div style={{ width: '100%', maxWidth: '650px', padding: '20px 0 40px 0' }}>
-          {/* Formulario conectado a nuestro manejador personalizado */}
           <form onSubmit={handleCustomSubmit} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <input
               style={{
@@ -371,7 +426,7 @@ export default function PatmosChat() {
               }}
               placeholder="Search the scriptures..."
               value={customInput}
-              onChange={(e) => setCustomInput(e.target.value)} // ⚡ React State Puro: Descongela tu teclado de inmediato
+              onChange={(e) => setCustomInput(e.target.value)} 
               disabled={isLoading}
             />
             <button 
