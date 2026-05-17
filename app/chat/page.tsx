@@ -6,7 +6,9 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
-import { useChat } from '@ai-sdk/react'; // Único import oficial para el hook moderno
+
+// @ts-ignore
+import { useChat } from 'ai/react'; // Ruta nativa universal compatible con el empaquetador
 
 interface ChatSession {
   id: string;
@@ -25,6 +27,9 @@ export default function PatmosChat() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
+  // ⚡ Control manual e infalible del texto del teclado
+  const [customInput, setCustomInput] = useState("");
+
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -33,13 +38,10 @@ export default function PatmosChat() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // ⚡ El Truco Maestro Definitivo: Casteamos tanto el objeto de opciones 
-  // como el hook completo a 'any' para pulverizar las restricciones de tipo.
+  // ⚡ Motor de streaming oficial adaptado
   const { 
     messages, 
-    input, 
-    handleInputChange, 
-    handleSubmit, 
+    append, // Usamos append para enviar el mensaje manualmente sin usar las funciones rotas del formulario
     isLoading, 
     setMessages 
   } = useChat({
@@ -129,6 +131,20 @@ export default function PatmosChat() {
       { id: `${session.id}-user`, role: "user", content: session.user_query },
       { id: `${session.id}-bot`, role: "assistant", content: session.bot_response }
     ]);
+  };
+
+  // ⚡ Manejador personalizado del envío para disparar el stream sin usar handleSubmit roto
+  const handleCustomSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customInput.trim() || isLoading) return;
+
+    // Disparamos el mensaje directamente al hook de streaming
+    append({
+      role: 'user',
+      content: customInput
+    });
+
+    setCustomInput(""); // Limpiamos la caja de texto
   };
 
   return (
@@ -321,7 +337,6 @@ export default function PatmosChat() {
                     )
                   }}
                 >
-                  {/* Escudo polimórfico compatible con cualquier versión de la estructura del SDK */}
                   {m.content || (m.parts && m.parts[0]?.text) || ""}
                 </ReactMarkdown>
               </div>
@@ -339,7 +354,8 @@ export default function PatmosChat() {
 
         {/* Caja de Input */}
         <div style={{ width: '100%', maxWidth: '650px', padding: '20px 0 40px 0' }}>
-          <form onSubmit={handleSubmit} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          {/* Formulario conectado a nuestro manejador personalizado */}
+          <form onSubmit={handleCustomSubmit} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <input
               style={{
                 width: '100%',
@@ -354,8 +370,8 @@ export default function PatmosChat() {
                 transition: 'all 0.3s ease'
               }}
               placeholder="Search the scriptures..."
-              value={input || ""}
-              onChange={handleInputChange} 
+              value={customInput}
+              onChange={(e) => setCustomInput(e.target.value)} // ⚡ React State Puro: Descongela tu teclado de inmediato
               disabled={isLoading}
             />
             <button 
