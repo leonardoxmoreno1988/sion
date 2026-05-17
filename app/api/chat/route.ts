@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Forzamos a Next.js a tratar esta ruta como 100% dinámica para evitar fallos de build
+// Forzamos a Next.js a tratar esta ruta como 100% dinámica para evitar fallos de compilación en el build de Vercel
 export const dynamic = 'force-dynamic';
 
 const openai = new OpenAI({
@@ -38,40 +38,38 @@ export async function POST(req: Request) {
     }
 
     // ====================== RETRIEVAL (RAG SEMÁNTICO) ======================
+    // 1. Generamos el embedding de la pregunta del usuario (1536 dimensiones)
     const embeddingResponse = await openai.embeddings.create({
       model: 'text-embedding-3-small',
       input: lastMessage,
     });
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
+    // 2. Búsqueda semántica usando tu función RPC en Supabase
     const { data: semanticResults, error: rpcError } = await supabase
       .rpc('match_documents', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.30,      // ← Umbral bajo para mayor cobertura conceptual
-        match_count: 12             // ← Traemos más fragmentos para alimentar la síntesis
+        match_threshold: 0.30,      // ← Umbral ideal para capturar conceptos teóricos amplios
+        match_count: 12             // ← Traemos suficiente masa crítica para la síntesis analítica
       });
 
     if (rpcError) {
-      console.error('RPC Error:', rpcError);
+      console.error('❌ RPC Error:', rpcError);
       throw rpcError;
     }
 
-    // Debug mejorado en la consola del servidor
-    console.log("🔍 DEBUG RAG - Fragmentos recuperados:", semanticResults?.length || 0);
-    if (semanticResults && semanticResults.length > 0) {
-      console.log("🔍 DEBUG RAG - Top 3 similitudes vectoriales:");
-      semanticResults.slice(0, 3).forEach((doc: any, i: number) => {
-        const sourceName = doc.metadata?.source || doc.metadata?.version || 'Unknown';
-        console.log(`   ${i+1}. Similarity: ${(doc.similarity * 100).toFixed(1)}% | Source: ${sourceName}`);
-      });
-    }
-
-    // Construcción del bloque de contexto para el prompt
+    // 3. Filtro Teológico de Hierro: Mapeamos el contexto asegurando que SOLO pase RV1865 o KJV
     const contextText = semanticResults
+      ?.filter((doc: any) => {
+        const version = doc.metadata?.version?.toUpperCase()?.trim();
+        return version === 'RV1865' || version === 'KJV';
+      })
       ?.map((doc: any) => {
         const book = doc.metadata?.book || '';
         const chapter = doc.metadata?.chapter || '';
         const verse = doc.metadata?.verse || '';
+        
+        // Si tiene la estructura clásica de documentos RAG usa el source, sino arma la referencia bíblica
         const sourceInfo = doc.metadata?.source 
           ? `Source: ${doc.metadata.source} (chunk ${doc.metadata.chunk_index ?? ''})`
           : `Source: ${book} ${chapter}:${verse}`.trim();
@@ -80,7 +78,14 @@ export async function POST(req: Request) {
       })
       .join('\n\n---\n\n') || '';
 
-    console.log("🔍 DEBUG RAG - Longitud total del contexto inyectado:", contextText.length);
+    // Logs de auditoría teológica en la consola del servidor
+    const inyectadosCount = semanticResults?.filter((doc: any) => {
+      const v = doc.metadata?.version?.toUpperCase()?.trim();
+      return v === 'RV1865' || v === 'KJV';
+    }).length || 0;
+    
+    console.log(`🔍 DEBUG RAG - Recuperados: ${semanticResults?.length || 0} | Inyectados tras filtro: ${inyectadosCount}`);
+    console.log(`🔍 DEBUG RAG - Longitud total del string de contexto: ${contextText.length} caracteres.`);
 
     // ====================== REFINED SYSTEM PROMPT (Semantic NotebookLM Style) ======================
     const PATMOS_SYSTEM_PROMPT = `
@@ -105,6 +110,7 @@ Structure your response with absolute theological precision, utilizing 100% of t
       ...messages
     ];
 
+    // 4. Ejecución del modelo de lenguaje
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo',
       messages: fullPayload,
@@ -114,20 +120,32 @@ Structure your response with absolute theological precision, utilizing 100% of t
 
     const aiResponse = response.choices[0].message.content;
 
-    // Guardado automático en el historial de chat de Supabase
-    await supabase
-      .from('chat_history')
-      .insert([{
-        user_id: user.id,
-        user_query: lastMessage,
-        bot_response: aiResponse,
-        metadata: { source: 'Arsenal 1865', timestamp: new Date().toISOString() }
-      }]);
+    // ====================== HISTORIAL TOTALMENTE BLINDADO ======================
+    // Envolvemos esto en un sub-try-catch para que si la tabla chat_history falla, el usuario reciba su respuesta igual
+    try {
+      const { error: historyError } = await supabase
+        .from('chat_history')
+        .insert([{
+          user_id: user.id,
+          user_query: lastMessage,
+          bot_response: aiResponse,
+          metadata: { source: 'Arsenal 1865', timestamp: new Date().toISOString() }
+        }]);
+        
+      if (historyError) console.error('⚠️ Database log failure:', historyError.message);
+    } catch (historyCatch) {
+      console.error('⚠️ Failed to write to chat_history table:', historyCatch);
+    }
 
+    // Retorno JSON garantizado para evitar errores de parseo en el Frontend
     return NextResponse.json({ role: 'assistant', content: aiResponse });
 
   } catch (error: any) {
-    console.error('Patmos Core Chat Error:', error);
-    return new NextResponse('Internal Error within the Dogmatic Arsenal.', { status: 500 });
+    console.error('❌ Patmos Core Chat Fatal Error:', error);
+    // Respuesta de emergencia estructurada en JSON limpio
+    return NextResponse.json(
+      { role: 'assistant', content: 'Internal Error within the Dogmatic Arsenal. The Watchman is verifying database connectivity.' },
+      { status: 500 }
+    );
   }
 }
