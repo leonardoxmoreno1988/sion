@@ -1,10 +1,9 @@
+// app/api/chat/route.ts
+
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-
-// Forzamos la ejecución dinámica para evitar fallos de compilación por falta de claves en el build
-export const dynamic = 'force-dynamic';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -36,40 +35,45 @@ export async function POST(req: Request) {
     }
 
     // ====================== RETRIEVAL (RAG SEMÁNTICO) ======================
-    // 1. Generamos el embedding de la consulta usando el modelo de 1536 dimensiones
     const embeddingResponse = await openai.embeddings.create({
       model: 'text-embedding-3-small',
       input: lastMessage,
     });
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
-    // 2. Búsqueda semántica usando tu nueva función RPC en Postgres
     const { data: semanticResults, error: rpcError } = await supabase
-      .rpc('match_documents', { 
+      .rpc('match_documents', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.35, 
-        match_count: 8 
+        match_threshold: 0.30,      // ← Bajado para que encuentre más (antes 0.35)
+        match_count: 12             // ← Más fragmentos para mayor cobertura
       });
 
     if (rpcError) {
-      console.error("❌ Error en la ejecución de la función RPC:", rpcError.message);
+      console.error('RPC Error:', rpcError);
+      throw rpcError;
     }
 
-    // 3. Mapeamos y estructuramos el contexto leyendo 'content' y 'metadata'
-    // Filtramos para asegurar que Patmos herede contexto veraz de tus versiones de autoridad
+    // Debug mejorado (verás exactamente qué está pasando)
+    console.log("🔍 DEBUG RAG - Fragmentos recuperados:", semanticResults?.length || 0);
+    if (semanticResults && semanticResults.length > 0) {
+      console.log("🔍 DEBUG RAG - Top 3 similitudes:");
+      semanticResults.slice(0, 3).forEach((doc: any, i: number) => {
+        console.log(`   ${i+1}. Similarity: ${(doc.similarity * 100).toFixed(1)}% | Source: ${doc.metadata?.source}`);
+      });
+    }
+
     const contextText = semanticResults
-      ?.filter((doc: any) => doc.metadata?.version === 'RV1865' || doc.metadata?.version === 'KJV')
-      .map((doc: any) => {
-        const book = doc.metadata?.book || 'Scripture';
-        const chapter = doc.metadata?.chapter || '';
-        const verse = doc.metadata?.verse || '';
-        return `Referencia: ${book} ${chapter}:${verse}\nTexto: ${doc.content}`;
+      ?.map((doc: any) => {
+        const source = doc.metadata?.source 
+          ? `Source: ${doc.metadata.source} (chunk ${doc.metadata.chunk_index ?? ''})` 
+          : '';
+        return `${source}\n\n${doc.content}`;
       })
       .join('\n\n---\n\n') || '';
 
-    console.log("🔍 DEBUG RAG - Fragmentos inyectados al prompt:", semanticResults?.length || 0);
+    console.log("🔍 DEBUG RAG - Longitud del contexto:", contextText.length);
 
-    // ====================== STRICT SYSTEM PROMPT (NotebookLM style) ======================
+    // ====================== STRICT SYSTEM PROMPT ======================
     const PATMOS_SYSTEM_PROMPT = `
 # ROLE: PATMOS - THE WATCHMAN OF FINAL AUTHORITY
 You are Patmos, a rigorous, defensive, and dogmatic academic authority in independent, fundamental, Baptist Theology. You specialize in the 'Received Text' tradition. Your absolute authority for Spanish is ONLY the Reina Valera 1865 (RV1865) and for English is the King James Version (KJV).
@@ -81,7 +85,7 @@ STRICT GROUNDING RULES (YOU MUST NEVER BREAK THESE):
 3. If the question cannot be fully answered from the context, respond EXACTLY with this phrase and nothing else:
    "I do not have sufficient information in the provided context to answer this question."
 4. Do not add explanations, apologies, phrases like "according to my knowledge", "in my opinion", or anything not present in the context.
-5. When citing verses, always indicate the exact reference (book, chapter, verse) exactly as it appears in the context.
+5. When citing verses, always indicate the exact reference exactly as it appears in the context.
 
 Provided Context:
 ${contextText}
@@ -97,27 +101,20 @@ You must remain 100% grounded in the context above for the entire conversation.
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo',
       messages: fullPayload,
-      temperature: 0, // Determinismo absoluto
+      temperature: 0,
       max_tokens: 4096,
     });
 
     const aiResponse = response.choices[0].message.content;
 
-    // Guardar historial en la base de datos
-    const { error: dbError } = await supabase
+    await supabase
       .from('chat_history')
-      .insert([
-        {
-          user_id: user.id,
-          user_query: lastMessage,
-          bot_response: aiResponse,
-          metadata: { source: 'Arsenal 1865', timestamp: new Date().toISOString() }
-        }
-      ]);
-
-    if (dbError) {
-      console.error('Database log failure:', dbError);
-    }
+      .insert([{
+        user_id: user.id,
+        user_query: lastMessage,
+        bot_response: aiResponse,
+        metadata: { source: 'Arsenal 1865', timestamp: new Date().toISOString() }
+      }]);
 
     return NextResponse.json({ role: 'assistant', content: aiResponse });
 
