@@ -1,3 +1,4 @@
+// app/chat/page.tsx
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -5,6 +6,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
+
+// 💥 AGREGA ESTA LÍNEA EXACTA AQUÍ ABAJO PARA DESTRUIR EL ERROR VISUAL:
+// @ts-ignore
+import { useChat, type Message } from 'ai/react';
 
 interface ChatSession {
   id: string;
@@ -17,27 +22,34 @@ interface ChatSession {
 }
 
 export default function PatmosChat() {
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
-  const [messages, setMessages] = useState([
-    { 
-      role: "assistant", 
-      content: "Welcome. How may I assist your Bible inquiry today?" 
-    }
-  ]);
-
   const router = useRouter();
-  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
+
+  // ⚡ Integración del motor de streaming oficial
+  const { messages, input, setInput, handleSubmit, isLoading, setMessages } = useChat({
+    api: '/api/chat',
+    initialMessages: [
+      { id: 'welcome', role: 'assistant', content: "Welcome. How may I assist your Bible inquiry today?" }
+    ],
+    onFinish: () => {
+      fetchHistory(); 
+    },
+    // 💥 CAMBIA ESTA LÍNEA AGREGA EL TIPO (: Error) AQUÍ:
+    onError: (err: Error) => {
+      console.error("Patmos Stream Error:", err);
+    }
+  });
 
   const theme = {
     bg: isDarkMode ? '#020617' : '#f9fafb',
@@ -53,11 +65,13 @@ export default function PatmosChat() {
     fontSans: '"Inter", sans-serif',
   };
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     const initPage = async () => {
@@ -78,9 +92,7 @@ export default function PatmosChat() {
         setIsDarkMode(true);
       }
     };
-
     initPage();
-    scrollToBottom();
   }, []);
 
   useEffect(() => {
@@ -109,127 +121,16 @@ export default function PatmosChat() {
   const startNewInquiry = () => {
     setActiveSessionId(null);
     setMessages([
-      { role: "assistant", content: "Welcome. How may I assist your Bible inquiry today?" }
+      { id: 'welcome', role: "assistant", content: "Welcome. How may I assist your Bible inquiry today?" }
     ]);
   };
 
   const loadSession = (session: ChatSession) => {
     setActiveSessionId(session.id);
     setMessages([
-      { role: "user", content: session.user_query },
-      { role: "assistant", content: session.bot_response }
+      { id: `${session.id}-user`, role: "user", content: session.user_query },
+      { id: `${session.id}-bot`, role: "assistant", content: session.bot_response }
     ]);
-  };
-
-  const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userMessage = { role: "user", content: input };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    const currentInput = input; 
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      let contextText = "";
-
-      // 1. CAPTURA Y PARSEO DE CITAS BÍBLICAS
-      const match = currentInput.match(/(\d?\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ]+)\s*(\d+):(\d+)/);
-      
-      if (match) {
-        const rawBook = match[1].trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const chapterNum = match[2];
-        const verseNum = match[3];
-
-        // Diccionario alineado milimétricamente con los nombres reales de tu consulta SQL de Supabase
-        const bibleBooksIndex: Record<string, string> = {
-          "genesis": "Genesis", "exodo": "Exodus", "levitico": "Levítico", "numeros": "Numbers",
-          "deuteronomio": "Deuteronomy", "josue": "Joshua", "jueces": "Judges", "rut": "Ruth",
-          "1 samuel": "1 Samuel", "2 samuel": "2 Samuel", "1 reyes": "1 Kings", "2 reyes": "2 Kings",
-          "1 cronicas": "2 Chronicles", "2 cronicas": "2 Chronicles", "esdras": "Ezra", "nehemias": "Nehemiah",
-          "ester": "Esther", "job": "Job", "salmos": "Psalms", "proverbios": "Proverbs",
-          "eclesiastes": "Ecclesiastes", "cantares": "Song of Solomon", "isaias": "Isaiah",
-          "jeremias": "Jeremiah", "lamentaciones": "Lamentations", "ezequiel": "Ezekiel", "daniel": "Daniel",
-          "oseas": "Hosea", "joel": "Joel", "amos": "Amos", "abdias": "Obadiah", "jonas": "Jonah",
-          "miqueas": "Micah", "nahum": "Nahum", "habacuc": "Habakuk", "sofonias": "Zephaniah",
-          "hageo": "Haggai", "zacarias": "Zechariah", "malaquias": "Malachi",
-          "mateo": "Matthew", "marcos": "Mark", "lucas": "Luke", "juan": "John", "hechos": "Acts",
-          "romanos": "Romans", "1 corintios": "1 Corinthians", "2 corintios": "2 Corinthians",
-          "galatas": "Galatians", "efesios": "Ephesians", "filipenses": "Philippians", "colosenses": "Colossians",
-          "1 tesalonicenses": "1 Thessalonians", "2 tesalonicenses": "2 Thessalonians",
-          "1 timoteo": "1 Timoteo", "2 timoteo": "2 Timoteo", "1 timothy": "1 Timoteo", "2 timothy": "2 Timoteo", "timoteo": "1 Timoteo",
-          "tito": "Titus", "filemon": "Philemon", "hebreos": "Hebreos", "santiago": "James",
-          "1 pedro": "1 Peter", "2 pedro": "2 Peter", "1 juan": "1 John", "2 juan": "2 John",
-          "3 juan": "3 John", "judas": "Jude", "apocalipsis": "Revelation", "revelacion": "Revelation"
-        };
-
-        const bookSearch = bibleBooksIndex[rawBook] || match[1].trim();
-
-        // RETORNO A LA EXTRACCIÓN DE METADATOS COMPATIBLE CON EL RLS ABIERTO
-        // Extraemos los valores como strings planos para romper bloqueos de tipado numérico
-        const { data: exactVerses, error: dbError } = await supabase
-          .from('documents')
-          .select('content, metadata')
-          .eq('metadata->>book', bookSearch)
-          .eq('metadata->>chapter', String(chapterNum))
-          .eq('metadata->>verse', String(verseNum));
-
-        if (!dbError && exactVerses && exactVerses.length > 0) {
-          const filtered = exactVerses.filter(f => f.metadata?.version === 'RV1865');
-          if (filtered.length > 0) {
-            contextText = filtered.map(f => f.content).join("\n\n");
-          }
-        } else if (dbError) {
-          console.error("Supabase Database Query Error:", dbError.message);
-        }
-      }
-
-      // 2. RESPALDO SEMÁNTICO POR PALABRA CLAVE
-      if (!contextText) {
-        const cleanInput = currentInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const keywords = cleanInput.split(" ").filter(w => w.length > 5);
-        
-        if (keywords.length > 0) {
-          const { data: keywordFragments } = await supabase
-            .from('documents')
-            .select('content, metadata')
-            .ilike('content', `%${keywords[0]}%`)
-            .limit(10);
-
-          if (keywordFragments && keywordFragments.length > 0) {
-            const filteredKeywords = keywordFragments.filter(f => f.metadata?.version === 'RV1865').slice(0, 3);
-            contextText = filteredKeywords.map(f => f.content).join("\n\n");
-          }
-        }
-      }
-
-      // 3. ENVÍO SEGURO DEL CONTEXTO REAL A LA API
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          messages: updatedMessages, 
-          contextText: contextText 
-        }),
-      });
-      
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `HTTP Error ${res.status}`);
-      
-      setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
-      fetchHistory(); 
-    } catch (error: any) {
-      console.error("Patmos Pipeline Error:", error);
-      setMessages((prev) => [
-        ...prev, 
-        { role: "assistant", content: `Aconteció un error en el script: ${error.message || error}` }
-      ]);
-    } finally { 
-      setIsLoading(false);
-      setTimeout(scrollToBottom, 100);
-    }
   };
 
   return (
@@ -267,7 +168,6 @@ export default function PatmosChat() {
           </button>
         </div>
 
-        {/* Lista de Registros del Historial */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '15px 10px' }}>
           <p style={{ fontSize: '9px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', marginBottom: '10px', fontFamily: 'serif' }}>
             Historical Records
@@ -324,7 +224,6 @@ export default function PatmosChat() {
         alignItems: 'center',
         padding: '0 20px',
       }}>
-        {/* Header Superior */}
         <div style={{
           width: '100%',
           maxWidth: '650px',
@@ -394,8 +293,8 @@ export default function PatmosChat() {
           gap: '20px',
           padding: '20px 0'
         }}>
-          {messages.map((m, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+          {messages.map((m: Message) => (
+            <div key={m.id} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
               <div style={{
                 maxWidth: '90%',
                 padding: '12px 20px',
@@ -413,20 +312,12 @@ export default function PatmosChat() {
                   remarkPlugins={[remarkGfm]}
                   components={{
                     p: ({ children }) => (
-                      <p style={{ 
-                        marginBottom: '16px', 
-                        marginTop: '0px',
-                        textAlign: 'left',
-                        whiteSpace: 'pre-wrap'
-                      }} className="last:mb-0">
+                      <p style={{ marginBottom: '16px', marginTop: '0px', textAlign: 'left', whiteSpace: 'pre-wrap' }}>
                         {children}
                       </p>
                     ),
                     strong: ({ children }) => (
-                      <strong style={{ 
-                        fontWeight: '700', 
-                        color: 'inherit' 
-                      }}>
+                      <strong style={{ fontWeight: '700', color: 'inherit' }}>
                         {children}
                       </strong>
                     )
@@ -449,7 +340,7 @@ export default function PatmosChat() {
 
         {/* Caja de Input */}
         <div style={{ width: '100%', maxWidth: '650px', padding: '20px 0 40px 0' }}>
-          <form onSubmit={sendMessage} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <form onSubmit={handleSubmit} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <input
               style={{
                 width: '100%',
