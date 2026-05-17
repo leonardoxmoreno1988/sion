@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Forzamos a Next.js a tratar esta ruta como 100% dinámica para evitar fallos de compilación en el build de Vercel
+// Forzamos a Next.js a tratar esta ruta como 100% dinámica para evitar fallos de compilación en Vercel
 export const dynamic = 'force-dynamic';
 
 const openai = new OpenAI({
@@ -38,38 +38,38 @@ export async function POST(req: Request) {
     }
 
     // ====================== RETRIEVAL (RAG SEMÁNTICO) ======================
-    // 1. Generamos el embedding de la pregunta del usuario (1536 dimensiones)
     const embeddingResponse = await openai.embeddings.create({
       model: 'text-embedding-3-small',
       input: lastMessage,
     });
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
-    // 2. Búsqueda semántica usando tu función RPC en Supabase
     const { data: semanticResults, error: rpcError } = await supabase
       .rpc('match_documents', {
         query_embedding: queryEmbedding,
-        match_threshold: 0.30,      // ← Umbral ideal para capturar conceptos teóricos amplios
-        match_count: 12             // ← Traemos suficiente masa crítica para la síntesis analítica
+        match_threshold: 0.30,      
+        match_count: 12             
       });
 
     if (rpcError) {
-      console.error('❌ RPC Error:', rpcError);
+      console.error('❌ RPC Error de Supabase:', rpcError);
       throw rpcError;
     }
 
-    // 3. Filtro Teológico de Hierro: Mapeamos el contexto asegurando que SOLO pase RV1865 o KJV
-    const contextText = semanticResults
-      ?.filter((doc: any) => {
-        const version = doc.metadata?.version?.toUpperCase()?.trim();
-        return version === 'RV1865' || version === 'KJV';
+    // ====================== FILTRO DE VERSIÓN ULTRA SEGURO ======================
+    const contextText = (semanticResults || [])
+      .filter((doc: any) => {
+        // Validación defensiva extrema: si no hay metadata o version, se descarta sin crashear
+        if (!doc || !doc.metadata || !doc.metadata.version) return false;
+        
+        const versionStr = String(doc.metadata.version).toUpperCase().trim();
+        return versionStr === 'RV1865' || versionStr === 'KJV';
       })
-      ?.map((doc: any) => {
+      .map((doc: any) => {
         const book = doc.metadata?.book || '';
         const chapter = doc.metadata?.chapter || '';
         const verse = doc.metadata?.verse || '';
         
-        // Si tiene la estructura clásica de documentos RAG usa el source, sino arma la referencia bíblica
         const sourceInfo = doc.metadata?.source 
           ? `Source: ${doc.metadata.source} (chunk ${doc.metadata.chunk_index ?? ''})`
           : `Source: ${book} ${chapter}:${verse}`.trim();
@@ -78,14 +78,9 @@ export async function POST(req: Request) {
       })
       .join('\n\n---\n\n') || '';
 
-    // Logs de auditoría teológica en la consola del servidor
-    const inyectadosCount = semanticResults?.filter((doc: any) => {
-      const v = doc.metadata?.version?.toUpperCase()?.trim();
-      return v === 'RV1865' || v === 'KJV';
-    }).length || 0;
-    
-    console.log(`🔍 DEBUG RAG - Recuperados: ${semanticResults?.length || 0} | Inyectados tras filtro: ${inyectadosCount}`);
-    console.log(`🔍 DEBUG RAG - Longitud total del string de contexto: ${contextText.length} caracteres.`);
+    // Logs para auditar en Vercel qué está pasando realmente con los datos
+    console.log(`🔍 DEBUG RAG - Recuperados de la base de datos: ${semanticResults?.length || 0}`);
+    console.log(`🔍 DEBUG RAG - Longitud del string de contexto final: ${contextText.length} caracteres.`);
 
     // ====================== REFINED SYSTEM PROMPT (Semantic NotebookLM Style) ======================
     const PATMOS_SYSTEM_PROMPT = `
@@ -110,20 +105,18 @@ Structure your response with absolute theological precision, utilizing 100% of t
       ...messages
     ];
 
-    // 4. Ejecución del modelo de lenguaje
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo',
       messages: fullPayload,
-      temperature: 0, // Determinismo total estilo NotebookLM
+      temperature: 0, 
       max_tokens: 4096,
     });
 
     const aiResponse = response.choices[0].message.content;
 
-    // ====================== HISTORIAL TOTALMENTE BLINDADO ======================
-    // Envolvemos esto en un sub-try-catch para que si la tabla chat_history falla, el usuario reciba su respuesta igual
+    // ====================== HISTORIAL EN SEGUNDO PLANO ======================
     try {
-      const { error: historyError } = await supabase
+      await supabase
         .from('chat_history')
         .insert([{
           user_id: user.id,
@@ -131,18 +124,14 @@ Structure your response with absolute theological precision, utilizing 100% of t
           bot_response: aiResponse,
           metadata: { source: 'Arsenal 1865', timestamp: new Date().toISOString() }
         }]);
-        
-      if (historyError) console.error('⚠️ Database log failure:', historyError.message);
     } catch (historyCatch) {
-      console.error('⚠️ Failed to write to chat_history table:', historyCatch);
+      console.error('⚠️ Failed to write to chat_history:', historyCatch);
     }
 
-    // Retorno JSON garantizado para evitar errores de parseo en el Frontend
     return NextResponse.json({ role: 'assistant', content: aiResponse });
 
   } catch (error: any) {
-    console.error('❌ Patmos Core Chat Fatal Error:', error);
-    // Respuesta de emergencia estructurada en JSON limpio
+    console.error('❌ CRITICAL CHAT ERROR:', error);
     return NextResponse.json(
       { role: 'assistant', content: 'Internal Error within the Dogmatic Arsenal. The Watchman is verifying database connectivity.' },
       { status: 500 }
