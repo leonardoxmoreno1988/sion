@@ -4,12 +4,8 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
+// Forzamos explícitamente que Next.js trate esta ruta como dinámica pura
 export const dynamic = 'force-dynamic';
-
-// Inicializamos Stripe de manera segura con tu API version estricta
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-01-27' as any,
-});
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -36,13 +32,25 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?next=/api/checkout`);
   }
 
+  // 🛡️ CONTROL DEFENSIVO DE STRIPE: Validar la existencia de la API key antes de instanciar
+  const stripeSecret = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecret) {
+    console.error("❌ STRIPE_SECRET_KEY is missing from environment variables.");
+    return NextResponse.redirect(`${origin}/?error=payment_configuration_error`);
+  }
+
   try {
+    // Inicializamos Stripe de manera segura DENTRO del flujo de ejecución del usuario
+    const stripe = new Stripe(stripeSecret, {
+      apiVersion: '2025-01-27' as any,
+    });
+
     // 2. Creamos la sesión de Checkout de Stripe vinculada matemáticamente al usuario
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          // 🎯 Tu ID de precio real e inyectado de tu catálogo de Stripe
+          // 🎯 Tu ID de precio real de tu catálogo de Stripe
           price: 'price_1TXptyRb2cKRI6uDvDzc6n7i', 
           quantity: 1,
         },
