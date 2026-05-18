@@ -30,7 +30,10 @@ export default function PatmosChat() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
-  // Estados nativos para controlar el chat y el input
+  // 🔒 NUEVOS ESTADOS: Control del Paywall automático
+  const [hasCredits, setHasCredits] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
+  
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'assistant', content: "Welcome. How may I assist your Bible inquiry today?" }
   ]);
@@ -74,20 +77,51 @@ export default function PatmosChat() {
       link.rel = 'stylesheet';
       document.head.appendChild(link);
 
-      // 🔒 VALIDACIÓN DE SESIÓN EN TIEMPO REAL (Fijación de Cookies)
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error || !session) {
-        // Si el servidor o el cliente no ven sesión válida, redirige de inmediato al login
         router.push('/login');
         return;
       }
 
       setUserEmail(session.user.email ?? 'Vigilante');
-      fetchHistory(); 
+      
+      // 1. Cargamos el historial primero para poder evaluar cuotas locales si es necesario
+      let currentHistory: ChatSession[] = [];
+      try {
+        const res = await fetch('/api/history');
+        if (res.ok) {
+          currentHistory = await res.json();
+          setHistory(currentHistory);
+        }
+      } catch (err) {
+        console.error("Error fetching history:", err);
+      }
 
-      // Listener reactivo para monitorear si la sesión expira o cambia
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      // 2. 🛡️ VERIFICACIÓN DE SUSCRIPCIÓN EN SUPABASE
+      try {
+        const { data: subscription } = await supabase
+          .from('subscriptions')
+          .select('status')
+          .eq('user_id', session.user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (subscription) {
+          setIsPremium(true);
+          setHasCredits(true); // Premium tiene créditos ilimitados
+        } else {
+          setIsPremium(false);
+          // Si es usuario gratuito, evaluamos si ya hizo 5 o más consultas históricas
+          setHasCredits(currentHistory.length < 5);
+        }
+      } catch (subErr) {
+        console.error("Error checking subscription tier:", subErr);
+        // Fallback defensivo: evaluamos con el historial cargado
+        setHasCredits(currentHistory.length < 5);
+      }
+
+      const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, currentSession) => {
         if (event === 'SIGNED_OUT' || !currentSession) {
           router.push('/login');
         }
@@ -100,7 +134,7 @@ export default function PatmosChat() {
       }
 
       return () => {
-        subscription.unsubscribe();
+        authSub.unsubscribe();
       };
     };
     initPage();
@@ -117,6 +151,11 @@ export default function PatmosChat() {
       if (res.ok) {
         const data = await res.json();
         setHistory(data);
+        
+        // 🚀 RE-EVALUACIÓN DE CRÉDITOS TRAS NUEVAS CONSULTAS
+        if (!isPremium) {
+          setHasCredits(data.length < 5);
+        }
       }
     } catch (err) {
       console.error("Error fetching history:", err);
@@ -144,16 +183,15 @@ export default function PatmosChat() {
     ]);
   };
 
-  // ⚡ PROCESADOR NATIVO DE STREAMING (Consumo directo de la API Route sin SDK)
   const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customInput.trim() || isLoading) return;
+    // 🔒 Bloqueo de seguridad a nivel de backend/subida
+    if (!customInput.trim() || isLoading || !hasCredits) return;
 
     const userQuery = customInput;
     setCustomInput("");
     setIsLoading(true);
 
-    // 1. Añadir mensaje del usuario en pantalla
     const userMessageId = Math.random().toString();
     const assistantMessageId = Math.random().toString();
     
@@ -164,7 +202,6 @@ export default function PatmosChat() {
     
     setMessages(updatedMessages);
 
-    // 2. Preparar el espacio del bot vacío para el stream
     setMessages((prev) => [
       ...prev,
       { id: assistantMessageId, role: 'assistant', content: "" }
@@ -181,7 +218,6 @@ export default function PatmosChat() {
         throw new Error("Failed to contact the Dogmatic Arsenal.");
       }
 
-      // 3. Lector nativo del flujo de bits continuo
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let done = false;
@@ -195,7 +231,6 @@ export default function PatmosChat() {
           const chunk = decoder.decode(value, { stream: !done });
           accumulatedText += chunk;
 
-          // Actualizamos progresivamente el contenido del último mensaje
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMessageId ? { ...m, content: accumulatedText } : m
@@ -204,7 +239,7 @@ export default function PatmosChat() {
         }
       }
 
-      fetchHistory(); // Actualizar el historial al concluir el flujo completo
+      fetchHistory(); 
 
     } catch (error) {
       console.error("Patmos Pipeline Native Error:", error);
@@ -425,40 +460,91 @@ export default function PatmosChat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Caja de Input */}
+        {/* Caja de Input + Banner del Paywall */}
         <div style={{ width: '100%', maxWidth: '650px', padding: '20px 0 40px 0' }}>
+          
+          {/* 🔒 BANNER DE INVITACIÓN CONDICIONAL AL AGOTAR CRÉDITOS */}
+          {!hasCredits && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'window' as any === 'undefined' || window.innerWidth < 640 ? 'column' : 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              backgroundColor: isDarkMode ? '#0f172a' : '#111827',
+              color: '#f9fafb',
+              padding: '16px 20px',
+              borderRadius: '12px',
+              marginBottom: '16px',
+              border: `1px solid ${isDarkMode ? '#1e293b' : 'transparent'}`,
+              gap: '12px',
+              textAlign: 'left'
+            }}>
+              <div style={{ flex: 1 }}>
+                <h5 style={{ fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#94a3b8', margin: '0 0 4px 0', fontFamily: 'serif' }}>
+                  Free Inquiry Limit Reached
+                </h5>
+                <p style={{ fontSize: '12px', color: '#cbd5e1', margin: 0, lineHeight: '1.4', fontFamily: theme.fontSans }}>
+                  Your manuscript pipeline allocation has concluded. Upgrade to sustain the architecture and execute unlimited Dogmatic inquiries.
+                </p>
+              </div>
+              <a 
+                href="/api/checkout"
+                style={{
+                  backgroundColor: '#fff',
+                  color: '#111827',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                  fontFamily: theme.fontSans,
+                  transition: 'background 0.2s'
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#e2e8f0')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#fff')}
+              >
+                Upgrade &rarr;
+              </a>
+            </div>
+          )}
+
           <form onSubmit={handleCustomSubmit} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <input
               style={{
                 width: '100%',
                 padding: '16px 60px 16px 25px',
                 borderRadius: '30px',
-                border: `1px solid ${isDarkMode ? '#334155' : '#9ca3af'}`,
+                border: `1px solid ${!hasCredits ? (isDarkMode ? '#7f1d1d' : '#fca5a5') : (isDarkMode ? '#334155' : '#9ca3af')}`,
                 fontSize: '15px',
                 outline: 'none',
-                backgroundColor: theme.inputBg,
-                color: theme.inputText,
+                backgroundColor: !hasCredits ? (isDarkMode ? '#450a0a/20' : '#fef2f2') : theme.inputBg,
+                color: !hasCredits ? '#94a3b8' : theme.inputText,
                 fontFamily: theme.fontSans,
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                cursor: !hasCredits ? 'not-allowed' : 'text'
               }}
-              placeholder="Search the scriptures..."
+              // 🔒 Bloqueo dinámico si expira o si está cargando
+              placeholder={hasCredits ? "Search the scriptures..." : "INQUIRY LOCKED — UPGRADE TO THE WATCHMAN TIER"}
               value={customInput}
               onChange={(e) => setCustomInput(e.target.value)} 
-              disabled={isLoading}
+              disabled={isLoading || !hasCredits}
             />
             <button 
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !hasCredits}
               style={{
                 position: 'absolute',
                 right: '10px',
-                backgroundColor: isLoading ? '#475569' : theme.textMain,
+                backgroundColor: (isLoading || !hasCredits) ? '#475569' : theme.textMain,
                 color: isDarkMode ? '#020617' : '#fff',
                 border: 'none',
                 borderRadius: '50%',
                 width: '40px',
                 height: '40px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
+                cursor: (isLoading || !hasCredits) ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
