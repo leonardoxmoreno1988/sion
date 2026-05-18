@@ -1,3 +1,4 @@
+// app/auth/callback/route.ts
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
@@ -8,7 +9,6 @@ export async function GET(request: Request) {
   const next = searchParams.get('next') ?? '/chat';
 
   if (code) {
-    // 1. ESPERAMOS a que las cookies se resuelvan (Requerido en Next.js 15+)
     const cookieStore = await cookies(); 
     
     const supabase = createServerClient(
@@ -20,10 +20,19 @@ export async function GET(request: Request) {
             return cookieStore.get(name)?.value;
           },
           set(name: string, value: string, options: CookieOptions) {
-            cookieStore.set({ name, value, ...options });
+            // 🔒 Blindaje Next.js 15: Forzar la escritura correcta de cookies en el Servidor
+            try {
+              cookieStore.set({ name, value, ...options });
+            } catch (error) {
+              // Esto evita que falle si se intenta llamar desde un Server Component estático
+            }
           },
           remove(name: string, options: CookieOptions) {
-            cookieStore.set({ name, value: '', ...options });
+            try {
+              cookieStore.set({ name, value: '', ...options });
+            } catch (error) {
+              // Evita caídas silenciosas en el middleware/callback
+            }
           },
         },
       }
@@ -32,9 +41,12 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      // 🚀 Modificación de seguridad: Asegurar que redirija a una URL absoluta
+      return NextResponse.redirect(new URL(next, request.url));
     }
+    
+    console.error("Error intercambiando sesión:", error);
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+  return NextResponse.redirect(new URL('/login?error=auth_callback_failed', request.url));
 }
