@@ -1,4 +1,4 @@
-// app/page.tsx o donde tengas tu Landing Page
+// app/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -197,12 +197,13 @@ export default function TemporalHomePage() {
               </div>
 
               <div className="mt-8">
-                <Link 
+                {/* 🔒 CORRECCIÓN CLAVE: Cambiado de <Link> a <a> pura para forzar redirección API */}
+                <a 
                   href="/api/checkout"
                   className="block w-full bg-[#111827] text-[#f9fafb] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#1f2937] rounded"
                 >
                   Upgrade to Watchman
-                </Link>
+                </a>
               </div>
             </div>
 
