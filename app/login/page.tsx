@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr'; 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation'; // 🔒 CORRECCIÓN: Importamos useSearchParams
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,6 +12,10 @@ export default function LoginPage() {
   const [message, setMessage] = useState<string | null>(null);
   
   const router = useRouter();
+  const searchParams = useSearchParams(); // 🔒 CORRECCIÓN: Instanciamos el lector de parámetros de la URL
+
+  // 🎯 CAPTURA DINÁMICA: Si venimos de la landing con un destino específico, lo usamos. Si no, va a /chat.
+  const nextRoute = searchParams.get('next') || '/chat';
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,7 +42,7 @@ export default function LoginPage() {
       setMessage(`Error: ${error.message}`);
       setLoading(false);
     } else {
-      router.push('/chat');
+      router.push(nextRoute); // Redirige de forma dinámica también en login tradicional
       router.refresh();
     }
   };
@@ -58,7 +62,7 @@ export default function LoginPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/chat`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${nextRoute}`, // Dinámico
       },
     });
 
@@ -70,21 +74,20 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  // ⚡ FUNCIÓN DE INICIO DE SESIÓN CON GOOGLE OAUTH (ESTRUCTURADA CORRECTAMENTE)
+  // ⚡ FUNCIÓN DE INICIO DE SESIÓN CON GOOGLE OAUTH (CORREGIDA DINÁMICAMENTE)
   const handleGoogleLogin = async () => {
     setLoading(true);
     setMessage(null);
     try {
-      // 1. La URL de retorno al callback debe ir LIMPIA, sin signos de interrogación manuales
       const redirectToUrl = `${window.location.origin}/auth/callback`;
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectToUrl,
-          // 2. Pasamos el destino final (/chat) de forma nativa para que Supabase lo encripte correctamente
+          // 🚀 LA CLAVE: Pasamos la ruta de destino real de forma dinámica para que no se pierda el flujo de cobro
           queryParams: {
-            next: '/chat'
+            next: nextRoute
           }
         },
       });
@@ -105,7 +108,6 @@ export default function LoginPage() {
           alt="Archive Ornament" 
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Capa de contraste para móvil */}
         <div className="absolute inset-0 bg-white/90 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none" />
       </div>
 
