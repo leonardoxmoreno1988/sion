@@ -40,10 +40,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Inicializamos Stripe de manera segura DENTRO del flujo de ejecución del usuario
-    const stripe = new Stripe(stripeSecret, {
-      apiVersion: '2025-01-27' as any,
-    });
+    // 🚀 RECONSTRUCCIÓN FORZADA: Inicialización limpia del SDK nativo para omitir microversiones en caché
+    const stripe = new Stripe(stripeSecret); 
 
     // 2. Creamos la sesión de Checkout de Stripe vinculada matemáticamente al usuario
     const session = await stripe.checkout.sessions.create({
