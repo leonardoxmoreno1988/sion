@@ -58,7 +58,7 @@ export default function LoginPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/chat`,
       },
     });
 
@@ -70,15 +70,17 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  // ⚡ FUNCIÓN DE INICIO DE SESIÓN CON GOOGLE OAUTH
+  // ⚡ FUNCIÓN DE INICIO DE SESIÓN CON GOOGLE OAUTH (PERFECTAMENTE PARAMETRIZADA)
   const handleGoogleLogin = async () => {
     setLoading(true);
     setMessage(null);
     try {
+      const redirectToUrl = `${window.location.origin}/auth/callback?next=/chat`;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/chat`,
+          redirectTo: redirectToUrl,
         },
       });
       if (error) throw error;
