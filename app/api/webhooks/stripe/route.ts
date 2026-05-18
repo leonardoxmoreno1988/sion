@@ -9,9 +9,9 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   // Inicializamos Stripe DENTRO de la función para que no explote en el build estático
   const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
-  const stripe = new Stripe(stripeKey, {
-    apiVersion: '2025-01-27' as any,
-  });
+  
+  // 🔒 CORRECCIÓN MAESTRA: Quitamos 'apiVersion' para evitar el error de SDK desactualizado
+  const stripe = new Stripe(stripeKey);
 
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
