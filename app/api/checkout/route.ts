@@ -1,64 +1,75 @@
+// app/api/checkout/route.ts
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: Request) {
-  try {
-    const cookieStore = await cookies();
-    
-    // 1. Inicializar Supabase para capturar al usuario logueado
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) { return cookieStore.get(name)?.value; },
-          set(name: string, value: string, options: CookieOptions) { cookieStore.set({ name, value, ...options }); },
-          remove(name: string, options: CookieOptions) { cookieStore.set({ name, value: '', ...options }); },
+// Inicializamos Stripe de manera segura con tu API version estricta
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-01-27' as any,
+});
+
+export async function GET(request: Request) {
+  const requestUrl = new URL(request.url);
+  const origin = requestUrl.origin;
+  const cookieStore = await cookies();
+
+  // 1. Instanciamos Supabase para verificar si el cliente tiene sesión abierta
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
         },
-      }
-    );
-
-    const { data: { user } } = await supabase.auth.getUser();
-
-    // Si el usuario no está logueado, no lo dejamos avanzar
-    if (!user) {
-      return new NextResponse('Unauthorized', { status: 401 });
+      },
     }
+  );
 
-    // 2. Inicializar Stripe
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2025-01-27' as any,
-    });
+  const { data: { user } } = await supabase.auth.getUser();
 
-    // 3. Crear la sesión de Checkout de Stripe
+  // 🔒 CONTROL DE FLUJO: Si no está logueado, lo mandamos a autenticarse primero con Google
+  if (!user) {
+    return NextResponse.redirect(`${origin}/login?next=/api/checkout`);
+  }
+
+  try {
+    // 2. Creamos la sesión de Checkout de Stripe vinculada matemáticamente al usuario
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          // Aquí pones el ID del precio que creaste en tu catálogo de Stripe
-          // Ej: 'price_1Qxyz...' (puedes crear uno rápido en tu panel de Stripe)
+          // 🎯 Tu ID de precio real e inyectado de tu catálogo de Stripe
           price: 'price_1TXptyRb2cKRI6uDvDzc6n7i', 
           quantity: 1,
         },
       ],
       mode: 'subscription',
-      // ¡ESTA ES LA LLAVE MAESTRA QUE RECOGE EL WEBHOOK!
-      client_reference_id: user.id, 
       customer_email: user.email,
-      // Direcciones de redirección según el éxito del pago
-      success_url: `${req.headers.get('origin')}/chat?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get('origin')}/prices`,
+      
+      // 🚀 LLAVE MAESTRA: Metadatos idénticos que leerá el Webhook para actualizar Supabase
+      client_reference_id: user.id, 
+      metadata: {
+        supabase_user_id: user.id,
+      },
+
+      // Direcciones de redirección según el comportamiento en la pasarela
+      success_url: `${origin}/chat?session_id={CHECKOUT_SESSION_ID}&upgrade=success`,
+      cancel_url: `${origin}/?upgrade=cancelled`,
     });
 
-    // Devolvemos la URL de Stripe para que el frontend redirija al usuario
-    return NextResponse.json({ url: session.url });
+    // 3. Empujamos al navegador directamente a la pasarela de Stripe Checkout
+    if (session.url) {
+      return NextResponse.redirect(session.url);
+    }
+
+    return NextResponse.redirect(`${origin}/?error=stripe_session_failed`);
 
   } catch (error: any) {
     console.error('❌ Checkout Session Error:', error);
-    return new NextResponse('Internal Error', { status: 500 });
+    return NextResponse.redirect(`${origin}/?error=internal_server_error`);
   }
 }
