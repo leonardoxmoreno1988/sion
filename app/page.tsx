@@ -1,3 +1,4 @@
+// app/page.tsx o donde tengas tu Landing Page
 'use client';
 
 import Link from 'next/link';
@@ -58,7 +59,7 @@ export default function TemporalHomePage() {
         </div>
 
         {/* PRODUCT BENEFITS / SYSTEM PILLARS */}
-        <section className="border-t border-[#e5e7eb] pt-12">
+        <section className="border-t border-[#e5e7eb] pt-12 mb-16">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
             Core Architecture Pillars
           </h3>
@@ -103,6 +104,106 @@ export default function TemporalHomePage() {
               <p className="text-xs leading-relaxed text-[#6b7280] text-left">
                 Absolute defensive stance evaluating sign gifts under the strict completion of the Canon. Academic analysis running structural cross-references to expose contemporary charismatic vulnerabilities.
               </p>
+            </div>
+
+          </div>
+        </section>
+
+        {/* INTEGRATED PRICING SECTION */}
+        <section className="border-t border-[#e5e7eb] pt-12 pb-8">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
+            System Subscriptions & Access
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+            
+            {/* PLAN GRATUITO: THE INQUIRER */}
+            <div className="bg-white border border-[#e5e7eb] p-6 flex flex-col justify-between rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+              <div>
+                <span className="text-[9px] uppercase tracking-[0.2em] text-[#6b7280] font-bold">
+                  Initial Tier
+                </span>
+                <h4 className="text-base font-bold uppercase tracking-wide text-[#111827] mt-1">
+                  The Inquirer
+                </h4>
+                <div className="mt-4 flex items-baseline text-[#111827]">
+                  <span className="text-3xl font-bold tracking-tight">$0</span>
+                  <span className="ml-1 text-[10px] uppercase tracking-wider text-[#6b7280]">/ forever</span>
+                </div>
+                
+                <p className="mt-4 text-xs text-[#6b7280] leading-relaxed text-left">
+                  Designed for casual examiners of the scriptures seeking to test the dogmatic precision of the Watchman framework.
+                </p>
+
+                <ul className="mt-6 space-y-2 border-t border-[#e5e7eb] pt-4 text-[10px] uppercase tracking-widest text-[#111827] font-medium">
+                  <li className="flex items-center gap-2">
+                    <span className="text-[#6b7280]">✓</span> Limited query credits
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-[#6b7280]">✓</span> Base manuscript index access
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-[#6b7280]">✓</span> Standard inquiry layout
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mt-8">
+                <Link 
+                  href="/login"
+                  className="block w-full border border-[#111827] bg-transparent text-[#111827] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#111827]/5 rounded"
+                >
+                  Create Free Account
+                </Link>
+              </div>
+            </div>
+
+            {/* PLAN PREMIUM: THE WATCHMAN */}
+            <div className="bg-white border-2 border-[#1f2937] p-6 flex flex-col justify-between rounded-lg relative overflow-hidden shadow-sm">
+              <div className="absolute top-0 right-0 bg-[#1f2937] text-[#f9fafb] text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 rounded-bl">
+                Full Authority
+              </div>
+
+              <div>
+                <span className="text-[9px] uppercase tracking-[0.2em] text-[#6b7280] font-bold">
+                  Complete Access
+                </span>
+                <h4 className="text-base font-bold uppercase tracking-wide text-[#111827] mt-1">
+                  The Watchman
+                </h4>
+                <div className="mt-4 flex items-baseline text-[#111827]">
+                  <span className="text-3xl font-bold tracking-tight">$9</span>
+                  <span className="ml-1 text-[10px] uppercase tracking-wider text-[#6b7280]">/ month</span>
+                </div>
+                
+                <p className="mt-4 text-xs text-[#6b7280] leading-relaxed text-left">
+                  For serious students of the Word, approved workmen, and theologians requiring deep, unhindered pipeline execution.
+                </p>
+
+                <ul className="mt-6 space-y-2 border-t border-[#e5e7eb] pt-4 text-[10px] uppercase tracking-widest text-[#111827] font-medium">
+                  <li className="flex items-center gap-2 font-bold">
+                    <span>✓</span> Uncapped continuous queries
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span>✓</span> Maximum pipeline priority ranking
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span>✓</span> Full persistent historical archiving
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span>✓</span> Advanced doctrinal cross-references
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mt-8">
+                <Link 
+                  href="/api/checkout"
+                  className="block w-full bg-[#111827] text-[#f9fafb] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#1f2937] rounded"
+                >
+                  Upgrade to Watchman
+                </Link>
+              </div>
             </div>
 
           </div>
