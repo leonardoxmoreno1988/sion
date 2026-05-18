@@ -1,3 +1,4 @@
+// app/login/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -69,12 +70,29 @@ export default function LoginPage() {
     setLoading(false);
   };
 
+  // ⚡ FUNCIÓN DE INICIO DE SESIÓN CON GOOGLE OAUTH
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setMessage(null);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/chat`,
+        },
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      setMessage(`OAuth Error: ${error.message}`);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden text-black">
       
       {/* SECCIÓN IZQUIERDA: CONTENEDOR DE LA IMAGEN */}
       <div className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] bg-cover bg-center">
-        {/* Usamos una imagen HTML nativa optimizada por CSS para evitar conflictos de comillas en Turbopack */}
         <img 
           src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1200" 
           alt="Archive Ornament" 
@@ -132,7 +150,7 @@ export default function LoginPage() {
             )}
 
             {/* Botones de Acción */}
-            <div className="flex flex-col gap-4 pt-4">
+            <div className="flex flex-col gap-4 pt-2">
               <button
                 type="submit"
                 disabled={loading}
@@ -140,12 +158,35 @@ export default function LoginPage() {
               >
                 {loading ? 'AUTHENTICATING...' : 'ACCESS THE ARCHIVE'}
               </button>
+
+              {/* Separador Visual de Métodos */}
+              <div className="flex items-center my-1">
+                <div className="flex-1 h-[1px] bg-black/5" />
+                <span className="px-3 text-[9px] text-gray-300 tracking-widest font-medium uppercase">OR</span>
+                <div className="flex-1 h-[1px] bg-black/5" />
+              </div>
+
+              {/* Botón Minimalista de Google OAuth */}
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="w-full border border-black/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-black transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.65-5.17 3.65-8.58z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.11 0-5.74-2.11-6.68-4.96H1.21v3.15C3.18 21.88 7.31 24 12 24z"/>
+                  <path fill="#FBBC05" d="M5.32 14.24A7.16 7.16 0 0 1 5 12c0-.79.13-1.57.32-2.34V6.51H1.21A11.94 11.94 0 0 0 0 12c0 1.92.45 3.74 1.21 5.39l4.11-3.15z"/>
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.18 2.12 1.21 6.51l4.11 3.15c.94-2.85 3.57-4.91 6.68-4.91z"/>
+                </svg>
+                {loading ? 'CONNECTING...' : 'CONTINUE WITH GOOGLE'}
+              </button>
               
               <button
                 type="button"
                 onClick={handleSignUp}
                 disabled={loading}
-                className="text-[9px] uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors disabled:opacity-30 font-medium"
+                className="text-[9px] uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors disabled:opacity-30 font-medium text-center mt-2"
               >
                 Request New Registry
               </button>
@@ -153,7 +194,7 @@ export default function LoginPage() {
           </form>
 
           {/* Cita */}
-          <footer className="pt-8 text-center">
+          <footer className="pt-4 text-center">
             <p className="text-[10px] italic text-gray-500 font-serif leading-relaxed">
               "Procura con diligencia presentarte a Dios aprobado, como obrero que no tiene de qué avergonzarse..."
             </p>
@@ -163,4 +204,4 @@ export default function LoginPage() {
 
     </div>
   );
-} 
+}
