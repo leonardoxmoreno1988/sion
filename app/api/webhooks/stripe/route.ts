@@ -1,3 +1,4 @@
+// app/api/webhooks/stripe/route.ts
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
@@ -18,12 +19,14 @@ export async function POST(req: Request) {
   );
 
   const body = await req.text();
-  const signature = req.headers.get('Stripe-Signature');
+  
+  // 🔒 CONTROL SEGURO DE CABECERAS: Buscamos tanto en mayúsculas como en minúsculas
+  const signature = req.headers.get('stripe-signature') || req.headers.get('Stripe-Signature');
 
   let event: Stripe.Event;
 
   try {
-    if (!signature) throw new Error('Missing Stripe signature');
+    if (!signature) throw new Error('Missing Stripe signature header');
     
     event = stripe.webhooks.constructEvent(
       body,
@@ -43,6 +46,7 @@ export async function POST(req: Request) {
         if (session.mode === 'subscription') {
           const subscriptionId = session.subscription;
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          // Usamos el id de usuario de Supabase que inyectamos en el checkout
           await upsertSubscription(supabaseAdmin, subscription, session.client_reference_id);
         }
         break;
