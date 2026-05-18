@@ -3,7 +3,10 @@
 
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr'; 
-import { useRouter, useSearchParams } from 'next/navigation'; // 🔒 CORRECCIÓN: Importamos useSearchParams
+import { useRouter, useSearchParams } from 'next/navigation';
+
+// 🚀 LA SOLUCIÓN: Forzamos renderizado dinámico en tiempo de compilación
+export const dynamic = 'force-dynamic';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,8 +15,8 @@ export default function LoginPage() {
   const [message, setMessage] = useState<string | null>(null);
   
   const router = useRouter();
-  const searchParams = useSearchParams(); // 🔒 CORRECCIÓN: Instanciamos el lector de parámetros de la URL
-
+  const searchParams = useSearchParams();
+  
   // 🎯 CAPTURA DINÁMICA: Si venimos de la landing con un destino específico, lo usamos. Si no, va a /chat.
   const nextRoute = searchParams.get('next') || '/chat';
 
@@ -42,7 +45,7 @@ export default function LoginPage() {
       setMessage(`Error: ${error.message}`);
       setLoading(false);
     } else {
-      router.push(nextRoute); // Redirige de forma dinámica también en login tradicional
+      router.push(nextRoute); 
       router.refresh();
     }
   };
@@ -62,7 +65,7 @@ export default function LoginPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${nextRoute}`, // Dinámico
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${nextRoute}`,
       },
     });
 
@@ -74,7 +77,6 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  // ⚡ FUNCIÓN DE INICIO DE SESIÓN CON GOOGLE OAUTH (CORREGIDA DINÁMICAMENTE)
   const handleGoogleLogin = async () => {
     setLoading(true);
     setMessage(null);
@@ -85,7 +87,6 @@ export default function LoginPage() {
         provider: 'google',
         options: {
           redirectTo: redirectToUrl,
-          // 🚀 LA CLAVE: Pasamos la ruta de destino real de forma dinámica para que no se pierda el flujo de cobro
           queryParams: {
             next: nextRoute
           }
