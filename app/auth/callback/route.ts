@@ -8,9 +8,15 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/chat';
 
+  // Si ya estás en producción, asegúrate de usar HTTPS, si estás local usa HTTP
+  const requestUrl = new URL(request.url);
+
   if (code) {
-    const cookieStore = await cookies(); 
+    const cookieStore = await cookies();
     
+    // Creamos una respuesta base hacia donde queremos redirigir al usuario
+    const response = NextResponse.redirect(`${requestUrl.origin}${next}`);
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -20,33 +26,32 @@ export async function GET(request: Request) {
             return cookieStore.get(name)?.value;
           },
           set(name: string, value: string, options: CookieOptions) {
-            // 🔒 Blindaje Next.js 15: Forzar la escritura correcta de cookies en el Servidor
-            try {
-              cookieStore.set({ name, value, ...options });
-            } catch (error) {
-              // Esto evita que falle si se intenta llamar desde un Server Component estático
-            }
+            // 🔒 Next.js 15+ REQUIERE guardar las cookies TANTO en el almacén del servidor 
+            // como en la cabecera de la respuesta de redirección que va al navegador.
+            cookieStore.set({ name, value, ...options });
+            response.cookies.set({ name, value, ...options });
           },
           remove(name: string, options: CookieOptions) {
-            try {
-              cookieStore.set({ name, value: '', ...options });
-            } catch (error) {
-              // Evita caídas silenciosas en el middleware/callback
-            }
+            cookieStore.set({ name, value: '', ...options });
+            response.cookies.set({ name, value: '', ...options });
           },
         },
       }
     );
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    
-    if (!error) {
-      // 🚀 Modificación de seguridad: Asegurar que redirija a una URL absoluta
-      return NextResponse.redirect(new URL(next, request.url));
+    try {
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      
+      if (!error) {
+        // Retornamos la respuesta que ya lleva las cookies inyectadas físicamente
+        return response;
+      }
+      console.error("Error al intercambiar código por sesión:", error?.message);
+    } catch (err) {
+      console.error("Excepción en el callback de autenticación:", err);
     }
-    
-    console.error("Error intercambiando sesión:", error);
   }
 
-  return NextResponse.redirect(new URL('/login?error=auth_callback_failed', request.url));
+  // Si algo falla, lo mandamos al login con un error explícito
+  return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_callback_failed`);
 }
