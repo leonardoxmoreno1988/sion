@@ -172,7 +172,7 @@ export default function TemporalHomePage() {
                   The Watchman
                 </h4>
                 <div className="mt-4 flex items-baseline text-[#111827]">
-                  <span className="text-3xl font-bold tracking-tight">$9</span>
+                  <span className="text-3xl font-bold tracking-tight">$7</span>
                   <span className="ml-1 text-[10px] uppercase tracking-wider text-[#6b7280]">/ month</span>
                 </div>
                 
