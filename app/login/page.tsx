@@ -70,17 +70,22 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  // ⚡ FUNCIÓN DE INICIO DE SESIÓN CON GOOGLE OAUTH (PERFECTAMENTE PARAMETRIZADA)
+  // ⚡ FUNCIÓN DE INICIO DE SESIÓN CON GOOGLE OAUTH (ESTRUCTURADA CORRECTAMENTE)
   const handleGoogleLogin = async () => {
     setLoading(true);
     setMessage(null);
     try {
-      const redirectToUrl = `${window.location.origin}/auth/callback?next=/chat`;
+      // 1. La URL de retorno al callback debe ir LIMPIA, sin signos de interrogación manuales
+      const redirectToUrl = `${window.location.origin}/auth/callback`;
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectToUrl,
+          // 2. Pasamos el destino final (/chat) de forma nativa para que Supabase lo encripte correctamente
+          queryParams: {
+            next: '/chat'
+          }
         },
       });
       if (error) throw error;
