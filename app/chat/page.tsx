@@ -74,17 +74,34 @@ export default function PatmosChat() {
       link.rel = 'stylesheet';
       document.head.appendChild(link);
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserEmail(user.email ?? 'Vigilante');
-        fetchHistory(); 
+      // 🔒 VALIDACIÓN DE SESIÓN EN TIEMPO REAL (Fijación de Cookies)
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error || !session) {
+        // Si el servidor o el cliente no ven sesión válida, redirige de inmediato al login
+        router.push('/login');
+        return;
       }
+
+      setUserEmail(session.user.email ?? 'Vigilante');
+      fetchHistory(); 
+
+      // Listener reactivo para monitorear si la sesión expira o cambia
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+        if (event === 'SIGNED_OUT' || !currentSession) {
+          router.push('/login');
+        }
+      });
 
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
         setIsDarkMode(true);
       }
+
+      return () => {
+        subscription.unsubscribe();
+      };
     };
     initPage();
   }, []);
