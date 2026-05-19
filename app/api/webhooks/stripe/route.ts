@@ -40,22 +40,56 @@ export async function POST(req: Request) {
         if (session.mode === 'subscription') {
           const subscriptionId = session.subscription;
           
-          // 🔒 BLINDAJE DE PRECIO: Expandimos explícitamente los 'items' para asegurar que el price_id no llegue null
+          // 1. Recuperamos la suscripción expandiendo los items del precio
           const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
             expand: ['items.data.price'],
           });
           
-          // Usamos el id de usuario de Supabase que inyectamos en el checkout
-          await upsertSubscription(supabaseAdmin, subscription, session.client_reference_id);
+          // 2. Extraemos el ID del usuario de Supabase de forma jerárquica y segura
+          let userId = session.client_reference_id;
+
+          // 🔒 FILTRADO NATIVO JAVASCRIPT: Traemos la colección y buscamos por coincidencia exacta
+          if (!userId && session.customer_details?.email) {
+            console.log(`ℹ️ client_reference_id missing. Fallback search by email: ${session.customer_details.email}`);
+            const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+            if (!listError && users) {
+              const targetUser = users.find(u => u.email?.toLowerCase() === session.customer_details.email.toLowerCase());
+              if (targetUser) userId = targetUser.id;
+            }
+          }
+
+          if (!userId) {
+            throw new Error(`Fatal: No se pudo determinar el user_id de Supabase para el cliente ${session.customer}`);
+          }
+
+          // 3. Guardamos la suscripción vinculada al usuario real de Supabase
+          await upsertSubscription(supabaseAdmin, subscription, userId);
         }
         break;
 
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
         const subscription = event.data.object as any;
-        const userId = await getUserIdByCustomerId(supabaseAdmin, subscription.customer as string);
+        
+        // Intentamos buscarlo por mapeo de tabla cliente, si falla, buscamos directo por correo en Stripe
+        let userId = await getUserIdByCustomerId(supabaseAdmin, subscription.customer as string);
+        
+        // 🔒 FILTRADO NATIVO JAVASCRIPT: Traemos la colección y buscamos por coincidencia exacta
+        if (!userId) {
+          const customerData = await stripe.customers.retrieve(subscription.customer as string) as any;
+          if (customerData?.email) {
+            const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+            if (!listError && users) {
+              const targetUser = users.find(u => u.email?.toLowerCase() === customerData.email.toLowerCase());
+              if (targetUser) userId = targetUser.id;
+            }
+          }
+        }
+
         if (userId) {
           await upsertSubscription(supabaseAdmin, subscription, userId);
+        } else {
+          console.warn(`⚠️ Ignorando actualización: No se halló user_id para el cliente de Stripe: ${subscription.customer}`);
         }
         break;
 
@@ -63,8 +97,8 @@ export async function POST(req: Request) {
         console.log(`ℹ️ Unhandled event type: ${event.type}`);
     }
   } catch (error: any) {
-    console.error('❌ Error actualizando la base de datos desde el webhook:', error.message || error);
-    return new NextResponse('Webhook handler failed', { status: 500 });
+    console.error('❌ Error crítico en Webhook Handler:', error.message || error);
+    return new NextResponse(`Webhook handler failed: ${error.message}`, { status: 500 });
   }
 
   return NextResponse.json({ received: true });
@@ -73,11 +107,9 @@ export async function POST(req: Request) {
 // --- FUNCIONES AUXILIARES PASANDO EL CLIENTE ADMIN ---
 
 async function upsertSubscription(supabaseAdmin: any, subscription: any, userId: string) {
-  // Aseguramos una extracción defensiva del price id
   const stripePriceId = subscription.items?.data?.[0]?.price?.id || subscription.plan?.id;
 
   if (!stripePriceId) {
-    console.error(`❌ Fatal: El price_id no pudo ser extraído de la suscripción ${subscription.id}`);
     throw new Error('Missing price_id fields to bypass database strict constraints');
   }
 
@@ -96,8 +128,12 @@ async function upsertSubscription(supabaseAdmin: any, subscription: any, userId:
     .from('subscriptions')
     .upsert([subscriptionData]);
 
-  if (error) throw error;
-  console.log(`✅ Suscripción ${subscription.id} actualizada para el usuario ${userId}`);
+  if (error) {
+    console.error('❌ Supabase Upsert Error:', error);
+    throw error;
+  }
+  
+  console.log(`✅ Suscripción ${subscription.id} guardada con éxito en Supabase para el usuario ${userId}`);
 }
 
 async function getUserIdByCustomerId(supabaseAdmin: any, customerId: string): Promise<string | null> {
@@ -105,7 +141,7 @@ async function getUserIdByCustomerId(supabaseAdmin: any, customerId: string): Pr
     .from('customers')
     .select('id')
     .eq('stripe_customer_id', customerId)
-    .single();
+    .maybeSingle();
 
   if (error || !data) return null;
   return data.id;
