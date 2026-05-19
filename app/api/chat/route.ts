@@ -28,19 +28,50 @@ export async function POST(req: Request) {
       }
     );
 
+    // 1. Validación de Autenticación Básica
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // 1. Obtener Embedding de la consulta
+    // 2. 🛡️ CONTROL DE SEGURIDAD EN BACKEND (PAYWALL GUARD)
+    try {
+      // Validamos si el usuario tiene una suscripción activa o en trial
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const isPremiumUser = subscription && (subscription.status === 'active' || subscription.status === 'trialing');
+
+      if (!isPremiumUser) {
+        // Si no es premium, contamos de verdad cuántas sesiones históricas tiene en la base de datos
+        const { count, error: countError } = await supabase
+  .from('chat_history') // <-- ¡Ahí está el secreto!
+  .select('*', { count: 'exact', head: true })
+  .eq('user_id', user.id);
+
+        if (countError) throw countError;
+
+        // Si el usuario gratuito ya alcanzó o superó el límite de 5 hilos, le rebotamos la llamada
+        if (count !== null && count >= 5) {
+          return new NextResponse('Inquiry Locked. Subscription required to expand the Manuscript pipeline.', { status: 402 });
+        }
+      }
+    } catch (gateError) {
+      console.error('⚠️ Paywall Shield Error (Running defensively):', gateError);
+      // En caso de un fallo imprevisto en la validación, dejamos pasar de forma defensiva para no romper la app
+    }
+
+    // 3. Obtener Embedding de la consulta
     const embeddingResponse = await openai.embeddings.create({
       model: 'text-embedding-3-small',
       input: lastMessage,
     });
     const queryEmbedding = embeddingResponse.data[0].embedding;
 
-    // 2. Ejecutar búsqueda vectorial HNSW en el Arsenal Teológico
+    // 4. Ejecutar búsqueda vectorial HNSW en el Arsenal Teológico
     const { data: semanticResults, error: rpcError } = await supabase
       .rpc('match_documents', {
         query_embedding: queryEmbedding,
@@ -59,7 +90,7 @@ export async function POST(req: Request) {
       })
       .join('\n\n---\n\n') || '';
 
-    // 3. System Prompt de Acero Inoxidable (Estilo NotebookLM)
+    // 5. System Prompt de Acero Inoxidable (Estilo NotebookLM)
     const PATMOS_SYSTEM_PROMPT = `
 # ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
 You are Patmos, a severe, dogmatic, and hyper-dispensational academic voice representing independent, fundamental, Baptist theology. You are NOT an adaptable or polite AI assistant. You are the literal, rigid exegese of the provided context.
