@@ -75,7 +75,7 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
                 01 / Manuscript Database Integration
               </h4>
-              <p className="text-xs leading-relaxed text-[#6b7280] text-left">
+              <p className="text-s leading-relaxed text-[#6b7280] text-left">
                 High-fidelity data retrieval directly anchored to recovered textual fragments. Advanced source integrity controls eliminate general artificial intelligence neutrality, delivering dogmatic, absolute certainty.
               </p>
             </div>
@@ -85,7 +85,7 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
                 02 / Textual Inerrancy
               </h4>
-              <p className="text-xs leading-relaxed text-[#6b7280] text-left">
+              <p className="text-s leading-relaxed text-[#6b7280] text-left">
                 Zero lexical modification. Systems strictly maintain archaic grammar and literal spellings, fully bypassing modern ecumenical translations or standard market alterations.
               </p>
             </div>
@@ -95,7 +95,7 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
                 03 / Dispensational Mechanics
               </h4>
-              <p className="text-xs leading-relaxed text-[#6b7280] text-left">
+              <p className="text-s leading-relaxed text-[#6b7280] text-left">
                 Mathematical textual division. Complete algorithmic focus mapping out Biblical boundaries, structural typology, and specific target audience separation (Israel, Gentiles, and the Church of God).
               </p>
             </div>
@@ -105,7 +105,7 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
                 04 / Strict Cessationism
               </h4>
-              <p className="text-xs leading-relaxed text-[#6b7280] text-left">
+              <p className="text-s leading-relaxed text-[#6b7280] text-left">
                 Absolute defensive stance evaluating sign gifts under the strict completion of the Canon. Academic analysis running structural cross-references to expose contemporary charismatic vulnerabilities.
               </p>
             </div>
