@@ -30,7 +30,7 @@ export default function PatmosChat() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
-  // 🔒 NUEVOS ESTADOS: Control del Paywall automático
+  // 🔒 ESTADOS: Control del Paywall automático
   const [hasCredits, setHasCredits] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   
@@ -378,33 +378,60 @@ export default function PatmosChat() {
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <button 
-  onClick={() => setIsDarkMode(!isDarkMode)}
-  style={{ 
-    background: 'none', 
-    border: 'none', 
-    cursor: 'pointer', 
-    color: theme.textMuted, 
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '4px',
-    transition: 'color 0.2s ease'
-  }}
-  title="Toggle Theme"
->
-  {isDarkMode ? (
-    // ☼ ICONO DE SOL (Para Modo Oscuro -> Cambiar a Claro)
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="4"/>
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-    </svg>
-  ) : (
-    // ☾ ICONO DE LUNA (Para Modo Claro -> Cambiar a Oscuro)
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-    </svg>
-  )}
-</button>
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                cursor: 'pointer', 
+                color: theme.textMuted, 
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '4px',
+                transition: 'color 0.2s ease'
+              }}
+              title="Toggle Theme"
+            >
+              {isDarkMode ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="4"/>
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                </svg>
+              )}
+            </button>
+
+            {/* 🔒 ACCESO AL PORTAL DE STRIPE (Solo visible para usuarios premium activos) */}
+            {isPremium && (
+              <a 
+                href="/api/portal"
+                style={{
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  color: theme.textMuted,
+                  textDecoration: 'none',
+                  background: 'transparent',
+                  border: `1px solid ${theme.borderSion}`,
+                  padding: '4px 8px',
+                  fontFamily: theme.fontSans,
+                  textTransform: 'uppercase',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.color = theme.textMain;
+                  e.currentTarget.style.borderColor = theme.textMain;
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.color = theme.textMuted;
+                  e.currentTarget.style.borderColor = theme.borderSion;
+                }}
+              >
+                Billing
+              </a>
+            )}
 
             <button 
               onClick={handleLogout}
@@ -547,7 +574,6 @@ export default function PatmosChat() {
                 transition: 'all 0.3s ease',
                 cursor: !hasCredits ? 'not-allowed' : 'text'
               }}
-              // 🔒 Bloqueo dinámico si expira o si está cargando
               placeholder={hasCredits ? "Search the scriptures..." : "INQUIRY LOCKED — UPGRADE TO THE WATCHMAN TIER"}
               value={customInput}
               onChange={(e) => setCustomInput(e.target.value)} 
