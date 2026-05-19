@@ -54,11 +54,11 @@ export default function TemporalHomePage() {
             Try it Free &rarr;
           </Link>
           
-          {/* Imagen agregada sin radio en las esquinas */}
+          {/* Imagen plana, sin bordes redondeados y sin sombra */}
           <img 
             src="https://www.leonardoxmoreno.com/files/hero.jpg" 
             alt="Patmos Platform Preview" 
-            className="w-full h-auto mt-6 object-cover shadow-sm"
+            className="w-full h-auto mt-6 object-cover"
           />
         </div>
 
