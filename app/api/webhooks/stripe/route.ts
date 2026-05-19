@@ -46,13 +46,12 @@ export async function POST(req: Request) {
           
           let userId = session.client_reference_id;
 
-          // 🔒 FALLBACK DE SEGURIDAD ANTIFALLES: Si el ID viene vacío, buscamos directo en la tabla vinculada de auth
+          // Fallback en caso de que venga vacío el reference_id
           if (!userId && session.customer_details?.email) {
             console.log(`ℹ️ client_reference_id missing. Fallback SQL table search by email: ${session.customer_details.email}`);
             
-            // Consultamos la tabla nativa de identidades de Supabase para obtener el ID sin usar listUsers()
             const { data: userData, error: userError } = await supabaseAdmin
-              .from('profiles') // Si tu tabla personalizada de usuarios se llama 'profiles' o 'users', cámbiala aquí
+              .from('profiles') // Cambia a 'users' o 'customers' si usas otro nombre de tabla para tus usuarios
               .select('id')
               .eq('email', session.customer_details.email)
               .maybeSingle();
@@ -63,8 +62,7 @@ export async function POST(req: Request) {
           }
 
           if (!userId) {
-            // Como medida extrema de desarrollo, si no encuentra el ID, vinculamos la suscripción al primer registro o arrojamos el fallo limpio
-            throw new Error(`Fatal: No se pudo mapear un user_id válido en Supabase para ${session.customer_details?.email}`);
+            throw new Error(`Fatal: No se pudo determinar el user_id de Supabase para ${session.customer_details?.email}`);
           }
 
           await upsertSubscription(supabaseAdmin, subscription, userId);
@@ -81,7 +79,7 @@ export async function POST(req: Request) {
           const customerData = await stripe.customers.retrieve(subscription.customer as string) as any;
           if (customerData?.email) {
             const { data: userData } = await supabaseAdmin
-              .from('profiles') // Consistencia con la tabla elegida arriba
+              .from('profiles')
               .select('id')
               .eq('email', customerData.email)
               .maybeSingle();
@@ -117,16 +115,27 @@ async function upsertSubscription(supabaseAdmin: any, subscription: any, userId:
     throw new Error('Missing price_id fields to bypass database strict constraints');
   }
 
-  // 🔒 FORMATEO DEFENSIVO DE FECHAS: Pasamos strings planos limpios para evitar que Postgres aborte la conversión
+  // 🔒 CONTROL DE FECHAS SEGURO (Previene el error de "Invalid time value")
+  const rawStart = subscription.current_period_start || subscription.start_date;
+  const rawEnd = subscription.current_period_end || subscription.current_period_end;
+
+  const now = new Date();
+  const oneMonthFromNow = new Date();
+  oneMonthFromNow.setMonth(now.getMonth() + 1);
+
+  const startDateIso = rawStart ? new Date(rawStart * 1000).toISOString() : now.toISOString();
+  const endDateIso = rawEnd ? new Date(rawEnd * 1000).toISOString() : oneMonthFromNow.toISOString();
+  const endedAtIso = subscription.ended_at ? new Date(subscription.ended_at * 1000).toISOString() : null;
+
   const subscriptionData = {
     id: subscription.id,
     user_id: userId,
     status: subscription.status,
     price_id: stripePriceId,
     cancel_at_period_end: !!subscription.cancel_at_period_end,
-    current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-    ended_at: subscription.ended_at ? new Date(subscription.ended_at * 1000).toISOString() : null,
+    current_period_start: startDateIso,
+    current_period_end: endDateIso,
+    ended_at: endedAtIso,
   };
 
   const { error } = await supabaseAdmin
