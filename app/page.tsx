@@ -40,7 +40,7 @@ export default function TemporalHomePage() {
             The Watchman of Final Authority
           </p>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-[#111827] max-w-xl">
-            Rigorous Theological Execution & Scripture Verification.
+            Rigorous Theological Search & Scripture Verification.
           </h2>
         </div>
 
@@ -124,7 +124,7 @@ export default function TemporalHomePage() {
                   Initial Tier
                 </span>
                 <h4 className="text-base font-bold uppercase tracking-wide text-[#111827] mt-1">
-                  The Inquirer
+                  Free Use
                 </h4>
                 <div className="mt-4 flex items-baseline text-[#111827]">
                   <span className="text-3xl font-bold tracking-tight">$0</span>
