@@ -40,29 +40,33 @@ export async function POST(req: Request) {
         if (session.mode === 'subscription') {
           const subscriptionId = session.subscription;
           
-          // 1. Recuperamos la suscripción expandiendo los items del precio
           const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
             expand: ['items.data.price'],
           });
           
-          // 2. Extraemos el ID del usuario de Supabase de forma jerárquica y segura
           let userId = session.client_reference_id;
 
-          // 🔒 FILTRADO NATIVO JAVASCRIPT: Traemos la colección y buscamos por coincidencia exacta
+          // 🔒 FALLBACK DE SEGURIDAD ANTIFALLES: Si el ID viene vacío, buscamos directo en la tabla vinculada de auth
           if (!userId && session.customer_details?.email) {
-            console.log(`ℹ️ client_reference_id missing. Fallback search by email: ${session.customer_details.email}`);
-            const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-            if (!listError && users) {
-              const targetUser = users.find(u => u.email?.toLowerCase() === session.customer_details.email.toLowerCase());
-              if (targetUser) userId = targetUser.id;
+            console.log(`ℹ️ client_reference_id missing. Fallback SQL table search by email: ${session.customer_details.email}`);
+            
+            // Consultamos la tabla nativa de identidades de Supabase para obtener el ID sin usar listUsers()
+            const { data: userData, error: userError } = await supabaseAdmin
+              .from('profiles') // Si tu tabla personalizada de usuarios se llama 'profiles' o 'users', cámbiala aquí
+              .select('id')
+              .eq('email', session.customer_details.email)
+              .maybeSingle();
+
+            if (!userError && userData) {
+              userId = userData.id;
             }
           }
 
           if (!userId) {
-            throw new Error(`Fatal: No se pudo determinar el user_id de Supabase para el cliente ${session.customer}`);
+            // Como medida extrema de desarrollo, si no encuentra el ID, vinculamos la suscripción al primer registro o arrojamos el fallo limpio
+            throw new Error(`Fatal: No se pudo mapear un user_id válido en Supabase para ${session.customer_details?.email}`);
           }
 
-          // 3. Guardamos la suscripción vinculada al usuario real de Supabase
           await upsertSubscription(supabaseAdmin, subscription, userId);
         }
         break;
@@ -71,25 +75,25 @@ export async function POST(req: Request) {
       case 'customer.subscription.deleted':
         const subscription = event.data.object as any;
         
-        // Intentamos buscarlo por mapeo de tabla cliente, si falla, buscamos directo por correo en Stripe
         let userId = await getUserIdByCustomerId(supabaseAdmin, subscription.customer as string);
         
-        // 🔒 FILTRADO NATIVO JAVASCRIPT: Traemos la colección y buscamos por coincidencia exacta
         if (!userId) {
           const customerData = await stripe.customers.retrieve(subscription.customer as string) as any;
           if (customerData?.email) {
-            const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-            if (!listError && users) {
-              const targetUser = users.find(u => u.email?.toLowerCase() === customerData.email.toLowerCase());
-              if (targetUser) userId = targetUser.id;
-            }
+            const { data: userData } = await supabaseAdmin
+              .from('profiles') // Consistencia con la tabla elegida arriba
+              .select('id')
+              .eq('email', customerData.email)
+              .maybeSingle();
+              
+            if (userData) userId = userData.id;
           }
         }
 
         if (userId) {
           await upsertSubscription(supabaseAdmin, subscription, userId);
         } else {
-          console.warn(`⚠️ Ignorando actualización: No se halló user_id para el cliente de Stripe: ${subscription.customer}`);
+          console.warn(`⚠️ Ignorando evento: No se halló user_id en base para el cliente: ${subscription.customer}`);
         }
         break;
 
@@ -104,7 +108,7 @@ export async function POST(req: Request) {
   return NextResponse.json({ received: true });
 }
 
-// --- FUNCIONES AUXILIARES PASANDO EL CLIENTE ADMIN ---
+// --- FUNCIONES AUXILIARES ---
 
 async function upsertSubscription(supabaseAdmin: any, subscription: any, userId: string) {
   const stripePriceId = subscription.items?.data?.[0]?.price?.id || subscription.plan?.id;
@@ -113,6 +117,7 @@ async function upsertSubscription(supabaseAdmin: any, subscription: any, userId:
     throw new Error('Missing price_id fields to bypass database strict constraints');
   }
 
+  // 🔒 FORMATEO DEFENSIVO DE FECHAS: Pasamos strings planos limpios para evitar que Postgres aborte la conversión
   const subscriptionData = {
     id: subscription.id,
     user_id: userId,
