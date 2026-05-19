@@ -35,10 +35,8 @@ export default function TemporalHomePage() {
 
       {/* HERO SECTION */}
       <main className="flex-1 w-full max-w-[650px] flex flex-col justify-center py-16">
-        <div className="border-l-2 border-[#1f2937] pl-6 mb-12">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#6b7280] mb-3 font-serif">
-            The Watchman of Final Authority
-          </p>
+        {/* Modificado: Se removió la línea vertical y el subtítulo */}
+        <div className="mb-12">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-[#111827] max-w-xl">
             Rigorous Theological Search & Scripture Verification.
           </h2>
@@ -52,7 +50,7 @@ export default function TemporalHomePage() {
         <div className="mb-16">
           <Link 
             href="/login" 
-            className="inline-flex items-center justify-center bg-[#111827] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 hover:bg-[#1f2937] shadow-sm"
+            className="inline-flex items-center justify-center bg-[#111827] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[8px] transition-all duration-300 hover:bg-[#1f2937] shadow-sm"
           >
             Try it Free &rarr;
           </Link>
@@ -210,7 +208,7 @@ export default function TemporalHomePage() {
         </section>
       </main>
 
-      {/* FOOTER (Línea optimizada en una sola fila) */}
+      {/* FOOTER */}
       <footer className="w-full max-w-[650px] border-t border-[#e5e7eb] py-8 flex justify-center items-center mb-4">
         <p className="text-[10px] text-[#94a3b8] uppercase tracking-wider text-center">
           &copy; {new Date().getFullYear()} Patmos Research. All Rights Reserved.
