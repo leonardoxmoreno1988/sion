@@ -35,7 +35,6 @@ export default function TemporalHomePage() {
 
       {/* HERO SECTION */}
       <main className="flex-1 w-full max-w-[650px] flex flex-col justify-center py-16">
-        {/* Modificado: Se removió la línea vertical y el subtítulo */}
         <div className="mb-12">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-[#111827] max-w-xl">
             Rigorous Theological Search & Scripture Verification.
@@ -43,17 +42,24 @@ export default function TemporalHomePage() {
         </div>
 
         <p className="text-base leading-relaxed text-[#6b7280] text-left max-w-2xl mb-12">
-          Designed for deep academic inquiry, the core system process extracts, dissects, and evaluates theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational mechanics.
+          Designed for deep academic inquiry, the core system process extracts and evaluates theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational theology.
         </p>
 
         {/* PRIMARY CALL TO ACTION */}
-        <div className="mb-16">
+        <div className="mb-16 flex flex-col items-start">
           <Link 
             href="/login" 
             className="inline-flex items-center justify-center bg-[#111827] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[8px] transition-all duration-300 hover:bg-[#1f2937] shadow-sm"
           >
             Try it Free &rarr;
           </Link>
+          
+          {/* Imagen agregada sin radio en las esquinas */}
+          <img 
+            src="https://www.leonardoxmoreno.com/files/hero.jpg" 
+            alt="Patmos Platform Preview" 
+            className="w-full h-auto mt-6 object-cover shadow-sm"
+          />
         </div>
 
         {/* PRODUCT BENEFITS / SYSTEM PILLARS */}
