@@ -30,9 +30,10 @@ export default function PatmosChat() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
-  // 🔒 ESTADOS: Control del Paywall automático
+  // 🔒 ESTADOS: Control del Paywall automático y ciclo de vida de Stripe
   const [hasCredits, setHasCredits] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'assistant', content: "Welcome. How may I assist your Bible inquiry today?" }
@@ -98,26 +99,45 @@ export default function PatmosChat() {
         console.error("Error fetching history:", err);
       }
 
-      // 2. 🛡️ VERIFICACIÓN DE SUSCRIPCIÓN EN SUPABASE
+      // 2. 🛡️ VERIFICACIÓN AVANZADA DE SUSCRIPCIÓN EN SUPABASE
       try {
         const { data: subscription } = await supabase
           .from('subscriptions')
           .select('status')
           .eq('user_id', session.user.id)
-          .eq('status', 'active')
           .maybeSingle();
 
         if (subscription) {
-          setIsPremium(true);
-          setHasCredits(true); // Premium tiene créditos ilimitados
+          const currentStatus = subscription.status;
+          setSubscriptionStatus(currentStatus);
+
+          if (currentStatus === 'active' || currentStatus === 'trialing') {
+            // 🟢 ACCESO PREMIUM TOTAL
+            setIsPremium(true);
+            setHasCredits(true);
+          } else if (currentStatus === 'past_due') {
+            // 🟡 PAGO RECHAZADO: Bloqueo inmediato preventivo
+            setIsPremium(false);
+            setHasCredits(false);
+            setMessages([
+              { 
+                id: 'system-past-due', 
+                role: 'assistant', 
+                content: "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed. Access has been temporarily restricted. Please visit the **Billing** portal above to update your payment method." 
+              }
+            ]);
+          } else {
+            // 🔴 CANCELADA / EXPIRADA / IMPAGADA
+            setIsPremium(false);
+            setHasCredits(currentHistory.length < 5);
+          }
         } else {
+          // ⚪ SIN REGISTRO: Usuario Free Puro
           setIsPremium(false);
-          // Si es usuario gratuito, evaluamos si ya hizo 5 o más consultas históricas
           setHasCredits(currentHistory.length < 5);
         }
       } catch (subErr) {
         console.error("Error checking subscription tier:", subErr);
-        // Fallback defensivo: evaluamos con el historial cargado
         setHasCredits(currentHistory.length < 5);
       }
 
@@ -153,7 +173,7 @@ export default function PatmosChat() {
         setHistory(data);
         
         // 🚀 RE-EVALUACIÓN DE CRÉDITOS TRAS NUEVAS CONSULTAS
-        if (!isPremium) {
+        if (!isPremium && subscriptionStatus !== 'past_due') {
           setHasCredits(data.length < 5);
         }
       }
@@ -185,7 +205,6 @@ export default function PatmosChat() {
 
   const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 🔒 Bloqueo de seguridad a nivel de backend/subida
     if (!customInput.trim() || isLoading || !hasCredits) return;
 
     const userQuery = customInput;
@@ -201,7 +220,6 @@ export default function PatmosChat() {
     ];
     
     setMessages(updatedMessages);
-
     setMessages((prev) => [
       ...prev,
       { id: assistantMessageId, role: 'assistant', content: "" }
@@ -404,17 +422,17 @@ export default function PatmosChat() {
               )}
             </button>
 
-            {/* 🔒 ACCESO AL PORTAL DE STRIPE (Solo visible para usuarios premium activos) */}
-            {isPremium && (
+            {/* 🔒 ACCESO AL PORTAL DE STRIPE (Visible para Premium y cuentas Past Due) */}
+            {(isPremium || subscriptionStatus === 'past_due') && (
               <a 
                 href="/api/portal"
                 style={{
                   fontSize: '10px',
                   fontWeight: '700',
-                  color: theme.textMuted,
+                  color: subscriptionStatus === 'past_due' ? '#f87171' : theme.textMuted,
                   textDecoration: 'none',
                   background: 'transparent',
-                  border: `1px solid ${theme.borderSion}`,
+                  border: `1px solid ${subscriptionStatus === 'past_due' ? '#f87171' : theme.borderSion}`,
                   padding: '4px 8px',
                   fontFamily: theme.fontSans,
                   textTransform: 'uppercase',
@@ -425,11 +443,11 @@ export default function PatmosChat() {
                   e.currentTarget.style.borderColor = theme.textMain;
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.color = theme.textMuted;
-                  e.currentTarget.style.borderColor = theme.borderSion;
+                  e.currentTarget.style.color = subscriptionStatus === 'past_due' ? '#f87171' : theme.textMuted;
+                  e.currentTarget.style.borderColor = subscriptionStatus === 'past_due' ? '#f87171' : theme.borderSion;
                 }}
               >
-                Billing
+                {subscriptionStatus === 'past_due' ? 'Fix Billing' : 'Billing'}
               </a>
             )}
 
@@ -508,38 +526,49 @@ export default function PatmosChat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Caja de Input + Banner del Paywall */}
+        {/* Caja de Input + Banner del Paywall Dinámico */}
         <div style={{ width: '100%', maxWidth: '650px', padding: '20px 0 40px 0' }}>
           
-          {/* 🔒 BANNER DE INVITACIÓN CONDICIONAL AL AGOTAR CRÉDITOS */}
+          {/* 🔒 BANNER DE INVITACIÓN CONDICIONAL INTELIGENTE */}
           {!hasCredits && (
             <div style={{
               display: 'flex',
               flexDirection: 'window' as any === 'undefined' || window.innerWidth < 640 ? 'column' : 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
-              backgroundColor: isDarkMode ? '#0f172a' : '#111827',
-              color: '#f9fafb',
+              backgroundColor: subscriptionStatus === 'past_due' ? (isDarkMode ? '#450a0a' : '#fef2f2') : (isDarkMode ? '#0f172a' : '#111827'),
+              color: subscriptionStatus === 'past_due' ? (isDarkMode ? '#fecaca' : '#991b1b') : '#f9fafb',
               padding: '16px 20px',
               borderRadius: '12px',
               marginBottom: '16px',
-              border: `1px solid ${isDarkMode ? '#1e293b' : 'transparent'}`,
+              border: `1px solid ${subscriptionStatus === 'past_due' ? '#ef4444' : (isDarkMode ? '#1e293b' : 'transparent')}`,
               gap: '12px',
               textAlign: 'left'
             }}>
               <div style={{ flex: 1 }}>
-                <h5 style={{ fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#94a3b8', margin: '0 0 4px 0', fontFamily: 'serif' }}>
-                  Free Inquiry Limit Reached
+                <h5 style={{ 
+                  fontSize: '10px', 
+                  fontWeight: '700', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '1.5px', 
+                  color: subscriptionStatus === 'past_due' ? '#ef4444' : '#94a3b8', 
+                  margin: '0 0 4px 0', 
+                  fontFamily: 'serif' 
+                }}>
+                  {subscriptionStatus === 'past_due' ? 'Payment Settlement Required' : 'Free Inquiry Limit Reached'}
                 </h5>
-                <p style={{ fontSize: '12px', color: '#cbd5e1', margin: 0, lineHeight: '1.4', fontFamily: theme.fontSans }}>
-                  Your manuscript pipeline allocation has concluded. Upgrade to sustain the architecture and execute unlimited Dogmatic inquiries.
+                <p style={{ fontSize: '12px', color: subscriptionStatus === 'past_due' ? 'inherit' : '#cbd5e1', margin: 0, lineHeight: '1.4', fontFamily: theme.fontSans }}>
+                  {subscriptionStatus === 'past_due' 
+                    ? "Your station access is locked due to a failed renewal payment. Update your credit card credentials to resume pipeline access immediately."
+                    : "Your manuscript pipeline allocation has concluded. Upgrade to sustain the architecture and execute unlimited Dogmatic inquiries."
+                  }
                 </p>
               </div>
               <a 
-                href="/api/checkout"
+                href={subscriptionStatus === 'past_due' ? '/api/portal' : '/api/checkout'}
                 style={{
-                  backgroundColor: '#fff',
-                  color: '#111827',
+                  backgroundColor: subscriptionStatus === 'past_due' ? '#ef4444' : '#fff',
+                  color: subscriptionStatus === 'past_due' ? '#fff' : '#111827',
                   fontSize: '10px',
                   fontWeight: '700',
                   textTransform: 'uppercase',
@@ -551,10 +580,10 @@ export default function PatmosChat() {
                   fontFamily: theme.fontSans,
                   transition: 'background 0.2s'
                 }}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#e2e8f0')}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#fff')}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#dc2626' : '#e2e8f0')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#ef4444' : '#fff')}
               >
-                Upgrade &rarr;
+                {subscriptionStatus === 'past_due' ? 'Resolve Now &rarr;' : 'Upgrade &rarr;'}
               </a>
             </div>
           )}
@@ -568,13 +597,13 @@ export default function PatmosChat() {
                 border: `1px solid ${!hasCredits ? (isDarkMode ? '#7f1d1d' : '#fca5a5') : (isDarkMode ? '#334155' : '#9ca3af')}`,
                 fontSize: '15px',
                 outline: 'none',
-                backgroundColor: !hasCredits ? (isDarkMode ? '#450a0a/20' : '#fef2f2') : theme.inputBg,
+                backgroundColor: !hasCredits ? (isDarkMode ? '#450a0a20' : '#fef2f2') : theme.inputBg,
                 color: !hasCredits ? '#94a3b8' : theme.inputText,
                 fontFamily: theme.fontSans,
                 transition: 'all 0.3s ease',
                 cursor: !hasCredits ? 'not-allowed' : 'text'
               }}
-              placeholder={hasCredits ? "Search the scriptures..." : "INQUIRY LOCKED — UPGRADE TO THE WATCHMAN TIER"}
+              placeholder={hasCredits ? "Search the scriptures..." : (subscriptionStatus === 'past_due' ? "INQUIRY LOCKED — PAST DUE INVOICE" : "INQUIRY LOCKED — UPGRADE TO THE WATCHMAN TIER")}
               value={customInput}
               onChange={(e) => setCustomInput(e.target.value)} 
               disabled={isLoading || !hasCredits}
