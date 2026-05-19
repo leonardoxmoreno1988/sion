@@ -21,7 +21,7 @@ export default function TemporalHomePage() {
     <div className="min-h-screen bg-[#f9fafb] text-[#111827] flex flex-col items-center justify-between antialiased selection:bg-[#e5e7eb] px-6 md:px-0" style={{ fontFamily: '"Inter", sans-serif' }}>
       
       {/* MINIMALIST HEADER */}
-      <header className="w-full max-w-[650px] border-b border-[#1f2937] py-6 flex justify-between items-center mt-4">
+      <header className="w-full max-w-[650px] py-6 flex justify-between items-center mt-4">
         <span className="text-lg font-bold tracking-wider uppercase text-[#111827]">
           PATMOS
         </span>
@@ -45,7 +45,7 @@ export default function TemporalHomePage() {
         </div>
 
         <p className="text-base leading-relaxed text-[#6b7280] text-left max-w-2xl mb-12">
-          Patmos operates under absolute textual sovereignty. Designed for deep academic inquiry, the core system process extracts, dissects, and evaluates theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV) and the Reina Valera 1865. Every query is filtered under unwavering dispensational mechanics.
+          Designed for deep academic inquiry, the core system process extracts, dissects, and evaluates theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational mechanics.
         </p>
 
         {/* PRIMARY CALL TO ACTION */}
@@ -197,7 +197,6 @@ export default function TemporalHomePage() {
               </div>
 
               <div className="mt-8">
-                {/* 🔒 CORRECCIÓN CLAVE: Cambiado de <Link> a <a> pura para forzar redirección API */}
                 <a 
                   href="/api/checkout"
                   className="block w-full bg-[#111827] text-[#f9fafb] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#1f2937] rounded"
@@ -211,12 +210,9 @@ export default function TemporalHomePage() {
         </section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="w-full max-w-[650px] border-t border-[#e5e7eb] py-8 flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-        <p className="text-xs text-[#6b7280] tracking-widest uppercase font-serif text-center md:text-left">
-          Based on Rightly Dividing the Word of Truth
-        </p>
-        <p className="text-[10px] text-[#94a3b8] uppercase tracking-wider">
+      {/* FOOTER (Línea optimizada en una sola fila) */}
+      <footer className="w-full max-w-[650px] border-t border-[#e5e7eb] py-8 flex justify-center items-center mb-4">
+        <p className="text-[10px] text-[#94a3b8] uppercase tracking-wider text-center">
           &copy; {new Date().getFullYear()} Patmos Research. All Rights Reserved.
         </p>
       </footer>
