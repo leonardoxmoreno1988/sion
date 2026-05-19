@@ -3,14 +3,10 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-// Forzamos a Next.js a tratar esta ruta como 100% dinámica
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  // Inicializamos Stripe DENTRO de la función para que no explote en el build estático
   const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
-  
-  // 🔒 CORRECCIÓN MAESTRA: Quitamos 'apiVersion' para evitar el error de SDK desactualizado
   const stripe = new Stripe(stripeKey);
 
   const supabaseAdmin = createClient(
@@ -19,8 +15,6 @@ export async function POST(req: Request) {
   );
 
   const body = await req.text();
-  
-  // 🔒 CONTROL SEGURO DE CABECERAS: Buscamos tanto en mayúsculas como en minúsculas
   const signature = req.headers.get('stripe-signature') || req.headers.get('Stripe-Signature');
 
   let event: Stripe.Event;
@@ -45,7 +39,12 @@ export async function POST(req: Request) {
       case 'checkout.session.completed':
         if (session.mode === 'subscription') {
           const subscriptionId = session.subscription;
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          
+          // 🔒 BLINDAJE DE PRECIO: Expandimos explícitamente los 'items' para asegurar que el price_id no llegue null
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+            expand: ['items.data.price'],
+          });
+          
           // Usamos el id de usuario de Supabase que inyectamos en el checkout
           await upsertSubscription(supabaseAdmin, subscription, session.client_reference_id);
         }
@@ -63,8 +62,8 @@ export async function POST(req: Request) {
       default:
         console.log(`ℹ️ Unhandled event type: ${event.type}`);
     }
-  } catch (error) {
-    console.error('❌ Error actualizando la base de datos desde el webhook:', error);
+  } catch (error: any) {
+    console.error('❌ Error actualizando la base de datos desde el webhook:', error.message || error);
     return new NextResponse('Webhook handler failed', { status: 500 });
   }
 
@@ -74,11 +73,19 @@ export async function POST(req: Request) {
 // --- FUNCIONES AUXILIARES PASANDO EL CLIENTE ADMIN ---
 
 async function upsertSubscription(supabaseAdmin: any, subscription: any, userId: string) {
+  // Aseguramos una extracción defensiva del price id
+  const stripePriceId = subscription.items?.data?.[0]?.price?.id || subscription.plan?.id;
+
+  if (!stripePriceId) {
+    console.error(`❌ Fatal: El price_id no pudo ser extraído de la suscripción ${subscription.id}`);
+    throw new Error('Missing price_id fields to bypass database strict constraints');
+  }
+
   const subscriptionData = {
     id: subscription.id,
     user_id: userId,
     status: subscription.status,
-    price_id: subscription.items?.data?.[0]?.price?.id || '',
+    price_id: stripePriceId,
     cancel_at_period_end: !!subscription.cancel_at_period_end,
     current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
     current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
