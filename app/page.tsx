@@ -37,7 +37,7 @@ export default function TemporalHomePage() {
       <main className="flex-1 w-full max-w-[650px] flex flex-col justify-center py-16">
         <div className="mb-12">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-[#111827] max-w-xl">
-            Rigorous Theological Search & Scripture Verification.
+            Rigorous Theological Search & Scripture Verification
           </h2>
         </div>
 
@@ -51,7 +51,7 @@ export default function TemporalHomePage() {
             href="/login" 
             className="inline-flex items-center justify-center bg-[#111827] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[8px] transition-all duration-300 hover:bg-[#1f2937] shadow-sm"
           >
-            Try it Free &rarr;
+            Start Free &rarr;
           </Link>
           
           {/* Imagen plana, sin bordes redondeados y sin sombra */}
@@ -157,7 +157,7 @@ export default function TemporalHomePage() {
                   href="/login"
                   className="block w-full border border-[#111827] bg-transparent text-[#111827] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#111827]/5 rounded"
                 >
-                  Create Free Account
+                  Start Free
                 </Link>
               </div>
             </div>
