@@ -105,7 +105,8 @@ function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-300 tracking-wider"
+            // UX/UI: Se oscureció el placeholder de gray-300 a gray-500
+            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-500 tracking-wider"
           />
         </div>
         <div>
@@ -115,13 +116,14 @@ function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-300 tracking-wider"
+            // UX/UI: Se oscureció el placeholder de gray-300 a gray-500
+            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-500 tracking-wider"
           />
         </div>
       </div>
 
       {message && (
-        <div className="bg-[#000f37]/5 border border-[#000f37]/10 py-2 text-[10px] text-[#000f37] text-center uppercase tracking-widest leading-relaxed px-2 font-medium">
+        <div className="bg-[#000f37]/5 border border-[#000f37]/10 py-2 text-[10px] text-[#000f37] text-center uppercase tracking-widest leading-relaxed px-2 font-medium rounded">
           {message}
         </div>
       )}
@@ -130,7 +132,8 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
+          // UX/UI: Añadido rounded-lg (8px)
+          className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-lg transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           {loading ? 'AUTHENTICATING...' : 'ACCESS THE ARCHIVE'}
         </button>
@@ -145,7 +148,8 @@ function LoginForm() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+          // UX/UI: Añadido rounded-lg (8px)
+          className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
             <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.65-5.17 3.65-8.58z"/>
@@ -204,12 +208,7 @@ export default function LoginPage() {
             <LoginForm />
           </Suspense>
 
-          {/* Cita */}
-          <footer className="pt-4 text-center">
-            <p className="text-[10px] italic text-gray-500 font-serif leading-relaxed">
-              "Procura con diligencia presentarte a Dios aprobado, como obrero que no tiene de qué avergonzarse..."
-            </p>
-          </footer>
+          {/* UX/UI: Se removió el footer que contenía la cita teológica */}
         </div>
       </div>
 
