@@ -1,11 +1,11 @@
 // app/login/page.tsx
 'use client';
 
-import { useState, Suspense } from 'react'; // 🔒 Importamos Suspense
+import { useState, Suspense } from 'react'; 
 import { createBrowserClient } from '@supabase/ssr'; 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-// Mantener la ruta dinámica para que Vercel aplique este cambio de inmediato
+// Forzamos renderizado dinámico para evitar bloqueos de caché
 export const dynamic = 'force-dynamic';
 
 function LoginForm() {
@@ -16,7 +16,6 @@ function LoginForm() {
   
   const router = useRouter();
   const searchParams = useSearchParams();
-  
   const nextRoute = searchParams.get('next') || '/chat';
 
   const supabase = createBrowserClient(
@@ -30,15 +29,9 @@ function LoginForm() {
       setMessage("Please enter both email and password.");
       return;
     }
-
     setLoading(true);
     setMessage(null);
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setMessage(`Error: ${error.message}`);
       setLoading(false);
@@ -54,23 +47,15 @@ function LoginForm() {
       setMessage("Email and password are required for registry.");
       return;
     }
-
     setLoading(true);
     setMessage(null);
-    
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${nextRoute}`,
-      },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${nextRoute}` },
     });
-
-    if (error) {
-      setMessage(`Error: ${error.message}`);
-    } else {
-      setMessage('Check your email to confirm the registry.');
-    }
+    if (error) setMessage(`Error: ${error.message}`);
+    else setMessage('Check your email to confirm the registry.');
     setLoading(false);
   };
 
@@ -79,15 +64,9 @@ function LoginForm() {
     setMessage(null);
     try {
       const redirectToUrl = `${window.location.origin}/auth/callback`;
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: redirectToUrl,
-          queryParams: {
-            next: nextRoute
-          }
-        },
+        options: { redirectTo: redirectToUrl, queryParams: { next: nextRoute } },
       });
       if (error) throw error;
     } catch (error: any) {
@@ -106,7 +85,7 @@ function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-400 tracking-wider"
+            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-400 tracking-wider rounded-none"
           />
         </div>
         <div>
@@ -116,13 +95,13 @@ function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-400 tracking-wider"
+            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-400 tracking-wider rounded-none"
           />
         </div>
       </div>
 
       {message && (
-        <div className="bg-[#000f37]/5 border border-[#000f37]/10 py-2 text-[10px] text-[#000f37] text-center uppercase tracking-widest leading-relaxed px-2 font-medium rounded">
+        <div className="bg-[#000f37]/5 border border-[#000f37]/10 py-2 text-[10px] text-[#000f37] text-center uppercase tracking-widest leading-relaxed px-2 font-medium rounded-none">
           {message}
         </div>
       )}
@@ -131,7 +110,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-lg transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-none transition-all hover:bg-[#000f37]/90 disabled:opacity-30"
         >
           {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
         </button>
@@ -146,7 +125,7 @@ function LoginForm() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+          className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-none transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
             <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.65-5.17 3.65-8.58z"/>
@@ -161,7 +140,7 @@ function LoginForm() {
           type="button"
           onClick={handleSignUp}
           disabled={loading}
-          className="text-[9px] uppercase tracking-[0.2em] text-gray-400 hover:text-[#000f37] transition-colors disabled:opacity-30 font-medium text-center mt-2"
+          className="text-[9px] uppercase tracking-[0.2em] text-gray-400 hover:text-[#000f37] transition-colors font-medium text-center mt-2"
         >
           Request New Registry
         </button>
@@ -170,16 +149,13 @@ function LoginForm() {
   );
 }
 
-// 2. EXPORTACIÓN PRINCIPAL: CENTRADA, MINIMALISTA Y LIMPIA
 export default function LoginPage() {
   return (
-    // bg-[#f4f5f6] le da un tono gris muy ligero y premium al fondo de la pantalla
     <div className="flex min-h-screen w-full items-center justify-center bg-[#f4f5f6] px-4 relative overflow-hidden text-[#000f37]">
       
-      {/* Caja de login flotando perfectamente en el centro */}
-      <div className="w-full max-w-[400px] space-y-8 bg-white p-10 shadow-sm border border-gray-100 rounded-xl">
+      {/* Caja de login: Sin sombra y esquinas en 0 */}
+      <div className="w-full max-w-[400px] space-y-8 bg-white p-10 border border-gray-200 rounded-none shadow-none">
         
-        {/* Cabecera Minimalista */}
         <div className="text-center">
           <h1 className="text-4xl font-light tracking-[0.25em] text-[#000f37] font-serif">
              PATMOS
@@ -190,8 +166,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Formulario */}
-        <Suspense fallback={<div className="text-center py-4 text-xs tracking-widest text-gray-400 uppercase">Loading Session Parameters...</div>}>
+        <Suspense fallback={<div className="text-center py-4 text-xs tracking-widest text-gray-400 uppercase">Loading...</div>}>
           <LoginForm />
         </Suspense>
 
