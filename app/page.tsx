@@ -22,9 +22,9 @@ export default function TemporalHomePage() {
       
       {/* MINIMALIST HEADER */}
       <header className="w-full max-w-[650px] py-6 flex justify-between items-center mt-4">
-        {/* Logotipo modificado: Fuente Georgia con grosor más marcado (fontWeight: 600) e interletrado de 4px */}
+        {/* Logotipo modificado: Incrementado a text-xl para mayor presencia visual */}
         <span 
-          className="text-lg uppercase text-[#111827]" 
+          className="text-xl uppercase text-[#111827]" 
           style={{ fontFamily: 'Georgia, serif', fontWeight: 300, letterSpacing: '4px' }}
         >
           PATMOS
@@ -39,7 +39,8 @@ export default function TemporalHomePage() {
 
       {/* HERO SECTION */}
       <main className="flex-1 w-full max-w-[650px] flex flex-col justify-center py-16">
-        <div className="mb-12">
+        {/* Espaciado optimizado: Reducido de mb-12 a mb-4 para compactar el bloque de lectura */}
+        <div className="mb-4">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-[#111827] max-w-xl">
             Rigorous Theological Search & Scripture Verification
           </h2>
