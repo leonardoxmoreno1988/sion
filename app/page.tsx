@@ -18,20 +18,20 @@ export default function TemporalHomePage() {
   if (!isMounted) return <div className="min-h-screen bg-[#f9fafb]" />;
 
   return (
-    <div className="min-h-screen bg-[#f9fafb] text-[#111827] flex flex-col items-center justify-between antialiased selection:bg-[#e5e7eb] px-6 md:px-0" style={{ fontFamily: '"Inter", sans-serif' }}>
+    <div className="min-h-screen bg-[#f9fafb] text-[#000f37] flex flex-col items-center justify-between antialiased selection:bg-[#e5e7eb] px-6 md:px-0" style={{ fontFamily: '"Inter", sans-serif' }}>
       
       {/* MINIMALIST HEADER */}
       <header className="w-full max-w-[700px] py-6 flex justify-between items-center mt-4">
-        {/* Logotipo: Fuente Georgia con grosor 300 e interletrado de 4px */}
+        {/* Logotipo: Fuente Georgia con grosor 300, interletrado de 4px y color #000f37 */}
         <span 
-          className="text-xl uppercase text-[#111827]" 
+          className="text-xl uppercase text-[#000f37]" 
           style={{ fontFamily: 'Georgia, serif', fontWeight: 300, letterSpacing: '4px' }}
         >
           PATMOS
         </span>
         <Link 
           href="/login" 
-          className="text-xs font-bold uppercase tracking-wider border border-[#111827] px-4 py-2 transition-all duration-300 hover:bg-[#111827] hover:text-[#f9fafb]"
+          className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
         >
           Login
         </Link>
@@ -40,7 +40,7 @@ export default function TemporalHomePage() {
       {/* HERO SECTION */}
       <main className="flex-1 w-full max-w-[700px] flex flex-col justify-center py-16">
         <div className="mb-4">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-[#111827] max-w-xl">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-[#000f37] max-w-xl">
             Rigorous Theological Search & Scripture Verification
           </h2>
         </div>
@@ -58,7 +58,7 @@ export default function TemporalHomePage() {
             Start Free &rarr;
           </Link>
           
-          {/* Imagen adaptada al nuevo contenedor de 700px */}
+          {/* Imagen adaptada al contenedor de 700px */}
           <img 
             src="https://www.leonardoxmoreno.com/files/hero.jpg" 
             alt="Patmos Platform Preview" 
@@ -76,7 +76,7 @@ export default function TemporalHomePage() {
             
             {/* PILLAR 1 */}
             <div className="flex flex-col gap-2">
-              <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
+              <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 01 / Manuscript Database Integration
               </h4>
               <p className="text-sm leading-relaxed text-[#6b7280] text-left">
@@ -86,7 +86,7 @@ export default function TemporalHomePage() {
 
             {/* PILLAR 2 */}
             <div className="flex flex-col gap-2">
-              <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
+              <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 02 / Textual Inerrancy
               </h4>
               <p className="text-sm leading-relaxed text-[#6b7280] text-left">
@@ -96,7 +96,7 @@ export default function TemporalHomePage() {
 
             {/* PILLAR 3 */}
             <div className="flex flex-col gap-2">
-              <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
+              <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 03 / Dispensational Mechanics
               </h4>
               <p className="text-sm leading-relaxed text-[#6b7280] text-left">
@@ -106,7 +106,7 @@ export default function TemporalHomePage() {
 
             {/* PILLAR 4 */}
             <div className="flex flex-col gap-2">
-              <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
+              <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 04 / Strict Cessationism
               </h4>
               <p className="text-sm leading-relaxed text-[#6b7280] text-left">
@@ -131,10 +131,10 @@ export default function TemporalHomePage() {
                 <span className="text-[9px] uppercase tracking-[0.2em] text-[#6b7280] font-bold">
                   Initial Tier
                 </span>
-                <h4 className="text-base font-bold uppercase tracking-wide text-[#111827] mt-1">
+                <h4 className="text-base font-bold uppercase tracking-wide text-[#000f37] mt-1">
                   Free Use
                 </h4>
-                <div className="mt-4 flex items-baseline text-[#111827]">
+                <div className="mt-4 flex items-baseline text-[#000f37]">
                   <span className="text-3xl font-bold tracking-tight">$0</span>
                   <span className="ml-1 text-[10px] uppercase tracking-wider text-[#6b7280]">/ forever</span>
                 </div>
@@ -143,7 +143,7 @@ export default function TemporalHomePage() {
                   Designed for casual examiners of the scriptures seeking to test the dogmatic precision of the Watchman framework.
                 </p>
 
-                <ul className="mt-6 space-y-2 border-t border-[#e5e7eb] pt-4 text-[10px] uppercase tracking-widest text-[#111827] font-medium">
+                <ul className="mt-6 space-y-2 border-t border-[#e5e7eb] pt-4 text-[10px] uppercase tracking-widest text-[#000f37] font-medium">
                   <li className="flex items-center gap-2">
                     <span className="text-[#6b7280]">✓</span> Limited query credits
                   </li>
@@ -159,7 +159,7 @@ export default function TemporalHomePage() {
               <div className="mt-8">
                 <Link 
                   href="/login"
-                  className="block w-full border border-[#111827] bg-transparent text-[#111827] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#111827]/5 rounded"
+                  className="block w-full border border-[#000f37] text-[#000f37] bg-transparent py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#000f37]/5 rounded"
                 >
                   Start Free
                 </Link>
@@ -167,8 +167,8 @@ export default function TemporalHomePage() {
             </div>
 
             {/* PLAN PREMIUM: THE WATCHMAN (BOTÓN AZUL #2d65f6 - SIN SOMBRA) */}
-            <div className="bg-white border-2 border-[#1f2937] p-6 flex flex-col justify-between rounded-lg relative overflow-hidden shadow-sm">
-              <div className="absolute top-0 right-0 bg-[#1f2937] text-[#f9fafb] text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 rounded-bl">
+            <div className="bg-white border-2 border-[#000f37] p-6 flex flex-col justify-between rounded-lg relative overflow-hidden shadow-sm">
+              <div className="absolute top-0 right-0 bg-[#000f37] text-[#f9fafb] text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 rounded-bl">
                 Full Authority
               </div>
 
@@ -176,10 +176,10 @@ export default function TemporalHomePage() {
                 <span className="text-[9px] uppercase tracking-[0.2em] text-[#6b7280] font-bold">
                   Complete Access
                 </span>
-                <h4 className="text-base font-bold uppercase tracking-wide text-[#111827] mt-1">
+                <h4 className="text-base font-bold uppercase tracking-wide text-[#000f37] mt-1">
                   The Watchman
                 </h4>
-                <div className="mt-4 flex items-baseline text-[#111827]">
+                <div className="mt-4 flex items-baseline text-[#000f37]">
                   <span className="text-3xl font-bold tracking-tight">$7</span>
                   <span className="ml-1 text-[10px] uppercase tracking-wider text-[#6b7280]">/ month</span>
                 </div>
@@ -188,7 +188,7 @@ export default function TemporalHomePage() {
                   For serious students of the Word, approved workmen, and theologians requiring deep, unhindered pipeline execution.
                 </p>
 
-                <ul className="mt-6 space-y-2 border-t border-[#e5e7eb] pt-4 text-[10px] uppercase tracking-widest text-[#111827] font-medium">
+                <ul className="mt-6 space-y-2 border-t border-[#e5e7eb] pt-4 text-[10px] uppercase tracking-widest text-[#000f37] font-medium">
                   <li className="flex items-center gap-2 font-bold">
                     <span>✓</span> Uncapped continuous queries
                   </li>
