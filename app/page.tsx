@@ -150,7 +150,7 @@ export default function TemporalHomePage() {
                 
                 {/* 🖋️ TEXTO OSCURECIDO */}
                 <p className="mt-4 text-sm text-[#4b5563] leading-relaxed text-left">
-                  Designed for casual examiners of the scriptures seeking to test the dogmatic precision of the Watchman framework.
+                  Designed for casual examiners of the scriptures seeking to test the dogmatic precision.
                 </p>
 
                 {/* Checks de lista oscurecidos */}
@@ -222,7 +222,7 @@ export default function TemporalHomePage() {
                   href="/api/checkout"
                   className="block w-full bg-[#000f37] text-[#f9fafb] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#000f37]/90 rounded"
                 >
-                  Upgrade to Watchman
+                  Upgrade to PRO
                 </a>
               </div>
             </div>
