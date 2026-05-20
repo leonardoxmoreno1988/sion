@@ -5,7 +5,6 @@ import { useState, Suspense } from 'react';
 import { createBrowserClient } from '@supabase/ssr'; 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-// Forzamos renderizado dinámico para evitar bloqueos de caché
 export const dynamic = 'force-dynamic';
 
 function LoginForm() {
@@ -107,10 +106,11 @@ function LoginForm() {
       )}
 
       <div className="flex flex-col gap-4 pt-2">
+        {/* 🔘 BOTÓN CON RATIO CORNER DE 8PX (rounded-lg) */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-none transition-all hover:bg-[#000f37]/90 disabled:opacity-30"
+          className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-lg transition-all hover:bg-[#000f37]/90 disabled:opacity-30"
         >
           {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
         </button>
@@ -121,11 +121,12 @@ function LoginForm() {
           <div className="flex-1 h-[1px] bg-[#000f37]/10" />
         </div>
 
+        {/* 🔘 BOTÓN GOOGLE CON RATIO CORNER DE 8PX (rounded-lg) */}
         <button
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-none transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30"
+          className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
             <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.65-5.17 3.65-8.58z"/>
@@ -153,8 +154,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#f4f5f6] px-4 relative overflow-hidden text-[#000f37]">
       
-      {/* Caja de login: Sin sombra y esquinas en 0 */}
-      <div className="w-full max-w-[400px] space-y-8 bg-white p-10 border border-gray-200 rounded-none shadow-none">
+      {/* 📦 CAJA DE LOGIN NUEVA: Sin stroke (border-none), sin sombra (shadow-none) y esquinas rectas */}
+      <div className="w-full max-w-[400px] space-y-8 bg-white p-10 border-none rounded-none shadow-none">
         
         <div className="text-center">
           <h1 className="text-4xl font-light tracking-[0.25em] text-[#000f37] font-serif">
