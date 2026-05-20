@@ -376,12 +376,29 @@ export default function PatmosChat() {
               ☰
             </button>
             <div>
-              <h1 style={{ fontSize: '18px', fontWeight: '700', margin: 0, letterSpacing: '1px', color: theme.textMain }}>
+              {/* 🏛️ LOGOTIPO: Aplicamos el estilo exacto y solemne de la landing page */}
+              <h1 style={{ 
+                fontSize: '18px', 
+                textTransform: 'uppercase', 
+                color: theme.textMain, 
+                fontFamily: 'Georgia, serif', 
+                fontWeight: 300, 
+                letterSpacing: '4px',
+                margin: 0 
+              }}>
                 PATMOS
               </h1>
               {userEmail && (
-                <p style={{ fontSize: '9px', color: theme.textMuted, margin: '2px 0 0 0', fontFamily: theme.fontSans, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Station: {userEmail}
+                /* 📧 CORREO: Removemos la palabra "Station:" y dejamos solo el identificador limpio */
+                <p style={{ 
+                  fontSize: '9px', 
+                  color: theme.textMuted, 
+                  margin: '4px 0 0 0', 
+                  fontFamily: theme.fontSans, 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.5px' 
+                }}>
+                  {userEmail}
                 </p>
               )}
             </div>
