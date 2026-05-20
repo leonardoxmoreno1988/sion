@@ -587,7 +587,8 @@ export default function PatmosChat() {
                 width: '100%',
                 padding: '16px 60px 16px 25px',
                 borderRadius: '30px',
-                border: `1px solid ${!hasCredits ? (isDarkMode ? '#7f1d1d' : '#fca5a5') : (isDarkMode ? '#334155' : '#000f37/20')}`, // Ajustado a borde sutil azul oscuro en modo claro
+                /* 🛠️ CORRECCIÓN: Usamos #000f3733 para inyectar un 20% de opacidad pura en el borde del modo claro */
+                border: `1px solid ${!hasCredits ? (isDarkMode ? '#7f1d1d' : '#fca5a5') : (isDarkMode ? '#334155' : '#000f3733')}`, 
                 fontSize: '15px',
                 outline: 'none',
                 backgroundColor: !hasCredits ? (isDarkMode ? '#450a0a20' : '#fef2f2') : theme.inputBg,
