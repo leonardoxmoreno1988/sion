@@ -33,7 +33,7 @@ export default function TemporalHomePage() {
           href="/login" 
           className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded-none transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
         >
-          Login
+          Sign In
         </Link>
       </header>
 
