@@ -49,17 +49,18 @@ export default function PatmosChat() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
+  // 🎨 CONFIGURACIÓN DE BRANDING: Ajustado al azul oscuro #000f37 preservando el modo oscuro intacto
   const theme = {
     bg: isDarkMode ? '#020617' : '#f9fafb',
     sidebarBg: isDarkMode ? '#090d16' : '#f3f4f6',
-    headerLine: isDarkMode ? '#1e293b' : '#1f2937',
-    textMain: isDarkMode ? '#f1f5f9' : '#111827',
+    headerLine: isDarkMode ? '#1e293b' : '#000f37', // Ajustado a azul oscuro en modo claro
+    textMain: isDarkMode ? '#f1f5f9' : '#000f37', // Ajustado a azul oscuro en modo claro
     textMuted: isDarkMode ? '#94a3b8' : '#6b7280',
-    bubbleUser: isDarkMode ? '#273c5a' : '#1f2937',
+    bubbleUser: isDarkMode ? '#273c5a' : '#000f37', // Ajustado a azul oscuro en modo claro
     bubbleSion: isDarkMode ? '#0f172a' : '#fff',
     borderSion: isDarkMode ? '#1e293b' : '#e5e7eb',
     inputBg: isDarkMode ? '#0f172a' : '#fff',
-    inputText: isDarkMode ? '#f8fafc' : '#111827',
+    inputText: isDarkMode ? '#f8fafc' : '#000f37', // Ajustado a azul oscuro en modo claro
     fontSans: '"Inter", sans-serif',
   };
 
@@ -87,7 +88,6 @@ export default function PatmosChat() {
 
       setUserEmail(session.user.email ?? 'Vigilante');
       
-      // 1. Cargamos el historial primero para poder evaluar cuotas locales si es necesario
       let currentHistory: ChatSession[] = [];
       try {
         const res = await fetch('/api/history');
@@ -99,7 +99,6 @@ export default function PatmosChat() {
         console.error("Error fetching history:", err);
       }
 
-      // 2. 🛡️ VERIFICACIÓN AVANZADA DE SUSCRIPCIÓN EN SUPABASE
       try {
         const { data: subscription } = await supabase
           .from('subscriptions')
@@ -112,11 +111,9 @@ export default function PatmosChat() {
           setSubscriptionStatus(currentStatus);
 
           if (currentStatus === 'active' || currentStatus === 'trialing') {
-            // 🟢 ACCESO PREMIUM TOTAL
             setIsPremium(true);
             setHasCredits(true);
           } else if (currentStatus === 'past_due') {
-            // 🟡 PAGO RECHAZADO: Bloqueo inmediato preventivo
             setIsPremium(false);
             setHasCredits(false);
             setMessages([
@@ -127,12 +124,10 @@ export default function PatmosChat() {
               }
             ]);
           } else {
-            // 🔴 CANCELADA / EXPIRADA / IMPAGADA
             setIsPremium(false);
             setHasCredits(currentHistory.length < 5);
           }
         } else {
-          // ⚪ SIN REGISTRO: Usuario Free Puro
           setIsPremium(false);
           setHasCredits(currentHistory.length < 5);
         }
@@ -171,8 +166,6 @@ export default function PatmosChat() {
       if (res.ok) {
         const data = await res.json();
         setHistory(data);
-        
-        // 🚀 RE-EVALUACIÓN DE CRÉDITOS TRAS NUEVAS CONSULTAS
         if (!isPremium && subscriptionStatus !== 'past_due') {
           setHasCredits(data.length < 5);
         }
@@ -422,7 +415,7 @@ export default function PatmosChat() {
               )}
             </button>
 
-            {/* 🔒 ACCESO AL PORTAL DE STRIPE (Visible para Premium y cuentas Past Due) */}
+            {/* 🔒 ACCESO AL PORTAL DE STRIPE */}
             {(isPremium || subscriptionStatus === 'past_due') && (
               <a 
                 href="/api/portal"
@@ -536,7 +529,7 @@ export default function PatmosChat() {
               flexDirection: 'window' as any === 'undefined' || window.innerWidth < 640 ? 'column' : 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
-              backgroundColor: subscriptionStatus === 'past_due' ? (isDarkMode ? '#450a0a' : '#fef2f2') : (isDarkMode ? '#0f172a' : '#111827'),
+              backgroundColor: subscriptionStatus === 'past_due' ? (isDarkMode ? '#450a0a' : '#fef2f2') : (isDarkMode ? '#0f172a' : '#000f37'), // Ajustado a azul oscuro en modo claro
               color: subscriptionStatus === 'past_due' ? (isDarkMode ? '#fecaca' : '#991b1b') : '#f9fafb',
               padding: '16px 20px',
               borderRadius: '12px',
@@ -551,7 +544,7 @@ export default function PatmosChat() {
                   fontWeight: '700', 
                   textTransform: 'uppercase', 
                   letterSpacing: '1.5px', 
-                  color: subscriptionStatus === 'past_due' ? '#ef4444' : '#94a3b8', 
+                  color: subscriptionStatus === 'past_due' ? '#ef4444' : (isDarkMode ? '#94a3b8' : '#cbd5e1'), 
                   margin: '0 0 4px 0', 
                   fontFamily: 'serif' 
                 }}>
@@ -568,7 +561,7 @@ export default function PatmosChat() {
                 href={subscriptionStatus === 'past_due' ? '/api/portal' : '/api/checkout'}
                 style={{
                   backgroundColor: subscriptionStatus === 'past_due' ? '#ef4444' : '#fff',
-                  color: subscriptionStatus === 'past_due' ? '#fff' : '#111827',
+                  color: subscriptionStatus === 'past_due' ? '#fff' : '#000f37', // Ajustado a azul oscuro en modo claro
                   fontSize: '10px',
                   fontWeight: '700',
                   textTransform: 'uppercase',
@@ -594,7 +587,7 @@ export default function PatmosChat() {
                 width: '100%',
                 padding: '16px 60px 16px 25px',
                 borderRadius: '30px',
-                border: `1px solid ${!hasCredits ? (isDarkMode ? '#7f1d1d' : '#fca5a5') : (isDarkMode ? '#334155' : '#9ca3af')}`,
+                border: `1px solid ${!hasCredits ? (isDarkMode ? '#7f1d1d' : '#fca5a5') : (isDarkMode ? '#334155' : '#000f37/20')}`, // Ajustado a borde sutil azul oscuro en modo claro
                 fontSize: '15px',
                 outline: 'none',
                 backgroundColor: !hasCredits ? (isDarkMode ? '#450a0a20' : '#fef2f2') : theme.inputBg,
