@@ -19,7 +19,6 @@ export default function TemporalHomePage() {
 
   return (
     <div className="min-h-screen bg-[#f9fafb] text-[#000f37] flex flex-col items-center justify-between antialiased selection:bg-[#e5e7eb] px-6 md:px-0" style={{ fontFamily: '"Inter", sans-serif' }}>
-      
       {/* MINIMALIST HEADER */}
       <header className="w-full max-w-[700px] py-6 flex justify-between items-center mt-4">
         {/* Logotipo: Fuente Georgia con grosor 300, interletrado de 4px y color #000f37 */}
@@ -29,9 +28,10 @@ export default function TemporalHomePage() {
         >
           PATMOS
         </span>
+        {/* 🛠️ CORRECCIÓN: Retornamos el ratio corner a cero usando rounded-none */}
         <Link 
           href="/login" 
-          className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
+          className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded-none transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
         >
           Login
         </Link>
