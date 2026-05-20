@@ -22,10 +22,10 @@ export default function TemporalHomePage() {
       
       {/* MINIMALIST HEADER */}
       <header className="w-full max-w-[650px] py-6 flex justify-between items-center mt-4">
-        {/* Logotipo modificado con Georgia, peso ligero e interletrado de 4px */}
+        {/* Logotipo modificado: Fuente Georgia con grosor más marcado (fontWeight: 600) e interletrado de 4px */}
         <span 
           className="text-lg uppercase text-[#111827]" 
-          style={{ fontFamily: 'Georgia, serif', fontWeight: 300, letterSpacing: '4px' }}
+          style={{ fontFamily: 'Georgia, serif', fontWeight: 600, letterSpacing: '4px' }}
         >
           PATMOS
         </span>
@@ -49,11 +49,11 @@ export default function TemporalHomePage() {
           Designed for deep academic inquiry, the core system process extracts and evaluates theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational theology.
         </p>
 
-        {/* PRIMARY CALL TO ACTION (BOTÓN AZUL #2d65f6) */}
+        {/* PRIMARY CALL TO ACTION (BOTÓN AZUL #2d65f6 - SIN SOMBRA) */}
         <div className="mb-16 flex flex-col items-start">
           <Link 
             href="/login" 
-            className="inline-flex items-center justify-center bg-[#2d65f6] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[8px] transition-all duration-300 hover:bg-[#1e4ed8] shadow-sm"
+            className="inline-flex items-center justify-center bg-[#2d65f6] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[8px] transition-all duration-300 hover:bg-[#1e4ed8]"
           >
             Start Free &rarr;
           </Link>
@@ -166,7 +166,7 @@ export default function TemporalHomePage() {
               </div>
             </div>
 
-            {/* PLAN PREMIUM: THE WATCHMAN (BOTÓN AZUL #2d65f6) */}
+            {/* PLAN PREMIUM: THE WATCHMAN (BOTÓN AZUL #2d65f6 - SIN SOMBRA) */}
             <div className="bg-white border-2 border-[#1f2937] p-6 flex flex-col justify-between rounded-lg relative overflow-hidden shadow-sm">
               <div className="absolute top-0 right-0 bg-[#1f2937] text-[#f9fafb] text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 rounded-bl">
                 Full Authority
