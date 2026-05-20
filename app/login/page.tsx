@@ -130,7 +130,6 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          // UX/UI: Texto modificado a "SIGN IN" de forma limpia
           className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-lg transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
@@ -138,7 +137,6 @@ function LoginForm() {
 
         <div className="flex items-center my-1">
           <div className="flex-1 h-[1px] bg-[#000f37]/10" />
-          {/* UX/UI: "OR" oscurecido con opacidad controlada para mayor nitidez */}
           <span className="px-3 text-[9px] text-[#000f37]/60 tracking-widest font-bold uppercase">OR</span>
           <div className="flex-1 h-[1px] bg-[#000f37]/10" />
         </div>
@@ -176,20 +174,21 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden text-[#000f37]">
       
-      {/* SECCIÓN IZQUIERDA: CONTENEDOR DE LA IMAGEN */}
+      {/* SECCIÓN IZQUIERDA: CONTENEDOR DE LA NUEVA IMAGEN DE MANUSCRITO */}
       <div className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] bg-cover bg-center">
         <img 
-          src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=1200" 
-          alt="Archive Ornament" 
+          src="https://images.unsplash.com/photo-1695417389485-44a58cb111cd?q=80&w=1200&auto=format&fit=crop" 
+          alt="Ancient Scripture Fragment" 
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-white/90 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none" />
+        {/* 🔒 CAPA ALFA OSCURA: Cambiado bg-white/90 a bg-black/50 para lograr un oscurecimiento del 50% */}
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] md:backdrop-blur-none" />
       </div>
 
       {/* SECCIÓN DERECHA: CAJA DE LOGIN */}
       <div className="relative z-10 w-full md:w-1/2 flex items-center justify-center px-6 sm:px-12 lg:px-20">
-        {/* UX/UI: Se removió 'border border-[#000f37]/5' para quitar el stroke exterior */}
-        <div className="w-full max-w-[400px] space-y-8 bg-white/95 md:bg-white p-10 shadow-xl md:shadow-none backdrop-blur-md md:backdrop-blur-none rounded-xl md:rounded-none">
+        {/* En móvil, la opacidad de la caja se ajusta para contrastar con el fondo oscuro */}
+        <div className="w-full max-w-[400px] space-y-8 bg-white/95 md:bg-white p-10 shadow-xl md:shadow-none rounded-xl md:rounded-none">
           
           {/* Cabecera Solemne */}
           <div className="text-center">
@@ -202,7 +201,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* 🔒 SOLUCIÓN MAESTRA: Envolvemos el formulario reactivo dentro de un Suspense */}
+          {/* Formulario Reactivo */}
           <Suspense fallback={<div className="text-center py-4 text-xs tracking-widest text-gray-400 uppercase">Loading Session Parameters...</div>}>
             <LoginForm />
           </Suspense>
