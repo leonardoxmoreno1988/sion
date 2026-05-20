@@ -176,18 +176,18 @@ export default function LoginPage() {
       
       {/* SECCIÓN IZQUIERDA: CONTENEDOR DE LA NUEVA IMAGEN DE MANUSCRITO */}
       <div className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] bg-cover bg-center">
+        {/* 🔒 URL SANEADA Y LIGERA: Evita conflictos de codificación en el render de Next.js */}
         <img 
-          src="https://images.unsplash.com/photo-1695417389485-44a58cb111cd?q=80&w=1200&auto=format&fit=crop" 
+          src="https://images.unsplash.com/photo-1695417389485-44a58cb111cd?w=1200&q=80" 
           alt="Ancient Scripture Fragment" 
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* 🔒 CAPA ALFA OSCURA: Cambiado bg-white/90 a bg-black/50 para lograr un oscurecimiento del 50% */}
+        {/* 🔒 CAPA ALFA OSCURA: Desenfoque sutil y 50% negro para un contraste perfecto */}
         <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] md:backdrop-blur-none" />
       </div>
 
       {/* SECCIÓN DERECHA: CAJA DE LOGIN */}
       <div className="relative z-10 w-full md:w-1/2 flex items-center justify-center px-6 sm:px-12 lg:px-20">
-        {/* En móvil, la opacidad de la caja se ajusta para contrastar con el fondo oscuro */}
         <div className="w-full max-w-[400px] space-y-8 bg-white/95 md:bg-white p-10 shadow-xl md:shadow-none rounded-xl md:rounded-none">
           
           {/* Cabecera Solemne */}
