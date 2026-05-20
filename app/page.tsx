@@ -25,7 +25,7 @@ export default function TemporalHomePage() {
         {/* Logotipo modificado: Fuente Georgia con grosor más marcado (fontWeight: 600) e interletrado de 4px */}
         <span 
           className="text-lg uppercase text-[#111827]" 
-          style={{ fontFamily: 'Georgia, serif', fontWeight: 600, letterSpacing: '4px' }}
+          style={{ fontFamily: 'Georgia, serif', fontWeight: 300, letterSpacing: '4px' }}
         >
           PATMOS
         </span>
