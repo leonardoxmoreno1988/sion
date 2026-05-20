@@ -174,15 +174,14 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden text-[#000f37]">
       
-      {/* SECCIÓN IZQUIERDA: CONTENEDOR DE LA NUEVA IMAGEN DE MANUSCRITO */}
-      <div className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] bg-cover bg-center">
-        {/* 🔒 URL SANEADA Y LIGERA: Evita conflictos de codificación en el render de Next.js */}
-        <img 
-          src="https://images.unsplash.com/photo-1695417389485-44a58cb111cd?w=1200&q=80" 
-          alt="Ancient Scripture Fragment" 
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        {/* 🔒 CAPA ALFA OSCURA: Desenfoque sutil y 50% negro para un contraste perfecto */}
+      {/* SECCIÓN IZQUIERDA: CONTENEDOR CON LA IMAGEN DE FONDO DIRECTA */}
+      <div 
+        className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] bg-cover bg-center"
+        style={{ 
+          backgroundImage: `url('https://images.unsplash.com/photo-1695417389485-44a58cb111cd?w=1200&q=80')` 
+        }}
+      >
+        {/* 🔒 CAPA ALFA OSCURA AL 50% */}
         <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] md:backdrop-blur-none" />
       </div>
 
