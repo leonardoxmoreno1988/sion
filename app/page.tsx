@@ -71,7 +71,7 @@ export default function TemporalHomePage() {
         <section className="border-t border-[#e5e7eb] pt-12 mb-16">
           {/* Subtítulo de sección oscurecido de #6b7280 A #4b5563 */}
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#4b5563] mb-8 font-serif">
-            Core Architecture Pillars
+            Architecture Pillars
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
@@ -127,7 +127,7 @@ export default function TemporalHomePage() {
         <section className="border-t border-[#e5e7eb] pt-12 pb-8">
           {/* Subtítulo de sección oscurecido */}
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#4b5563] mb-8 font-serif">
-            System Subscriptions & Access
+            Subscriptions & Access
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
@@ -136,9 +136,6 @@ export default function TemporalHomePage() {
             <div className="bg-white border border-[#e5e7eb] p-6 flex flex-col justify-between rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
               <div>
                 {/* Tag de plan oscurecido */}
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#4b5563] font-bold">
-                  Initial Tier
-                </span>
                 <h4 className="text-base font-bold uppercase tracking-wide text-[#000f37] mt-1">
                   Free Use
                 </h4>
@@ -185,9 +182,6 @@ export default function TemporalHomePage() {
 
               <div>
                 {/* Tag de plan oscurecido */}
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#4b5563] font-bold">
-                  Complete Access
-                </span>
                 <h4 className="text-base font-bold uppercase tracking-wide text-[#000f37] mt-1">
                   Supporter
                 </h4>
