@@ -105,7 +105,7 @@ function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border-b border-black/10 bg-transparent py-3 text-sm text-black outline-none focus:border-black/50 transition-colors placeholder:text-gray-300 tracking-wider"
+            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-300 tracking-wider"
           />
         </div>
         <div>
@@ -115,13 +115,13 @@ function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border-b border-black/10 bg-transparent py-3 text-sm text-black outline-none focus:border-black/50 transition-colors placeholder:text-gray-300 tracking-wider"
+            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-300 tracking-wider"
           />
         </div>
       </div>
 
       {message && (
-        <div className="bg-black/5 border border-black/10 py-2 text-[10px] text-black text-center uppercase tracking-widest leading-relaxed px-2 font-medium">
+        <div className="bg-[#000f37]/5 border border-[#000f37]/10 py-2 text-[10px] text-[#000f37] text-center uppercase tracking-widest leading-relaxed px-2 font-medium">
           {message}
         </div>
       )}
@@ -130,22 +130,22 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-black py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           {loading ? 'AUTHENTICATING...' : 'ACCESS THE ARCHIVE'}
         </button>
 
         <div className="flex items-center my-1">
-          <div className="flex-1 h-[1px] bg-black/5" />
+          <div className="flex-1 h-[1px] bg-[#000f37]/5" />
           <span className="px-3 text-[9px] text-gray-300 tracking-widest font-medium uppercase">OR</span>
-          <div className="flex-1 h-[1px] bg-black/5" />
+          <div className="flex-1 h-[1px] bg-[#000f37]/5" />
         </div>
 
         <button
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full border border-black/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-black transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+          className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
             <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.65-5.17 3.65-8.58z"/>
@@ -160,7 +160,7 @@ function LoginForm() {
           type="button"
           onClick={handleSignUp}
           disabled={loading}
-          className="text-[9px] uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors disabled:opacity-30 font-medium text-center mt-2"
+          className="text-[9px] uppercase tracking-[0.2em] text-gray-400 hover:text-[#000f37] transition-colors disabled:opacity-30 font-medium text-center mt-2"
         >
           Request New Registry
         </button>
@@ -172,7 +172,7 @@ function LoginForm() {
 // 2. EXPORTACIÓN PRINCIPAL QUE ENVUELVE TODO EL CONTENEDOR VISUAL
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden text-black">
+    <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden text-[#000f37]">
       
       {/* SECCIÓN IZQUIERDA: CONTENEDOR DE LA IMAGEN */}
       <div className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] bg-cover bg-center">
@@ -186,14 +186,14 @@ export default function LoginPage() {
 
       {/* SECCIÓN DERECHA: CAJA DE LOGIN */}
       <div className="relative z-10 w-full md:w-1/2 flex items-center justify-center px-6 sm:px-12 lg:px-20">
-        <div className="w-full max-w-[400px] space-y-8 border border-black/5 bg-white/95 md:bg-white p-10 shadow-xl md:shadow-none backdrop-blur-md md:backdrop-blur-none rounded-xl md:rounded-none">
+        <div className="w-full max-w-[400px] space-y-8 border border-[#000f37]/5 bg-white/95 md:bg-white p-10 shadow-xl md:shadow-none backdrop-blur-md md:backdrop-blur-none rounded-xl md:rounded-none">
           
           {/* Cabecera Solemne */}
           <div className="text-center">
-            <h1 className="text-4xl font-light tracking-[0.25em] text-black font-serif">
+            <h1 className="text-4xl font-light tracking-[0.25em] text-[#000f37] font-serif">
                PATMOS
             </h1>
-            <div className="mt-2 h-[1px] w-full bg-gradient-to-r from-transparent via-black/20 to-transparent" />
+            <div className="mt-2 h-[1px] w-full bg-gradient-to-r from-transparent via-[#000f37]/20 to-transparent" />
             <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-gray-400">
               The Watchman of Final Authority
             </p>
