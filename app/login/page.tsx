@@ -105,7 +105,6 @@ function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            // UX/UI: Se oscureció el placeholder de gray-300 a gray-500
             className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-500 tracking-wider"
           />
         </div>
@@ -116,7 +115,6 @@ function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            // UX/UI: Se oscureció el placeholder de gray-300 a gray-500
             className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-500 tracking-wider"
           />
         </div>
@@ -132,23 +130,23 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          // UX/UI: Añadido rounded-lg (8px)
+          // UX/UI: Texto modificado a "SIGN IN" de forma limpia
           className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-lg transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          {loading ? 'AUTHENTICATING...' : 'ACCESS THE ARCHIVE'}
+          {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
         </button>
 
         <div className="flex items-center my-1">
-          <div className="flex-1 h-[1px] bg-[#000f37]/5" />
-          <span className="px-3 text-[9px] text-gray-300 tracking-widest font-medium uppercase">OR</span>
-          <div className="flex-1 h-[1px] bg-[#000f37]/5" />
+          <div className="flex-1 h-[1px] bg-[#000f37]/10" />
+          {/* UX/UI: "OR" oscurecido con opacidad controlada para mayor nitidez */}
+          <span className="px-3 text-[9px] text-[#000f37]/60 tracking-widest font-bold uppercase">OR</span>
+          <div className="flex-1 h-[1px] bg-[#000f37]/10" />
         </div>
 
         <button
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          // UX/UI: Añadido rounded-lg (8px)
           className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
@@ -190,7 +188,8 @@ export default function LoginPage() {
 
       {/* SECCIÓN DERECHA: CAJA DE LOGIN */}
       <div className="relative z-10 w-full md:w-1/2 flex items-center justify-center px-6 sm:px-12 lg:px-20">
-        <div className="w-full max-w-[400px] space-y-8 border border-[#000f37]/5 bg-white/95 md:bg-white p-10 shadow-xl md:shadow-none backdrop-blur-md md:backdrop-blur-none rounded-xl md:rounded-none">
+        {/* UX/UI: Se removió 'border border-[#000f37]/5' para quitar el stroke exterior */}
+        <div className="w-full max-w-[400px] space-y-8 bg-white/95 md:bg-white p-10 shadow-xl md:shadow-none backdrop-blur-md md:backdrop-blur-none rounded-xl md:rounded-none">
           
           {/* Cabecera Solemne */}
           <div className="text-center">
@@ -208,7 +207,6 @@ export default function LoginPage() {
             <LoginForm />
           </Suspense>
 
-          {/* UX/UI: Se removió el footer que contenía la cita teológica */}
         </div>
       </div>
 
