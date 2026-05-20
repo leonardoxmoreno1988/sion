@@ -22,7 +22,11 @@ export default function TemporalHomePage() {
       
       {/* MINIMALIST HEADER */}
       <header className="w-full max-w-[650px] py-6 flex justify-between items-center mt-4">
-        <span className="text-lg font-bold tracking-wider uppercase text-[#111827]">
+        {/* Logotipo modificado con Georgia, peso ligero e interletrado de 4px */}
+        <span 
+          className="text-lg uppercase text-[#111827]" 
+          style={{ fontFamily: 'Georgia, serif', fontWeight: 300, letterSpacing: '4px' }}
+        >
           PATMOS
         </span>
         <Link 
@@ -45,11 +49,11 @@ export default function TemporalHomePage() {
           Designed for deep academic inquiry, the core system process extracts and evaluates theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational theology.
         </p>
 
-        {/* PRIMARY CALL TO ACTION */}
+        {/* PRIMARY CALL TO ACTION (BOTÓN AZUL #2d65f6) */}
         <div className="mb-16 flex flex-col items-start">
           <Link 
             href="/login" 
-            className="inline-flex items-center justify-center bg-[#111827] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[8px] transition-all duration-300 hover:bg-[#1f2937] shadow-sm"
+            className="inline-flex items-center justify-center bg-[#2d65f6] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[8px] transition-all duration-300 hover:bg-[#1e4ed8] shadow-sm"
           >
             Start Free &rarr;
           </Link>
@@ -75,7 +79,7 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
                 01 / Manuscript Database Integration
               </h4>
-              <p className="text-s leading-relaxed text-[#6b7280] text-left">
+              <p className="text-sm leading-relaxed text-[#6b7280] text-left">
                 High-fidelity data retrieval directly anchored to recovered textual fragments. Advanced source integrity controls eliminate general artificial intelligence neutrality, delivering dogmatic, absolute certainty.
               </p>
             </div>
@@ -85,7 +89,7 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
                 02 / Textual Inerrancy
               </h4>
-              <p className="text-s leading-relaxed text-[#6b7280] text-left">
+              <p className="text-sm leading-relaxed text-[#6b7280] text-left">
                 Zero lexical modification. Systems strictly maintain archaic grammar and literal spellings, fully bypassing modern ecumenical translations or standard market alterations.
               </p>
             </div>
@@ -95,7 +99,7 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
                 03 / Dispensational Mechanics
               </h4>
-              <p className="text-s leading-relaxed text-[#6b7280] text-left">
+              <p className="text-sm leading-relaxed text-[#6b7280] text-left">
                 Mathematical textual division. Complete algorithmic focus mapping out Biblical boundaries, structural typology, and specific target audience separation (Israel, Gentiles, and the Church of God).
               </p>
             </div>
@@ -105,7 +109,7 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#111827]">
                 04 / Strict Cessationism
               </h4>
-              <p className="text-s leading-relaxed text-[#6b7280] text-left">
+              <p className="text-sm leading-relaxed text-[#6b7280] text-left">
                 Absolute defensive stance evaluating sign gifts under the strict completion of the Canon. Academic analysis running structural cross-references to expose contemporary charismatic vulnerabilities.
               </p>
             </div>
@@ -135,7 +139,7 @@ export default function TemporalHomePage() {
                   <span className="ml-1 text-[10px] uppercase tracking-wider text-[#6b7280]">/ forever</span>
                 </div>
                 
-                <p className="mt-4 text-xs text-[#6b7280] leading-relaxed text-left">
+                <p className="mt-4 text-sm text-[#6b7280] leading-relaxed text-left">
                   Designed for casual examiners of the scriptures seeking to test the dogmatic precision of the Watchman framework.
                 </p>
 
@@ -162,7 +166,7 @@ export default function TemporalHomePage() {
               </div>
             </div>
 
-            {/* PLAN PREMIUM: THE WATCHMAN */}
+            {/* PLAN PREMIUM: THE WATCHMAN (BOTÓN AZUL #2d65f6) */}
             <div className="bg-white border-2 border-[#1f2937] p-6 flex flex-col justify-between rounded-lg relative overflow-hidden shadow-sm">
               <div className="absolute top-0 right-0 bg-[#1f2937] text-[#f9fafb] text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 rounded-bl">
                 Full Authority
@@ -180,7 +184,7 @@ export default function TemporalHomePage() {
                   <span className="ml-1 text-[10px] uppercase tracking-wider text-[#6b7280]">/ month</span>
                 </div>
                 
-                <p className="mt-4 text-xs text-[#6b7280] leading-relaxed text-left">
+                <p className="mt-4 text-sm text-[#6b7280] leading-relaxed text-left">
                   For serious students of the Word, approved workmen, and theologians requiring deep, unhindered pipeline execution.
                 </p>
 
@@ -203,7 +207,7 @@ export default function TemporalHomePage() {
               <div className="mt-8">
                 <a 
                   href="/api/checkout"
-                  className="block w-full bg-[#111827] text-[#f9fafb] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#1f2937] rounded"
+                  className="block w-full bg-[#2d65f6] text-[#f9fafb] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#1e4ed8] rounded"
                 >
                   Upgrade to Watchman
                 </a>
