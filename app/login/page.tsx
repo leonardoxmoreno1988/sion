@@ -5,6 +5,9 @@ import { useState, Suspense } from 'react'; // 🔒 CORRECCIÓN: Importamos Susp
 import { createBrowserClient } from '@supabase/ssr'; 
 import { useRouter, useSearchParams } from 'next/navigation';
 
+// ⚡ SOLUCIÓN MAESTRA: Forzamos a Next.js a ignorar el caché estático SSG y renderizar en vivo
+export const dynamic = 'force-dynamic';
+
 // 1. CREAMOS UN COMPONENTE INTERNO PARA EL FORMULARIO QUE CONTIENE EL LECTOR DE URL
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -174,7 +177,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden text-[#000f37]">
       
-      {/* SECCIÓN IZQUIERDA: CONTENEDOR CON TU IMAGEN DE FONDO PROPIA (PROVENIENTE DE TU HOSTING PERSONAL) */}
+      {/* SECCIÓN IZQUIERDA: CONTENEDOR CON LA IMAGEN DE FONDO DE TU PROPIO HOSTING */}
       <div 
         className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] bg-cover bg-center"
         style={{ 
