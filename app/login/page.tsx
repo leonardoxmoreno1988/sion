@@ -1,14 +1,13 @@
 // app/login/page.tsx
 'use client';
 
-import { useState, Suspense } from 'react'; // 🔒 CORRECCIÓN: Importamos Suspense
+import { useState, Suspense } from 'react'; // 🔒 Importamos Suspense
 import { createBrowserClient } from '@supabase/ssr'; 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-// ⚡ SOLUCIÓN MAESTRA: Forzamos a Next.js a ignorar el caché estático SSG y renderizar en vivo
+// Mantener la ruta dinámica para que Vercel aplique este cambio de inmediato
 export const dynamic = 'force-dynamic';
 
-// 1. CREAMOS UN COMPONENTE INTERNO PARA EL FORMULARIO QUE CONTIENE EL LECTOR DE URL
 function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +17,6 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // Captura dinámica del parámetro ?next=
   const nextRoute = searchParams.get('next') || '/chat';
 
   const supabase = createBrowserClient(
@@ -108,7 +106,7 @@ function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-500 tracking-wider"
+            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-400 tracking-wider"
           />
         </div>
         <div>
@@ -118,7 +116,7 @@ function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-500 tracking-wider"
+            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-400 tracking-wider"
           />
         </div>
       </div>
@@ -172,43 +170,31 @@ function LoginForm() {
   );
 }
 
-// 2. EXPORTACIÓN PRINCIPAL QUE ENVUELVE TODO EL CONTENEDOR VISUAL
+// 2. EXPORTACIÓN PRINCIPAL: CENTRADA, MINIMALISTA Y LIMPIA
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden text-[#000f37]">
+    // bg-[#f4f5f6] le da un tono gris muy ligero y premium al fondo de la pantalla
+    <div className="flex min-h-screen w-full items-center justify-center bg-[#f4f5f6] px-4 relative overflow-hidden text-[#000f37]">
       
-      {/* SECCIÓN IZQUIERDA: CONTENEDOR CON LA IMAGEN DE FONDO DE TU PROPIO HOSTING */}
-      <div 
-        className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] bg-cover bg-center"
-        style={{ 
-          backgroundImage: `url('https://www.leonardoxmoreno.com/files/bg-patmos.jpg')` 
-        }}
-      >
-        {/* 🔒 CAPA ALFA OSCURA AL 50% */}
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] md:backdrop-blur-none" />
-      </div>
-
-      {/* SECCIÓN DERECHA: CAJA DE LOGIN */}
-      <div className="relative z-10 w-full md:w-1/2 flex items-center justify-center px-6 sm:px-12 lg:px-20">
-        <div className="w-full max-w-[400px] space-y-8 bg-white/95 md:bg-white p-10 shadow-xl md:shadow-none rounded-xl md:rounded-none">
-          
-          {/* Cabecera Solemne */}
-          <div className="text-center">
-            <h1 className="text-4xl font-light tracking-[0.25em] text-[#000f37] font-serif">
-               PATMOS
-            </h1>
-            <div className="mt-2 h-[1px] w-full bg-gradient-to-r from-transparent via-[#000f37]/20 to-transparent" />
-            <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-gray-400">
-              The Watchman of Final Authority
-            </p>
-          </div>
-
-          {/* Formulario Reactivo */}
-          <Suspense fallback={<div className="text-center py-4 text-xs tracking-widest text-gray-400 uppercase">Loading Session Parameters...</div>}>
-            <LoginForm />
-          </Suspense>
-
+      {/* Caja de login flotando perfectamente en el centro */}
+      <div className="w-full max-w-[400px] space-y-8 bg-white p-10 shadow-sm border border-gray-100 rounded-xl">
+        
+        {/* Cabecera Minimalista */}
+        <div className="text-center">
+          <h1 className="text-4xl font-light tracking-[0.25em] text-[#000f37] font-serif">
+             PATMOS
+          </h1>
+          <div className="mt-2 h-[1px] w-full bg-gradient-to-r from-transparent via-[#000f37]/20 to-transparent" />
+          <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-gray-400">
+            The Watchman of Final Authority
+          </p>
         </div>
+
+        {/* Formulario */}
+        <Suspense fallback={<div className="text-center py-4 text-xs tracking-widest text-gray-400 uppercase">Loading Session Parameters...</div>}>
+          <LoginForm />
+        </Suspense>
+
       </div>
 
     </div>
