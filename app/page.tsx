@@ -29,7 +29,6 @@ export default function TemporalHomePage() {
         >
           PATMOS
         </span>
-        {/* 🔘 CORRECCIÓN: Botón Login con ratio corner de 4px (rounded) */}
         <Link 
           href="/login" 
           className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
@@ -46,8 +45,9 @@ export default function TemporalHomePage() {
           </h2>
         </div>
 
-        <p className="text-base leading-relaxed text-[#6b7280] text-left max-w-2xl mb-12">
-          Designed for deep academic inquiry, the core system process extracts and evaluates theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational theology.
+        {/* 🖋️ TEXTO OSCURECIDO DE #6b7280 A #4b5563 */}
+        <p className="text-base leading-relaxed text-[#4b5563] text-left max-w-2xl mb-12">
+          Designed for deep academic inquiry and theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational theology.
         </p>
 
         {/* PRIMARY CALL TO ACTION */}
@@ -69,7 +69,8 @@ export default function TemporalHomePage() {
 
         {/* PRODUCT BENEFITS / SYSTEM PILLARS */}
         <section className="border-t border-[#e5e7eb] pt-12 mb-16">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
+          {/* Subtítulo de sección oscurecido de #6b7280 A #4b5563 */}
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[#4b5563] mb-8 font-serif">
             Core Architecture Pillars
           </h3>
           
@@ -80,7 +81,8 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 01 / Manuscript Database Integration
               </h4>
-              <p className="text-sm leading-relaxed text-[#6b7280] text-left">
+              {/* 🖋️ TEXTO OSCURECIDO */}
+              <p className="text-sm leading-relaxed text-[#4b5563] text-left">
                 High-fidelity data retrieval directly anchored to recovered textual fragments. Advanced source integrity controls eliminate general artificial intelligence neutrality, delivering dogmatic, absolute certainty.
               </p>
             </div>
@@ -90,7 +92,8 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 02 / Textual Inerrancy
               </h4>
-              <p className="text-sm leading-relaxed text-[#6b7280] text-left">
+              {/* 🖋️ TEXTO OSCURECIDO */}
+              <p className="text-sm leading-relaxed text-[#4b5563] text-left">
                 Zero lexical modification. Systems strictly maintain archaic grammar and literal spellings, fully bypassing modern ecumenical translations or standard market alterations.
               </p>
             </div>
@@ -100,7 +103,8 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 03 / Dispensational Mechanics
               </h4>
-              <p className="text-sm leading-relaxed text-[#6b7280] text-left">
+              {/* 🖋️ TEXTO OSCURECIDO */}
+              <p className="text-sm leading-relaxed text-[#4b5563] text-left">
                 Mathematical textual division. Complete algorithmic focus mapping out Biblical boundaries, structural typology, and specific target audience separation (Israel, Gentiles, and the Church of God).
               </p>
             </div>
@@ -110,7 +114,8 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 04 / Strict Cessationism
               </h4>
-              <p className="text-sm leading-relaxed text-[#6b7280] text-left">
+              {/* 🖋️ TEXTO OSCURECIDO */}
+              <p className="text-sm leading-relaxed text-[#4b5563] text-left">
                 Absolute defensive stance evaluating sign gifts under the strict completion of the Canon. Academic analysis running structural cross-references to expose contemporary charismatic vulnerabilities.
               </p>
             </div>
@@ -120,7 +125,8 @@ export default function TemporalHomePage() {
 
         {/* INTEGRATED PRICING SECTION */}
         <section className="border-t border-[#e5e7eb] pt-12 pb-8">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
+          {/* Subtítulo de sección oscurecido */}
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[#4b5563] mb-8 font-serif">
             System Subscriptions & Access
           </h3>
 
@@ -129,7 +135,8 @@ export default function TemporalHomePage() {
             {/* PLAN GRATUITO: THE INQUIRER */}
             <div className="bg-white border border-[#e5e7eb] p-6 flex flex-col justify-between rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
               <div>
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#6b7280] font-bold">
+                {/* Tag de plan oscurecido */}
+                <span className="text-[9px] uppercase tracking-[0.2em] text-[#4b5563] font-bold">
                   Initial Tier
                 </span>
                 <h4 className="text-base font-bold uppercase tracking-wide text-[#000f37] mt-1">
@@ -137,22 +144,25 @@ export default function TemporalHomePage() {
                 </h4>
                 <div className="mt-4 flex items-baseline text-[#000f37]">
                   <span className="text-3xl font-bold tracking-tight">$0</span>
-                  <span className="ml-1 text-[10px] uppercase tracking-wider text-[#6b7280]">/ forever</span>
+                  {/* Duración de plan oscurecido */}
+                  <span className="ml-1 text-[10px] uppercase tracking-wider text-[#4b5563]">/ forever</span>
                 </div>
                 
-                <p className="mt-4 text-sm text-[#6b7280] leading-relaxed text-left">
+                {/* 🖋️ TEXTO OSCURECIDO */}
+                <p className="mt-4 text-sm text-[#4b5563] leading-relaxed text-left">
                   Designed for casual examiners of the scriptures seeking to test the dogmatic precision of the Watchman framework.
                 </p>
 
+                {/* Checks de lista oscurecidos */}
                 <ul className="mt-6 space-y-2 border-t border-[#e5e7eb] pt-4 text-[10px] uppercase tracking-widest text-[#000f37] font-medium">
                   <li className="flex items-center gap-2">
-                    <span className="text-[#6b7280]">✓</span> Limited query credits
+                    <span className="text-[#4b5563]">✓</span> Limited query credits
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-[#6b7280]">✓</span> Base manuscript index access
+                    <span className="text-[#4b5563]">✓</span> Base manuscript index access
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-[#6b7280]">✓</span> Standard inquiry layout
+                    <span className="text-[#4b5563]">✓</span> Standard inquiry layout
                   </li>
                 </ul>
               </div>
@@ -174,7 +184,8 @@ export default function TemporalHomePage() {
               </div>
 
               <div>
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#6b7280] font-bold">
+                {/* Tag de plan oscurecido */}
+                <span className="text-[9px] uppercase tracking-[0.2em] text-[#4b5563] font-bold">
                   Complete Access
                 </span>
                 <h4 className="text-base font-bold uppercase tracking-wide text-[#000f37] mt-1">
@@ -182,10 +193,11 @@ export default function TemporalHomePage() {
                 </h4>
                 <div className="mt-4 flex items-baseline text-[#000f37]">
                   <span className="text-3xl font-bold tracking-tight">$7</span>
-                  <span className="ml-1 text-[10px] uppercase tracking-wider text-[#6b7280]">/ month</span>
+                  <span className="ml-1 text-[10px] uppercase tracking-wider text-[#4b5563]">/ month</span>
                 </div>
                 
-                <p className="mt-4 text-sm text-[#6b7280] leading-relaxed text-left">
+                {/* 🖋️ TEXTO OSCURECIDO */}
+                <p className="mt-4 text-sm text-[#4b5563] leading-relaxed text-left">
                   For serious students of the Word, approved workmen, and theologians requiring deep, unhindered pipeline execution.
                 </p>
 
