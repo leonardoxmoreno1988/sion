@@ -29,9 +29,10 @@ export default function TemporalHomePage() {
         >
           PATMOS
         </span>
+        {/* 🔘 CORRECCIÓN: Botón Login con ratio corner de 8px (rounded-lg) */}
         <Link 
           href="/login" 
-          className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
+          className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded-lg transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
         >
           Login
         </Link>
@@ -49,11 +50,11 @@ export default function TemporalHomePage() {
           Designed for deep academic inquiry, the core system process extracts and evaluates theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational theology.
         </p>
 
-        {/* PRIMARY CALL TO ACTION (BOTÓN AZUL #2d65f6 - SIN SOMBRA) */}
+        {/* PRIMARY CALL TO ACTION (CAMBIO: AZUL OSCURO #000f37) */}
         <div className="mb-16 flex flex-col items-start w-full">
           <Link 
             href="/login" 
-            className="inline-flex items-center justify-center bg-[#2d65f6] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[8px] transition-all duration-300 hover:bg-[#1e4ed8]"
+            className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[8px] transition-all duration-300 hover:bg-[#000f37]/90"
           >
             Start Free &rarr;
           </Link>
@@ -166,7 +167,7 @@ export default function TemporalHomePage() {
               </div>
             </div>
 
-            {/* PLAN PREMIUM: THE WATCHMAN (BOTÓN AZUL #2d65f6 - SIN SOMBRA) */}
+            {/* PLAN PREMIUM: THE WATCHMAN (CAMBIO: AZUL OSCURO #000f37 - MANTIENE CONFIGURACIÓN DE BORDES DE TU DISEÑO) */}
             <div className="bg-white border-2 border-[#000f37] p-6 flex flex-col justify-between rounded-lg relative overflow-hidden shadow-sm">
               <div className="absolute top-0 right-0 bg-[#000f37] text-[#f9fafb] text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 rounded-bl">
                 Full Authority
@@ -205,9 +206,10 @@ export default function TemporalHomePage() {
               </div>
 
               <div className="mt-8">
+                {/* 🔘 CAMBIO: Botón Premium pasa a ser bg-[#000f37] con bordes heredados */}
                 <a 
                   href="/api/checkout"
-                  className="block w-full bg-[#2d65f6] text-[#f9fafb] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#1e4ed8] rounded"
+                  className="block w-full bg-[#000f37] text-[#f9fafb] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#000f37]/90 rounded"
                 >
                   Upgrade to Watchman
                 </a>
