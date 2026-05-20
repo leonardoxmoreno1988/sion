@@ -174,11 +174,11 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full bg-[#f9fafb] relative overflow-hidden text-[#000f37]">
       
-      {/* SECCIÓN IZQUIERDA: CONTENEDOR CON LA IMAGEN DE FONDO DIRECTA */}
+      {/* SECCIÓN IZQUIERDA: CONTENEDOR CON TU IMAGEN DE FONDO PROPIA (PROVENIENTE DE TU HOSTING PERSONAL) */}
       <div 
         className="absolute inset-0 md:relative md:w-1/2 h-full bg-[#f3f4f6] bg-cover bg-center"
         style={{ 
-          backgroundImage: `url('https://images.unsplash.com/photo-1695417389485-44a58cb111cd?w=1200&q=80')` 
+          backgroundImage: `url('https://www.leonardoxmoreno.com/files/bg-patmos.jpg')` 
         }}
       >
         {/* 🔒 CAPA ALFA OSCURA AL 50% */}
