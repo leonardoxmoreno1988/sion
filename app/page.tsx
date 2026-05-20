@@ -79,7 +79,7 @@ export default function TemporalHomePage() {
             {/* PILLAR 1 */}
             <div className="flex flex-col gap-2">
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
-                01 / Manuscript Database Integration
+                01 / Biblical Responses
               </h4>
               {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
@@ -101,22 +101,22 @@ export default function TemporalHomePage() {
             {/* PILLAR 3 */}
             <div className="flex flex-col gap-2">
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
-                03 / Dispensational Mechanics
+                03 / KJV Dispensational Mechanics
               </h4>
               {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
-                Complete algorithmic focus mapping out Biblical boundaries, structural typology, and specific target audience separation (Israel, Gentiles, and the Church of God).
+                Complete algorithmic focus mapping out Biblical boundaries, structural typology, and specific target audience separation.
               </p>
             </div>
 
             {/* PILLAR 4 */}
             <div className="flex flex-col gap-2">
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
-                04 / Strict Cessationism
+                04 / Strict Cross-References
               </h4>
               {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
-                Academic analysis running structural cross-references to expose contemporary charismatic vulnerabilities.
+                Academic analysis running structural cross-references to expose false doctrines.
               </p>
             </div>
 
