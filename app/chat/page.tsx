@@ -49,18 +49,18 @@ export default function PatmosChat() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // 🎨 CONFIGURACIÓN DE BRANDING: Ajustado al azul oscuro #000f37 preservando el modo oscuro intacto
+  // 🎨 CONFIGURACIÓN DE BRANDING: Actualizado con el nuevo gris premium #4b5563
   const theme = {
     bg: isDarkMode ? '#020617' : '#f9fafb',
     sidebarBg: isDarkMode ? '#090d16' : '#f3f4f6',
-    headerLine: isDarkMode ? '#1e293b' : '#000f37', // Ajustado a azul oscuro en modo claro
-    textMain: isDarkMode ? '#f1f5f9' : '#000f37', // Ajustado a azul oscuro en modo claro
-    textMuted: isDarkMode ? '#94a3b8' : '#6b7280',
-    bubbleUser: isDarkMode ? '#273c5a' : '#000f37', // Ajustado a azul oscuro en modo claro
+    headerLine: isDarkMode ? '#1e293b' : '#000f37',
+    textMain: isDarkMode ? '#f1f5f9' : '#000f37',
+    textMuted: isDarkMode ? '#94a3b8' : '#4b5563', // 🖋️ CAMBIO: De #6b7280 a #4b5563 para cuerpos de texto
+    bubbleUser: isDarkMode ? '#273c5a' : '#000f37',
     bubbleSion: isDarkMode ? '#0f172a' : '#fff',
     borderSion: isDarkMode ? '#1e293b' : '#e5e7eb',
     inputBg: isDarkMode ? '#0f172a' : '#fff',
-    inputText: isDarkMode ? '#f8fafc' : '#000f37', // Ajustado a azul oscuro en modo claro
+    inputText: isDarkMode ? '#f8fafc' : '#000f37',
     fontSans: '"Inter", sans-serif',
   };
 
@@ -376,7 +376,6 @@ export default function PatmosChat() {
               ☰
             </button>
             <div>
-              {/* 🏛️ LOGOTIPO: Aplicamos el estilo exacto y solemne de la landing page */}
               <h1 style={{ 
                 fontSize: '18px', 
                 textTransform: 'uppercase', 
@@ -389,7 +388,6 @@ export default function PatmosChat() {
                 PATMOS
               </h1>
               {userEmail && (
-                /* 📧 CORREO: Removemos la palabra "Station:" y dejamos solo el identificador limpio */
                 <p style={{ 
                   fontSize: '9px', 
                   color: theme.textMuted, 
@@ -432,29 +430,21 @@ export default function PatmosChat() {
               )}
             </button>
 
-            {/* 🔒 ACCESO AL PORTAL DE STRIPE */}
+            {/* 🔒 📊 BOTÓN BILLING: Sincronizado para reflejar exactamente la misma firma visual y comportamiento interactivo de Exit */}
             {(isPremium || subscriptionStatus === 'past_due') && (
               <a 
                 href="/api/portal"
                 style={{
                   fontSize: '10px',
                   fontWeight: '700',
-                  color: subscriptionStatus === 'past_due' ? '#f87171' : theme.textMuted,
+                  color: subscriptionStatus === 'past_due' ? '#f87171' : theme.textMain,
                   textDecoration: 'none',
                   background: 'transparent',
-                  border: `1px solid ${subscriptionStatus === 'past_due' ? '#f87171' : theme.borderSion}`,
+                  border: `1px solid ${subscriptionStatus === 'past_due' ? '#f87171' : theme.textMain}`,
                   padding: '4px 8px',
                   fontFamily: theme.fontSans,
                   textTransform: 'uppercase',
                   transition: 'all 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.color = theme.textMain;
-                  e.currentTarget.style.borderColor = theme.textMain;
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.color = subscriptionStatus === 'past_due' ? '#f87171' : theme.textMuted;
-                  e.currentTarget.style.borderColor = subscriptionStatus === 'past_due' ? '#f87171' : theme.borderSion;
                 }}
               >
                 {subscriptionStatus === 'past_due' ? 'Fix Billing' : 'Billing'}
@@ -539,14 +529,13 @@ export default function PatmosChat() {
         {/* Caja de Input + Banner del Paywall Dinámico */}
         <div style={{ width: '100%', maxWidth: '650px', padding: '20px 0 40px 0' }}>
           
-          {/* 🔒 BANNER DE INVITACIÓN CONDICIONAL INTELIGENTE */}
           {!hasCredits && (
             <div style={{
               display: 'flex',
               flexDirection: 'window' as any === 'undefined' || window.innerWidth < 640 ? 'column' : 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
-              backgroundColor: subscriptionStatus === 'past_due' ? (isDarkMode ? '#450a0a' : '#fef2f2') : (isDarkMode ? '#0f172a' : '#000f37'), // Ajustado a azul oscuro en modo claro
+              backgroundColor: subscriptionStatus === 'past_due' ? (isDarkMode ? '#450a0a' : '#fef2f2') : (isDarkMode ? '#0f172a' : '#000f37'),
               color: subscriptionStatus === 'past_due' ? (isDarkMode ? '#fecaca' : '#991b1b') : '#f9fafb',
               padding: '16px 20px',
               borderRadius: '12px',
@@ -578,7 +567,7 @@ export default function PatmosChat() {
                 href={subscriptionStatus === 'past_due' ? '/api/portal' : '/api/checkout'}
                 style={{
                   backgroundColor: subscriptionStatus === 'past_due' ? '#ef4444' : '#fff',
-                  color: subscriptionStatus === 'past_due' ? '#fff' : '#000f37', // Ajustado a azul oscuro en modo claro
+                  color: subscriptionStatus === 'past_due' ? '#fff' : '#000f37',
                   fontSize: '10px',
                   fontWeight: '700',
                   textTransform: 'uppercase',
@@ -604,8 +593,7 @@ export default function PatmosChat() {
                 width: '100%',
                 padding: '16px 60px 16px 25px',
                 borderRadius: '30px',
-                /* 🛠️ CORRECCIÓN: Usamos #000f3733 para inyectar un 20% de opacidad pura en el borde del modo claro */
-                border: `1px solid ${!hasCredits ? (isDarkMode ? '#7f1d1d' : '#fca5a5') : (isDarkMode ? '#334155' : '#000f3733')}`, 
+                border: `1px solid ${!hasCredits ? (isDarkMode ? '#7f1d1d' : '#fca5a5') : (isDarkMode ? '#334155' : '#000f3733')}`,
                 fontSize: '15px',
                 outline: 'none',
                 backgroundColor: !hasCredits ? (isDarkMode ? '#450a0a20' : '#fef2f2') : theme.inputBg,
