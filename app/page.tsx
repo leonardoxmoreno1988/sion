@@ -83,7 +83,7 @@ export default function TemporalHomePage() {
               </h4>
               {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
-                High-fidelity data retrieval directly anchored to recovered textual fragments. Advanced source integrity controls eliminate general artificial intelligence neutrality, delivering dogmatic, absolute certainty.
+                Advanced source integrity controls eliminate general artificial intelligence neutrality, delivering dogmatic, absolute certainty.
               </p>
             </div>
 
@@ -94,7 +94,7 @@ export default function TemporalHomePage() {
               </h4>
               {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
-                Zero lexical modification. Systems strictly maintain archaic grammar and literal spellings, fully bypassing modern ecumenical translations or standard market alterations.
+                Zero lexical modification. Fully bypassing modern ecumenical translations or standard market alterations.
               </p>
             </div>
 
@@ -105,7 +105,7 @@ export default function TemporalHomePage() {
               </h4>
               {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
-                Mathematical textual division. Complete algorithmic focus mapping out Biblical boundaries, structural typology, and specific target audience separation (Israel, Gentiles, and the Church of God).
+                Complete algorithmic focus mapping out Biblical boundaries, structural typology, and specific target audience separation (Israel, Gentiles, and the Church of God).
               </p>
             </div>
 
@@ -116,7 +116,7 @@ export default function TemporalHomePage() {
               </h4>
               {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
-                Absolute defensive stance evaluating sign gifts under the strict completion of the Canon. Academic analysis running structural cross-references to expose contemporary charismatic vulnerabilities.
+                Academic analysis running structural cross-references to expose contemporary charismatic vulnerabilities.
               </p>
             </div>
 
@@ -189,7 +189,7 @@ export default function TemporalHomePage() {
                   Complete Access
                 </span>
                 <h4 className="text-base font-bold uppercase tracking-wide text-[#000f37] mt-1">
-                  The Watchman
+                  Supporter
                 </h4>
                 <div className="mt-4 flex items-baseline text-[#000f37]">
                   <span className="text-3xl font-bold tracking-tight">$7</span>
