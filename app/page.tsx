@@ -21,7 +21,7 @@ export default function TemporalHomePage() {
     <div className="min-h-screen bg-[#f9fafb] text-[#111827] flex flex-col items-center justify-between antialiased selection:bg-[#e5e7eb] px-6 md:px-0" style={{ fontFamily: '"Inter", sans-serif' }}>
       
       {/* MINIMALIST HEADER */}
-      <header className="w-full max-w-[800px] py-6 flex justify-between items-center mt-4">
+      <header className="w-full max-w-[700px] py-6 flex justify-between items-center mt-4">
         {/* Logotipo: Fuente Georgia con grosor 300 e interletrado de 4px */}
         <span 
           className="text-xl uppercase text-[#111827]" 
@@ -38,14 +38,14 @@ export default function TemporalHomePage() {
       </header>
 
       {/* HERO SECTION */}
-      <main className="flex-1 w-full max-w-[800px] flex flex-col justify-center py-16">
+      <main className="flex-1 w-full max-w-[700px] flex flex-col justify-center py-16">
         <div className="mb-4">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-[#111827] max-w-2xl">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-[#111827] max-w-xl">
             Rigorous Theological Search & Scripture Verification
           </h2>
         </div>
 
-        <p className="text-base leading-relaxed text-[#6b7280] text-left max-w-3xl mb-12">
+        <p className="text-base leading-relaxed text-[#6b7280] text-left max-w-2xl mb-12">
           Designed for deep academic inquiry, the core system process extracts and evaluates theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational theology.
         </p>
 
@@ -58,7 +58,7 @@ export default function TemporalHomePage() {
             Start Free &rarr;
           </Link>
           
-          {/* Imagen plana, sin bordes redondeados y sin sombra a ancho completo del contenedor */}
+          {/* Imagen adaptada al nuevo contenedor de 700px */}
           <img 
             src="https://www.leonardoxmoreno.com/files/hero.jpg" 
             alt="Patmos Platform Preview" 
@@ -219,7 +219,7 @@ export default function TemporalHomePage() {
       </main>
 
       {/* FOOTER */}
-      <footer className="w-full max-w-[800px] border-t border-[#e5e7eb] py-8 flex justify-center items-center mb-4">
+      <footer className="w-full max-w-[700px] border-t border-[#e5e7eb] py-8 flex justify-center items-center mb-4">
         <p className="text-[10px] text-[#94a3b8] uppercase tracking-wider text-center">
           &copy; {new Date().getFullYear()} Patmos Research. All Rights Reserved.
         </p>
