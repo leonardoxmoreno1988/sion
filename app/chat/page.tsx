@@ -302,7 +302,8 @@ export default function PatmosChat() {
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '15px 10px' }}>
-          <p style={{ fontSize: '9px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', marginBottom: '10px', fontFamily: 'serif' }}>
+          {/* 🔍 TITULO: Sube de 9px a 11px */}
+          <p style={{ fontSize: '11px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', marginBottom: '12px', fontFamily: 'serif' }}>
             Historical Records
           </p>
           {history.length === 0 ? (
@@ -327,8 +328,9 @@ export default function PatmosChat() {
                   transition: 'background 0.2s'
                 }}
               >
+                {/* 🔍 TEXTO DE LA INQUIRY: Sube de 12px a 14px */}
                 <span style={{ 
-                  fontSize: '12px', 
+                  fontSize: '14px', 
                   color: theme.textMain, 
                   fontWeight: '500', 
                   whiteSpace: 'nowrap', 
@@ -339,7 +341,8 @@ export default function PatmosChat() {
                 }}>
                   {session.user_query}
                 </span>
-                <span style={{ fontSize: '9px', color: theme.textMuted, fontFamily: theme.fontSans }}>
+                {/* 🔍 FECHA: Sube de 9px a 11px */}
+                <span style={{ fontSize: '11px', color: theme.textMuted, fontFamily: theme.fontSans }}>
                   {new Date(session.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </button>
@@ -388,8 +391,9 @@ export default function PatmosChat() {
                 PATMOS
               </h1>
               {userEmail && (
+                /* 🔍 CORREO ELECTRONICO: Sube de 9px a 11px */
                 <p style={{ 
-                  fontSize: '9px', 
+                  fontSize: '11px', 
                   color: theme.textMuted, 
                   margin: '4px 0 0 0', 
                   fontFamily: theme.fontSans, 
