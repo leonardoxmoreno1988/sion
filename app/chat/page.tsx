@@ -571,7 +571,7 @@ export default function PatmosChat() {
                     <span style={{
                       backgroundColor: '#2d65f6',
                       color: '#ffffff',
-                      fontSize: '8px',
+                      fontSize: '11px',
                       fontWeight: '800',
                       letterSpacing: '1px',
                       padding: '2px 6px',
