@@ -571,10 +571,10 @@ export default function PatmosChat() {
                     <span style={{
                       backgroundColor: '#2d65f6',
                       color: '#ffffff',
-                      fontSize: '11px',
+                      fontSize: '10px',
                       fontWeight: '800',
                       letterSpacing: '1px',
-                      padding: '2px 6px',
+                      padding: '4px 8px',
                       borderRadius: '4px',
                       fontFamily: theme.fontSans,
                       textTransform: 'uppercase',
