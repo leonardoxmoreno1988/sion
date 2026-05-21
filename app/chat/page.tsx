@@ -200,6 +200,7 @@ export default function PatmosChat() {
   };
 
   // ⚙️ PIPELINE DE PURGA: Método DELETE para limpiar registros históricos (Exclusivo Premium)
+  // Busca esta función en app/chat/page.tsx y asegúrate de que limpie así:
   const handleClearHistory = async () => {
     if (!isPremium) return;
     const confirmClear = window.confirm("Are you certain you want to purge all continuous historical archives? This structural action is absolute.");
@@ -210,7 +211,10 @@ export default function PatmosChat() {
       const res = await fetch('/api/history', { method: 'DELETE' });
       if (res.ok) {
         setHistory([]);
-        startNewInquiry();
+        setActiveSessionId(null); // 👈 CRUCIAL: Limpia el ID activo para que no intente sobreescribir una sesión inexistente
+        setMessages([
+          { id: 'welcome', role: 'assistant', content: "Welcome. How may I assist your Bible inquiry today?" }
+        ]);
       } else {
         alert("Failed to execute pipeline purge request.");
       }
