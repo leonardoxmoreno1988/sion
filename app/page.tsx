@@ -59,9 +59,9 @@ export default function TemporalHomePage() {
             Start Free &rarr;
           </Link>
           
-          {/* Imagen adaptada al contenedor de 700px */}
+          {/* 🖼️ CAMBIO DE IMAGEN: Se ha actualizado la ruta de la fuente (src) */}
           <img 
-            src="https://www.leonardoxmoreno.com/files/hero.jpg" 
+            src="https://www.leonardoxmoreno.com/files/patmos-illustration.jpg" 
             alt="Patmos Platform Preview" 
             className="w-full h-auto mt-6 object-cover"
           />
