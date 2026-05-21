@@ -30,6 +30,9 @@ export default function PatmosChat() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
+  // ⚙️ ESTADO DE CONTROL DE CONFIGURACIÓN DEL HISTORIAL
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  
   // 🔒 ESTADOS: Control del Paywall automático y ciclo de vida de Stripe
   const [hasCredits, setHasCredits] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
@@ -55,7 +58,7 @@ export default function PatmosChat() {
     sidebarBg: isDarkMode ? '#090d16' : '#f3f4f6',
     headerLine: isDarkMode ? '#1e293b' : '#000f37',
     textMain: isDarkMode ? '#f1f5f9' : '#000f37',
-    textMuted: isDarkMode ? '#94a3b8' : '#4b5563', // 🖋️ CAMBIO: De #6b7280 a #4b5563 para cuerpos de texto
+    textMuted: isDarkMode ? '#94a3b8' : '#4b5563', 
     bubbleUser: isDarkMode ? '#273c5a' : '#000f37',
     bubbleSion: isDarkMode ? '#0f172a' : '#fff',
     borderSion: isDarkMode ? '#1e293b' : '#e5e7eb',
@@ -196,6 +199,26 @@ export default function PatmosChat() {
     ]);
   };
 
+  // ⚙️ PIPELINE DE PURGA: Método DELETE para limpiar registros históricos (Exclusivo Premium)
+  const handleClearHistory = async () => {
+    if (!isPremium) return;
+    const confirmClear = window.confirm("Are you certain you want to purge all continuous historical archives? This structural action is absolute.");
+    if (!confirmClear) return;
+    
+    setSettingsOpen(false);
+    try {
+      const res = await fetch('/api/history', { method: 'DELETE' });
+      if (res.ok) {
+        setHistory([]);
+        startNewInquiry();
+      } else {
+        alert("Failed to execute pipeline purge request.");
+      }
+    } catch (err) {
+      console.error("Error executing historical purge pipeline:", err);
+    }
+  };
+
   const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customInput.trim() || isLoading || !hasCredits) return;
@@ -301,11 +324,79 @@ export default function PatmosChat() {
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '15px 10px' }}>
-          {/* 🔍 TITULO: Sube de 9px a 11px */}
-          <p style={{ fontSize: '11px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', marginBottom: '12px', fontFamily: 'serif' }}>
-            Historical Records
-          </p>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '15px 10px', position: 'relative' }}>
+          
+          {/* 🛠️ CONTENEDOR ENCABEZADO DE HISTORIAL CON TUERCA MÓDULO PREMIUM */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px', marginBottom: '12px', position: 'relative' }}>
+            <p style={{ fontSize: '11px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', margin: 0, fontFamily: 'serif' }}>
+              Historical Records
+            </p>
+            
+            {/* Solo renderiza si cuenta con estatus Pro */}
+            {isPremium && (
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setSettingsOpen(!settingsOpen)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: theme.textMuted,
+                    padding: '2px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    outline: 'none'
+                  }}
+                  title="Archive Preferences"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                  </svg>
+                </button>
+
+                {/* MENÚ FLOTANTE ACCIÓN PURGA */}
+                {settingsOpen && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '20px',
+                    right: 0,
+                    backgroundColor: isDarkMode ? '#1e293b' : '#fff',
+                    border: `1px solid ${theme.borderSion}`,
+                    borderRadius: '4px',
+                    padding: '4px 0',
+                    zIndex: 50,
+                    width: '160px',
+                    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                  }}>
+                    <button
+                      onClick={handleClearHistory}
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        background: 'none',
+                        border: 'none',
+                        padding: '8px 12px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        color: '#ef4444',
+                        cursor: 'pointer',
+                        fontFamily: theme.fontSans,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}
+                      onMouseOver={(e) => (e.currentTarget.style.backgroundColor = isDarkMode ? '#334155' : '#f3f4f6')}
+                      onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    >
+                      Clean historical record
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {history.length === 0 ? (
             <p style={{ fontSize: '11px', color: theme.textMuted, paddingLeft: '10px', fontStyle: 'italic', fontFamily: theme.fontSans }}>No records found.</p>
           ) : (
@@ -328,7 +419,6 @@ export default function PatmosChat() {
                   transition: 'background 0.2s'
                 }}
               >
-                {/* 🔍 TEXTO DE LA INQUIRY: Sube de 12px a 14px */}
                 <span style={{ 
                   fontSize: '14px', 
                   color: theme.textMain, 
@@ -341,7 +431,6 @@ export default function PatmosChat() {
                 }}>
                   {session.user_query}
                 </span>
-                {/* 🔍 FECHA: Sube de 9px a 11px */}
                 <span style={{ fontSize: '11px', color: theme.textMuted, fontFamily: theme.fontSans }}>
                   {new Date(session.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </span>
@@ -391,7 +480,6 @@ export default function PatmosChat() {
                 PATMOS
               </h1>
               {userEmail && (
-                /* 🔍 CORREO ELECTRONICO: Sube de 9px a 11px */
                 <p style={{ 
                   fontSize: '11px', 
                   color: theme.textMuted, 
@@ -434,7 +522,6 @@ export default function PatmosChat() {
               )}
             </button>
 
-            {/* 🔒 📊 BOTÓN BILLING: Sincronizado para reflejar exactamente la misma firma visual y comportamiento interactivo de Exit */}
             {(isPremium || subscriptionStatus === 'past_due') && (
               <a 
                 href="/api/portal"
