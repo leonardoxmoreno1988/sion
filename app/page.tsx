@@ -52,9 +52,10 @@ export default function TemporalHomePage() {
 
         {/* PRIMARY CALL TO ACTION */}
         <div className="mb-16 flex flex-col items-start w-full">
+          {/* 🔘 CORRECCIÓN: Modificado de rounded-[8px] a rounded (4px de ratio corner) */}
           <Link 
             href="/login" 
-            className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[8px] transition-all duration-300 hover:bg-[#000f37]/90"
+            className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded transition-all duration-300 hover:bg-[#000f37]/90"
           >
             Start Free &rarr;
           </Link>
@@ -176,8 +177,9 @@ export default function TemporalHomePage() {
 
             {/* PLAN PREMIUM: THE WATCHMAN */}
             <div className="bg-white border-2 border-[#000f37] p-6 flex flex-col justify-between rounded-lg relative overflow-hidden shadow-sm">
-              <div className="absolute top-0 right-0 bg-[#000f37] text-[#f9fafb] text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 rounded-bl">
-                Full Authority
+              {/* 🎨 CORRECCIÓN: Modificado color de fondo de bg-[#000f37] a bg-[#2d65f6] */}
+              <div className="absolute top-0 right-0 bg-[#2d65f6] text-[#f9fafb] text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 rounded-bl">
+                PRO Version
               </div>
 
               <div>
