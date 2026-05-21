@@ -69,7 +69,7 @@ export default function TemporalHomePage() {
 
         {/* PRODUCT BENEFITS / SYSTEM PILLARS */}
         <section className="border-t border-[#e5e7eb] pt-12 mb-16">
-          {/* 🎨 CORRECCIÓN: Título aclarado a un sutil gris pizarra claro text-[#6b7280] */}
+          {/* Título aclarado a un sutil gris pizarra claro text-[#6b7280] */}
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
             Architecture Pillars
           </h3>
@@ -120,8 +120,8 @@ export default function TemporalHomePage() {
         </section>
 
         {/* INTEGRATED PRICING SECTION */}
-        <section className="border-t border-[#e5e7eb] pt-12 pb-8">
-          {/* 🎨 CORRECCIÓN: Título aclarado a un sutil gris pizarra claro text-[#6b7280] */}
+        <section className="border-t border-[#e5e7eb] pt-12 pb-12">
+          {/* Título aclarado a un sutil gris pizarra claro text-[#6b7280] */}
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
             Subscriptions & Access
           </h3>
@@ -212,6 +212,76 @@ export default function TemporalHomePage() {
               </div>
             </div>
 
+          </div>
+        </section>
+
+        {/* 🛠️ NUEVA SECCIÓN: FAQS CON ACORDEONES EXPANDIBLES */}
+        <section className="border-t border-[#e5e7eb] pt-12 pb-8">
+          {/* Título unificado en gris claro text-[#6b7280] y tipografía serif */}
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
+            FAQs
+          </h3>
+
+          <div className="flex flex-col border-b border-[#e5e7eb]">
+            {/* PREGUNTA 1 */}
+            <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
+                <h4 className="text-sm font-bold uppercase tracking-wide">
+                  What is the primary manuscript lineage used by Patmos?
+                </h4>
+                <span className="relative size-5 shrink-0">
+                  <span className="absolute inset-0 rounded-full bg-transparent border border-[#000f37]/20 group-open:rotate-180 transition-transform duration-300 flex items-center justify-center font-mono text-xs text-[#4b5563]">&darr;</span>
+                </span>
+              </summary>
+              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+                Patmos maps out strict biblical context utilizing exclusively the Textus Receptus lineage through the authorized King James Version (KJV), ensuring zero modern lexical modification.
+              </p>
+            </details>
+
+            {/* PREGUNTA 2 */}
+            <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
+                <h4 className="text-sm font-bold uppercase tracking-wide">
+                  How does the system enforce dispensational theology?
+                </h4>
+                <span className="relative size-5 shrink-0">
+                  <span className="absolute inset-0 rounded-full bg-transparent border border-[#000f37]/20 group-open:rotate-180 transition-transform duration-300 flex items-center justify-center font-mono text-xs text-[#4b5563]">&darr;</span>
+                </span>
+              </summary>
+              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+                Every prompt execution runs through native filters that align data structures with right division metrics, parsing structural typology, biblical boundaries, and audience separation rules.
+              </p>
+            </details>
+
+            {/* PREGUNTA 3 */}
+            <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
+                <h4 className="text-sm font-bold uppercase tracking-wide">
+                  What happens when my free pipeline query allotment runs out?
+                </h4>
+                <span className="relative size-5 shrink-0">
+                  <span className="absolute inset-0 rounded-full bg-transparent border border-[#000f37]/20 group-open:rotate-180 transition-transform duration-300 flex items-center justify-center font-mono text-xs text-[#4b5563]">&darr;</span>
+                </span>
+              </summary>
+              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+                Once the initial free inquiry credit barrier is met, access will lock automatically. You can sustain the pipeline structure by upgrading to the Supporter level at any time.
+              </p>
+            </details>
+
+            {/* PREGUNTA 4 */}
+            <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
+                <h4 className="text-sm font-bold uppercase tracking-wide">
+                  Can I manage my billing or cancel my subscription dynamically?
+                </h4>
+                <span className="relative size-5 shrink-0">
+                  <span className="absolute inset-0 rounded-full bg-transparent border border-[#000f37]/20 group-open:rotate-180 transition-transform duration-300 flex items-center justify-center font-mono text-xs text-[#4b5563]">&darr;</span>
+                </span>
+              </summary>
+              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+                Yes. Supporter accounts gain immediate access to a secure Stripe Customer Portal integrated right into the control panel header to update credentials, download past due invoices, or adjust tiers.
+              </p>
+            </details>
           </div>
         </section>
       </main>
