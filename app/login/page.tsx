@@ -162,7 +162,7 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={toggleAuthMode}
-                  className="text-[#000f37] font-bold hover:underline bg-transparent border-none p-0 outline-none cursor-pointer ms-1"
+                  className="text-[#000f37] font-bold underline hover:no-underline bg-transparent border-none p-0 outline-none cursor-pointer ms-1"
                 >
                   Sign in.
                 </button>
@@ -173,7 +173,7 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={toggleAuthMode}
-                  className="text-[#000f37] font-bold hover:underline bg-transparent border-none p-0 outline-none cursor-pointer ms-1"
+                  className="text-[#000f37] font-bold underline hover:no-underline bg-transparent border-none p-0 outline-none cursor-pointer ms-1"
                 >
                   Sign up.
                 </button>
