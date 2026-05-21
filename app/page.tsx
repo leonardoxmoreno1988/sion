@@ -159,7 +159,7 @@ export default function TemporalHomePage() {
               <div className="mt-8">
                 <Link 
                   href="/login"
-                  className="block w-full border border-[#000f37] text-[#000f37] bg-transparent py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#000f37]/5 rounded"
+                  className="block w-full border border-[#000f37] text-[#000f37] bg-transparent py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#000f37]/5 rounded-[6px]"
                 >
                   Start Free
                 </Link>
@@ -205,7 +205,7 @@ export default function TemporalHomePage() {
               <div className="mt-8">
                 <a 
                   href="/api/checkout"
-                  className="block w-full bg-[#000f37] text-[#f9fafb] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#000f37]/90 rounded"
+                  className="block w-full bg-[#000f37] text-[#f9fafb] py-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 hover:bg-[#000f37]/90 rounded-[6px]"
                 >
                   Upgrade to PRO
                 </a>
