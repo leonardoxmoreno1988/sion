@@ -30,8 +30,9 @@ export default function PatmosChat() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
-  // ⚙️ ESTADO DE CONTROL DE CONFIGURACIÓN DEL HISTORIAL
+  // ⚙️ ESTADOS EXTRA: Control de utilidades y menús
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   
   // 🔒 ESTADOS: Control del Paywall automático y ciclo de vida de Stripe
   const [hasCredits, setHasCredits] = useState(true);
@@ -52,7 +53,7 @@ export default function PatmosChat() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // 🎨 CONFIGURACIÓN DE BRANDING: Actualizado con el nuevo gris premium #4b5563
+  // 🎨 CONFIGURACIÓN DE BRANDING: Consistencia total con Patmos Core
   const theme = {
     bg: isDarkMode ? '#020617' : '#f9fafb',
     sidebarBg: isDarkMode ? '#090d16' : '#f3f4f6',
@@ -172,7 +173,6 @@ export default function PatmosChat() {
         if (!isPremium && subscriptionStatus !== 'past_due') {
           setHasCredits(data.length < 5);
         }
-        // 🛠️ RE-EVALUACIÓN AUTOMÁTICA DEL ID ACTIVO TRAS NUEVAS CONSULTAS
         if (data.length > 0 && !activeSessionId) {
           setActiveSessionId(data[0].id);
         }
@@ -203,7 +203,6 @@ export default function PatmosChat() {
     ]);
   };
 
-  // ⚙️ PIPELINE DE PURGA: Borrado masivo absoluto
   const handleClearHistory = async () => {
     if (!isPremium) return;
     const confirmClear = window.confirm("Are you certain you want to purge all continuous historical archives? This structural action is absolute.");
@@ -224,6 +223,81 @@ export default function PatmosChat() {
     } catch (err) {
       console.error("Error executing historical purge pipeline:", err);
     }
+  };
+
+  // 📋 ACCIÓN: COPIADO AL PORTAPAPELES NATIVO
+  const handleCopyText = async (messageId: string, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMessageId(messageId);
+      setTimeout(() => setCopiedMessageId(null), 2000); // UI Feedback por 2 segundos
+    } catch (err) {
+      console.error("Could not copy manuscript response: ", err);
+    }
+  };
+
+  // 🖨️ ACCIÓN: IMPRESIÓN AISLADA MEDIANTE IFRAME TEMPORAL (Formato Editorial Serif)
+  const handlePrintMessage = (text: string) => {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '100%';
+    iframe.style.bottom = '100%';
+    iframe.style.width = '0px';
+    iframe.style.height = '0px';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document || iframe.contentDocument;
+    if (!doc) return;
+
+    // Inyectamos un HTML limpio con tipografía formal, ideal para lectura física de manuscritos
+    doc.write(`
+      <html>
+        <head>
+          <title>Patmos Research - Scripture Inquiry</title>
+          <style>
+            body {
+              font-family: 'Georgia', 'Times New Roman', serif;
+              line-height: 1.8;
+              color: #000f37;
+              padding: 2cm;
+              font-size: 12pt;
+            }
+            p { margin-bottom: 1.5em; text-align: justify; whiteSpace: pre-wrap; }
+            strong { font-weight: 700; }
+            .header {
+              text-align: center;
+              border-bottom: 2px solid #000f37;
+              padding-bottom: 10px;
+              margin-bottom: 30px;
+              letter-spacing: 4px;
+            }
+            .footer {
+              margin-top: 50px;
+              border-top: 1px solid #e5e7eb;
+              padding-top: 10px;
+              font-size: 9pt;
+              color: #4b5563;
+              text-align: center;
+              letter-spacing: 1px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">PATMOS RESEARCH</div>
+          <div>${text.replace(/\n/g, '<br/>')}</div>
+          <div class="footer">Based on Rightly Dividing the Word of Truth &copy; ${new Date().getFullYear()}</div>
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    // Disparamos la impresión nativa una vez cargado el árbol del DOM en el iframe
+    setTimeout(() => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      document.body.removeChild(iframe); // Destruimos el nodo temporal tras imprimir
+    }, 500);
   };
 
   const handleCustomSubmit = async (e: React.FormEvent) => {
@@ -280,7 +354,6 @@ export default function PatmosChat() {
         }
       }
 
-      // 🔄 SINCRONIZACIÓN SANA: Ejecuta el fetchHistory de forma controlada tras concluir el streaming
       await fetchHistory(); 
 
     } catch (error) {
@@ -573,11 +646,13 @@ export default function PatmosChat() {
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          gap: '20px',
+          gap: '24px',
           padding: '20px 0'
         }}>
           {messages.map((m) => (
-            <div key={m.id} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+            <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+              
+              {/* Globo contenedor de mensaje */}
               <div style={{
                 maxWidth: '90%',
                 padding: '12px 20px',
@@ -609,6 +684,62 @@ export default function PatmosChat() {
                   {m.content}
                 </ReactMarkdown>
               </div>
+
+              {/* 🛠️ ACTION BAR INDEPENDIENTE: Renderiza herramientas solo en respuestas de la IA */}
+              {m.role === 'assistant' && m.id !== 'welcome' && m.content.trim() !== "" && (
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  marginTop: '6px',
+                  paddingLeft: '10px',
+                  fontFamily: theme.fontSans,
+                  fontSize: '10px',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  {/* Botón Copiar */}
+                  <button
+                    onClick={() => handleCopyText(m.id, m.content)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: copiedMessageId === m.id ? '#34a853' : theme.textMuted,
+                      padding: 0,
+                      outline: 'none',
+                      fontSize: '10px',
+                      fontWeight: '700',
+                      transition: 'color 0.2s'
+                    }}
+                  >
+                    {copiedMessageId === m.id ? '✓ Copied' : 'Copy'}
+                  </button>
+
+                  <span style={{ color: theme.borderSion }}>|</span>
+
+                  {/* Botón Imprimir */}
+                  <button
+                    onClick={() => handlePrintMessage(m.content)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: theme.textMuted,
+                      padding: 0,
+                      outline: 'none',
+                      fontSize: '10px',
+                      fontWeight: '700',
+                      transition: 'color 0.2s'
+                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.color = theme.textMain)}
+                    onMouseOut={(e) => (e.currentTarget.style.color = theme.textMuted)}
+                  >
+                    Print
+                  </button>
+                </div>
+              )}
+
             </div>
           ))}
           {isLoading && (
