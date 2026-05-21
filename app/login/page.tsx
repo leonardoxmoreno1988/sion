@@ -24,7 +24,7 @@ function LoginForm() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // 🛠️ GESTIÓN DE ENVÍO CENTRALIZADA
+  // GESTIÓN DE ENVÍO CENTRALIZADA
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -77,103 +77,112 @@ function LoginForm() {
     }
   };
 
-  // Conmutador manual de modo limpio
+  // Alternar flujos limpiando mensajes previos
   const toggleAuthMode = () => {
     setIsSignUp(!isSignUp);
     setMessage(null);
   };
 
   return (
-    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-      <div className="space-y-4">
-        <div>
-          <input
-            type="email"
-            placeholder="EMAIL ADDRESS"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-400 tracking-wider rounded-none"
-          />
-        </div>
-        <div>
-          <input
-            type="password"
-            placeholder="PASSWORD"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-400 tracking-wider rounded-none"
-          />
-        </div>
+    <div>
+      {/* 🏛️ TITULO DINÁMICO DE ESTADO: Ubicado debajo del logo/cabecera */}
+      <div className="text-center mt-6">
+        <h2 className="text-xl font-medium tracking-wide text-[#000f37]">
+          {isSignUp ? 'Sign Up' : 'Sign In'}
+        </h2>
       </div>
 
-      {message && (
-        <div className="bg-[#000f37]/5 border border-[#000f37]/10 py-2 text-[10px] text-[#000f37] text-center uppercase tracking-widest leading-relaxed px-2 font-medium rounded-none">
-          {message}
+      <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
+        <div className="space-y-4">
+          <div>
+            <input
+              type="email"
+              placeholder="EMAIL ADDRESS"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-400 tracking-wider rounded-none"
+            />
+          </div>
+          <div>
+            <input
+              type="password"
+              placeholder="PASSWORD"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border-b border-[#000f37]/10 bg-transparent py-3 text-sm text-[#000f37] outline-none focus:border-[#000f37]/50 transition-colors placeholder:text-gray-400 tracking-wider rounded-none"
+            />
+          </div>
         </div>
-      )}
 
-      <div className="flex flex-col gap-4 pt-2">
-        {/* 🔘 BOTÓN PRINCIPAL CON CAMBIO DE ACCIÓN ADAPTATIVO */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-lg transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          {loading ? 'PROCESSING...' : (isSignUp ? 'SIGN UP' : 'SIGN IN')}
-        </button>
+        {message && (
+          <div className="bg-[#000f37]/5 border border-[#000f37]/10 py-2 text-[10px] text-[#000f37] text-center uppercase tracking-widest leading-relaxed px-2 font-medium rounded-none">
+            {message}
+          </div>
+        )}
 
-        <div className="flex items-center my-1">
-          <div className="flex-1 h-[1px] bg-[#000f37]/10" />
-          <span className="px-3 text-[9px] text-[#000f37]/60 tracking-widest font-bold uppercase">OR</span>
-          <div className="flex-1 h-[1px] bg-[#000f37]/10" />
+        <div className="flex flex-col gap-4 pt-2">
+          {/* BOTÓN PRINCIPAL ADAPTATIVO */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-lg transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            {loading ? 'PROCESSING...' : (isSignUp ? 'SIGN UP' : 'SIGN IN')}
+          </button>
+
+          <div className="flex items-center my-1">
+            <div className="flex-1 h-[1px] bg-[#000f37]/10" />
+            <span className="px-3 text-[9px] text-[#000f37]/60 tracking-widest font-bold uppercase">OR</span>
+            <div className="flex-1 h-[1px] bg-[#000f37]/10" />
+          </div>
+
+          {/* BOTÓN GOOGLE */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.65-5.17 3.65-8.58z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.11 0-5.74-2.11-6.68-4.96H1.21v3.15C3.18 21.88 7.31 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.32 14.24A7.16 7.16 0 0 1 5 12c0-.79.13-1.57.32-2.34V6.51H1.21A11.94 11.94 0 0 0 0 12c0 1.92.45 3.74 1.21 5.39l4.11-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.18 2.12 1.21 6.51l4.11 3.15c.94-2.85 3.57-4.91 6.68-4.91z"/>
+            </svg>
+            {loading ? 'CONNECTING...' : 'CONTINUE WITH GOOGLE'}
+          </button>
+          
+          {/* 🔗 ENLACES DE CONMUTACIÓN: Incrementados dos puntos de escala tipográfica (de text-[11px] a text-sm) */}
+          <div className="text-center mt-3">
+            {isSignUp ? (
+              <p className="text-sm text-gray-400 font-medium tracking-wide">
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={toggleAuthMode}
+                  className="text-[#000f37] font-bold hover:underline bg-transparent border-none p-0 outline-none cursor-pointer ms-1"
+                >
+                  Sign in.
+                </button>
+              </p>
+            ) : (
+              <p className="text-sm text-gray-400 font-medium tracking-wide">
+                Don't have an account?{' '}
+                <button
+                  type="button"
+                  onClick={toggleAuthMode}
+                  className="text-[#000f37] font-bold hover:underline bg-transparent border-none p-0 outline-none cursor-pointer ms-1"
+                >
+                  Sign up.
+                </button>
+              </p>
+            )}
+          </div>
         </div>
-
-        {/* 🔘 BOTÓN GOOGLE */}
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          disabled={loading}
-          className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
-            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.65-5.17 3.65-8.58z"/>
-            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.11 0-5.74-2.11-6.68-4.96H1.21v3.15C3.18 21.88 7.31 24 12 24z"/>
-            <path fill="#FBBC05" d="M5.32 14.24A7.16 7.16 0 0 1 5 12c0-.79.13-1.57.32-2.34V6.51H1.21A11.94 11.94 0 0 0 0 12c0 1.92.45 3.74 1.21 5.39l4.11-3.15z"/>
-            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.18 2.12 1.21 6.51l4.11 3.15c.94-2.85 3.57-4.91 6.68-4.91z"/>
-          </svg>
-          {loading ? 'CONNECTING...' : 'CONTINUE WITH GOOGLE'}
-        </button>
-        
-        {/* 🔗 ENLACES CLÁSICOS DE CONMUTACIÓN DE FLUJO */}
-        <div className="text-center mt-2">
-          {isSignUp ? (
-            <p className="text-[11px] text-gray-400 font-medium tracking-wide">
-              Already have an account?{' '}
-              <button
-                type="button"
-                onClick={toggleAuthMode}
-                className="text-[#000f37] font-bold hover:underline bg-transparent border-none p-0 outline-none cursor-pointer"
-              >
-                Sign in.
-              </button>
-            </p>
-          ) : (
-            <p className="text-[11px] text-gray-400 font-medium tracking-wide">
-              Don't have an account?{' '}
-              <button
-                type="button"
-                onClick={toggleAuthMode}
-                className="text-[#000f37] font-bold hover:underline bg-transparent border-none p-0 outline-none cursor-pointer"
-              >
-                Sign up.
-              </button>
-            </p>
-          )}
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }
 
@@ -182,7 +191,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen w-full items-center justify-center bg-[#f4f5f6] px-4 relative overflow-hidden text-[#000f37]">
       
       {/* 📦 CAJA DE LOGIN: Minimalismo puro, sin stroke, sin sombras */}
-      <div className="w-full max-w-[400px] space-y-8 bg-white p-10 border-none rounded-none shadow-none">
+      <div className="w-full max-w-[400px] bg-white p-10 border-none rounded-none shadow-none">
         
         <div className="text-center">
           <h1 className="text-4xl font-light tracking-[0.25em] text-[#000f37] font-serif">
