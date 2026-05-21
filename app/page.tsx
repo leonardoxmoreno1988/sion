@@ -41,7 +41,7 @@ export default function TemporalHomePage() {
       <main className="flex-1 w-full max-w-[700px] flex flex-col justify-center py-16">
         <div className="mb-4">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-[#000f37] max-w-xl">
-            Rigorous Theological AI Search & Scripture Verification
+            Rigorous Theological AI Search & Scripture Research
           </h2>
         </div>
 
