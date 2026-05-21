@@ -215,26 +215,29 @@ export default function TemporalHomePage() {
           </div>
         </section>
 
-        {/* 🛠️ SECCIÓN REFINADA: FAQS CON ACORDEONES MINIMALISTAS */}
+        {/* 🛠️ SECCIÓN REFINADA: FAQS SIN LÍNEA INICIAL Y CON ICONOS OUTLINED */}
         <section className="border-t border-[#e5e7eb] pt-12 pb-8">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
             FAQs
           </h3>
 
-          {/* ✂️ REMOVIDO: border-t inicial para evitar la doble línea gris después del título */}
           <div className="flex flex-col border-b border-[#e5e7eb]">
             
             {/* PREGUNTA 1 */}
-            <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
+            {/* ✂️ REMOVIDO: border-t inicial para eliminar el separador superior de la primera pregunta */}
+            <details className="group py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                {/* 🖋️ CAMBIO: Formato regular con solo la primera en mayúscula */}
-                <h4 className="text-sm font-semibold tracking-wide text-left">
+                {/* 🔍 TEXTO: Sube de text-sm a text-base */}
+                <h4 className="text-base font-semibold tracking-wide text-left">
                   What is the primary manuscript lineage used by Patmos?
                 </h4>
-                {/* 🔘 CAMBIO: Flecha clásica pura sin círculo contenedor que rota al abrir */}
-                <span className="text-xs text-[#4b5563] group-open:rotate-180 transition-transform duration-300 ease-in-out shrink-0 select-none">
-                  ▼
-                </span>
+                {/* 🔘 ICONO: Versión Outlined / Lineal pura con SVG que rota */}
+                <svg 
+                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 Patmos maps out strict biblical context utilizing exclusively the Textus Receptus lineage through the authorized King James Version (KJV), ensuring zero modern lexical modification.
@@ -244,14 +247,17 @@ export default function TemporalHomePage() {
             {/* PREGUNTA 2 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                {/* 🖋️ CAMBIO: Formato regular */}
-                <h4 className="text-sm font-semibold tracking-wide text-left">
+                {/* 🔍 TEXTO: text-base */}
+                <h4 className="text-base font-semibold tracking-wide text-left">
                   How does the system enforce dispensational theology?
                 </h4>
-                {/* 🔘 CAMBIO: Flecha clásica pura */}
-                <span className="text-xs text-[#4b5563] group-open:rotate-180 transition-transform duration-300 ease-in-out shrink-0 select-none">
-                  ▼
-                </span>
+                {/* 🔘 ICONO: Outlined */}
+                <svg 
+                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 Every prompt execution runs through native filters that align data structures with right division metrics, parsing structural typology, biblical boundaries, and audience separation rules.
@@ -261,14 +267,17 @@ export default function TemporalHomePage() {
             {/* PREGUNTA 3 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                {/* 🖋️ CAMBIO: Formato regular */}
-                <h4 className="text-sm font-semibold tracking-wide text-left">
+                {/* 🔍 TEXTO: text-base */}
+                <h4 className="text-base font-semibold tracking-wide text-left">
                   What happens when my free pipeline query allotment runs out?
                 </h4>
-                {/* 🔘 CAMBIO: Flecha clásica pura */}
-                <span className="text-xs text-[#4b5563] group-open:rotate-180 transition-transform duration-300 ease-in-out shrink-0 select-none">
-                  ▼
-                </span>
+                {/* 🔘 ICONO: Outlined */}
+                <svg 
+                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 Once the initial free inquiry credit barrier is met, access will lock automatically. You can sustain the pipeline structure by upgrading to the Supporter level at any time.
@@ -278,14 +287,17 @@ export default function TemporalHomePage() {
             {/* PREGUNTA 4 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                {/* 🖋️ CAMBIO: Formato regular */}
-                <h4 className="text-sm font-semibold tracking-wide text-left">
+                {/* 🔍 TEXTO: text-base */}
+                <h4 className="text-base font-semibold tracking-wide text-left">
                   Can I manage my billing or cancel my subscription dynamically?
                 </h4>
-                {/* 🔘 CAMBIO: Flecha clásica pura */}
-                <span className="text-xs text-[#4b5563] group-open:rotate-180 transition-transform duration-300 ease-in-out shrink-0 select-none">
-                  ▼
-                </span>
+                {/* 🔘 ICONO: Outlined */}
+                <svg 
+                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 Yes. Supporter accounts gain immediate access to a secure Stripe Customer Portal integrated right into the control panel header to update credentials, download past due invoices, or adjust tiers.
