@@ -553,16 +553,38 @@ export default function PatmosChat() {
                 PATMOS
               </h1>
               {userEmail && (
-                <p style={{ 
-                  fontSize: '11px', 
-                  color: theme.textMuted, 
-                  margin: '4px 0 0 0', 
-                  fontFamily: theme.fontSans, 
-                  textTransform: 'uppercase', 
-                  letterSpacing: '0.5px' 
-                }}>
-                  {userEmail}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '4px 0 0 0' }}>
+                  {/* Correo Electrónico */}
+                  <p style={{ 
+                    fontSize: '11px', 
+                    color: theme.textMuted, 
+                    margin: 0, 
+                    fontFamily: theme.fontSans, 
+                    textTransform: 'uppercase', 
+                    letterSpacing: '0.5px' 
+                  }}>
+                    {userEmail}
+                  </p>
+                  
+                  {/* 🔒 INSIGNIA PRO DINÁMICA: Solo se renderiza si el usuario tiene la suscripción premium activa */}
+                  {isPremium && (
+                    <span style={{
+                      backgroundColor: '#2d65f6',
+                      color: '#ffffff',
+                      fontSize: '8px',
+                      fontWeight: '800',
+                      letterSpacing: '1px',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      fontFamily: theme.fontSans,
+                      textTransform: 'uppercase',
+                      userSelect: 'none',
+                      lineHeight: '1'
+                    }}>
+                      PRO
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           </div>
