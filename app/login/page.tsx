@@ -8,6 +8,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 export const dynamic = 'force-dynamic';
 
 function LoginForm() {
+  // 🔄 ESTADO DINÁMICO: false = Modo Sign In (Default) | true = Modo Sign Up
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,40 +24,41 @@ function LoginForm() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // 🛠️ GESTIÓN DE ENVÍO CENTRALIZADA
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       setMessage("Please enter both email and password.");
       return;
     }
+
     setLoading(true);
     setMessage(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setMessage(`Error: ${error.message}`);
+
+    if (isSignUp) {
+      // Flujo dedicado de Registro (Sign Up)
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${nextRoute}` },
+      });
+      if (error) {
+        setMessage(`Error: ${error.message}`);
+      } else {
+        setMessage('Check your email to confirm the registry.');
+      }
       setLoading(false);
     } else {
-      router.push(nextRoute); 
-      router.refresh();
+      // Flujo dedicado de Autenticación (Sign In)
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setMessage(`Error: ${error.message}`);
+        setLoading(false);
+      } else {
+        router.push(nextRoute); 
+        router.refresh();
+      }
     }
-  };
-
-  const handleSignUp = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      setMessage("Email and password are required for registry.");
-      return;
-    }
-    setLoading(true);
-    setMessage(null);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${nextRoute}` },
-    });
-    if (error) setMessage(`Error: ${error.message}`);
-    else setMessage('Check your email to confirm the registry.');
-    setLoading(false);
   };
 
   const handleGoogleLogin = async () => {
@@ -74,8 +77,14 @@ function LoginForm() {
     }
   };
 
+  // Conmutador manual de modo limpio
+  const toggleAuthMode = () => {
+    setIsSignUp(!isSignUp);
+    setMessage(null);
+  };
+
   return (
-    <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-4">
         <div>
           <input
@@ -106,13 +115,13 @@ function LoginForm() {
       )}
 
       <div className="flex flex-col gap-4 pt-2">
-        {/* 🔘 BOTÓN CON RATIO CORNER DE 8PX (rounded-lg) */}
+        {/* 🔘 BOTÓN PRINCIPAL CON CAMBIO DE ACCIÓN ADAPTATIVO */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-lg transition-all hover:bg-[#000f37]/90 disabled:opacity-30"
+          className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-lg transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
+          {loading ? 'PROCESSING...' : (isSignUp ? 'SIGN UP' : 'SIGN IN')}
         </button>
 
         <div className="flex items-center my-1">
@@ -121,12 +130,12 @@ function LoginForm() {
           <div className="flex-1 h-[1px] bg-[#000f37]/10" />
         </div>
 
-        {/* 🔘 BOTÓN GOOGLE CON RATIO CORNER DE 8PX (rounded-lg) */}
+        {/* 🔘 BOTÓN GOOGLE */}
         <button
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30"
+          className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
             <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.65-5.17 3.65-8.58z"/>
@@ -137,14 +146,32 @@ function LoginForm() {
           {loading ? 'CONNECTING...' : 'CONTINUE WITH GOOGLE'}
         </button>
         
-        <button
-          type="button"
-          onClick={handleSignUp}
-          disabled={loading}
-          className="text-[9px] uppercase tracking-[0.2em] text-gray-400 hover:text-[#000f37] transition-colors font-medium text-center mt-2"
-        >
-          Request New Registry
-        </button>
+        {/* 🔗 ENLACES CLÁSICOS DE CONMUTACIÓN DE FLUJO */}
+        <div className="text-center mt-2">
+          {isSignUp ? (
+            <p className="text-[11px] text-gray-400 font-medium tracking-wide">
+              Already have an account?{' '}
+              <button
+                type="button"
+                onClick={toggleAuthMode}
+                className="text-[#000f37] font-bold hover:underline bg-transparent border-none p-0 outline-none cursor-pointer"
+              >
+                Sign in.
+              </button>
+            </p>
+          ) : (
+            <p className="text-[11px] text-gray-400 font-medium tracking-wide">
+              Don't have an account?{' '}
+              <button
+                type="button"
+                onClick={toggleAuthMode}
+                className="text-[#000f37] font-bold hover:underline bg-transparent border-none p-0 outline-none cursor-pointer"
+              >
+                Sign up.
+              </button>
+            </p>
+          )}
+        </div>
       </div>
     </form>
   );
@@ -154,7 +181,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#f4f5f6] px-4 relative overflow-hidden text-[#000f37]">
       
-      {/* 📦 CAJA DE LOGIN NUEVA: Sin stroke (border-none), sin sombra (shadow-none) y esquinas rectas */}
+      {/* 📦 CAJA DE LOGIN: Minimalismo puro, sin stroke, sin sombras */}
       <div className="w-full max-w-[400px] space-y-8 bg-white p-10 border-none rounded-none shadow-none">
         
         <div className="text-center">
