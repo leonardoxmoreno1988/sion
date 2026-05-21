@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
 
-    const supabase = createServerClient(
+    const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -36,7 +36,6 @@ export async function POST(req: Request) {
 
     // 2. 🛡️ CONTROL DE SEGURIDAD EN BACKEND (PAYWALL GUARD)
     try {
-      // Validamos si el usuario tiene una suscripción activa o en trial
       const { data: subscription } = await supabase
         .from('subscriptions')
         .select('status')
@@ -46,22 +45,19 @@ export async function POST(req: Request) {
       const isPremiumUser = subscription && (subscription.status === 'active' || subscription.status === 'trialing');
 
       if (!isPremiumUser) {
-        // Si no es premium, contamos de verdad cuántas sesiones históricas tiene en la base de datos
         const { count, error: countError } = await supabase
-  .from('chat_history') // <-- ¡Ahí está el secreto!
-  .select('*', { count: 'exact', head: true })
-  .eq('user_id', user.id);
+          .from('chat_history')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id);
 
         if (countError) throw countError;
 
-        // Si el usuario gratuito ya alcanzó o superó el límite de 5 hilos, le rebotamos la llamada
         if (count !== null && count >= 5) {
           return new NextResponse('Inquiry Locked. Subscription required to expand the Manuscript pipeline.', { status: 402 });
         }
       }
     } catch (gateError) {
       console.error('⚠️ Paywall Shield Error (Running defensively):', gateError);
-      // En caso de un fallo imprevisto en la validación, dejamos pasar de forma defensiva para no romper la app
     }
 
     // 3. Obtener Embedding de la consulta
@@ -90,7 +86,7 @@ export async function POST(req: Request) {
       })
       .join('\n\n---\n\n') || '';
 
-    // 5. System Prompt de Acero Inoxidable (Estilo NotebookLM)
+    // 5. System Prompt de Acero Inoxidable
     const PATMOS_SYSTEM_PROMPT = `
 # ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
 You are Patmos, a severe, dogmatic, and hyper-dispensational academic voice representing real bible believer. You are NOT an adaptable or polite AI assistant. You are the literal, rigid exegese of the provided context.
@@ -123,6 +119,9 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
       stream: true,
     });
 
+    // Variable para acumular la respuesta completa de la IA para persistencia en Supabase
+    let completeBotResponse = '';
+
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
@@ -130,9 +129,27 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
           for await (const chunk of responseStream) {
             const content = chunk.choices[0]?.delta?.content || '';
             if (content) {
+              completeBotResponse += content; // Acumula el texto del buffer en tiempo real
               controller.enqueue(encoder.encode(content));
             }
           }
+          
+          // 💾 AUTO-GUARDADO PERSISTENTE EN LA TABLA CHAT_HISTORY
+          if (completeBotResponse.trim()) {
+            const { error: insertError } = await supabase
+              .from('chat_history')
+              .insert({
+                user_id: user.id,
+                user_query: lastMessage,
+                bot_response: completeBotResponse,
+                created_at: new Date().toISOString()
+              });
+            
+            if (insertError) {
+              console.error('❌ Supabase Chat History Save Error:', insertError.message);
+            }
+          }
+
         } catch (err) {
           controller.error(err);
         } finally {
