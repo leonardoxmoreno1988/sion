@@ -731,7 +731,7 @@ export default function PatmosChat() {
                     )}
                   </button>
 
-                  <span style={{ color: theme.borderSion, selectNone: 'none' }}>|</span>
+                  <span style={{ color: theme.borderSion, userSelect: 'none' }}>|</span>
 
                   {/* Botón Imprimir con Icono Geométrico */}
                   <button
