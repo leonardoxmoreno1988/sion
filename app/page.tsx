@@ -28,7 +28,7 @@ export default function TemporalHomePage() {
         >
           PATMOS
         </span>
-        {/* 🛠️ CORRECCIÓN: Retornamos el ratio corner a cero usando rounded-none */}
+        {/* Retornamos el ratio corner a cero usando rounded-none */}
         <Link 
           href="/login" 
           className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded-none transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
@@ -45,17 +45,17 @@ export default function TemporalHomePage() {
           </h2>
         </div>
 
-        {/* 🖋️ TEXTO OSCURECIDO DE #6b7280 A #4b5563 */}
+        {/* TEXTO OSCURECIDO DE #6b7280 A #4b5563 */}
         <p className="text-base leading-relaxed text-[#4b5563] text-left max-w-2xl mb-12">
           Designed for deep academic inquiry and theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational theology.
         </p>
 
         {/* PRIMARY CALL TO ACTION */}
         <div className="mb-16 flex flex-col items-start w-full">
-          {/* 🔘 CORRECCIÓN: Modificado de rounded-[8px] a rounded (4px de ratio corner) */}
+          {/* 🔘 CORRECCIÓN: Modificado a rounded-[6px] para un ratio corner de exactamente 6px */}
           <Link 
             href="/login" 
-            className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded transition-all duration-300 hover:bg-[#000f37]/90"
+            className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[6px] transition-all duration-300 hover:bg-[#000f37]/90"
           >
             Start Free &rarr;
           </Link>
@@ -70,7 +70,7 @@ export default function TemporalHomePage() {
 
         {/* PRODUCT BENEFITS / SYSTEM PILLARS */}
         <section className="border-t border-[#e5e7eb] pt-12 mb-16">
-          {/* Subtítulo de sección oscurecido de #6b7280 A #4b5563 */}
+          {/* 🎨 CORRECCIÓN: Título suavizado al color gris pizarra text-[#4b5563] */}
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#4b5563] mb-8 font-serif">
             Architecture Pillars
           </h3>
@@ -82,7 +82,6 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 01 / Biblical Responses
               </h4>
-              {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
                 Advanced source integrity controls eliminate general artificial intelligence neutrality, delivering dogmatic, absolute certainty.
               </p>
@@ -93,7 +92,6 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 02 / Textual Inerrancy
               </h4>
-              {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
                 Zero lexical modification. Fully bypassing modern ecumenical translations or standard market alterations.
               </p>
@@ -104,7 +102,6 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 03 / KJV Dispensational Mechanics
               </h4>
-              {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
                 Complete algorithmic focus mapping out Biblical boundaries, structural typology, and specific target audience separation.
               </p>
@@ -115,7 +112,6 @@ export default function TemporalHomePage() {
               <h4 className="text-sm font-bold uppercase tracking-wide text-[#000f37]">
                 04 / Strict Cross-References
               </h4>
-              {/* 🖋️ TEXTO OSCURECIDO */}
               <p className="text-sm leading-relaxed text-[#4b5563] text-left">
                 Academic analysis running structural cross-references to expose false doctrines.
               </p>
@@ -126,7 +122,7 @@ export default function TemporalHomePage() {
 
         {/* INTEGRATED PRICING SECTION */}
         <section className="border-t border-[#e5e7eb] pt-12 pb-8">
-          {/* Subtítulo de sección oscurecido */}
+          {/* 🎨 CORRECCIÓN: Título suavizado al color gris pizarra text-[#4b5563] */}
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#4b5563] mb-8 font-serif">
             Subscriptions & Access
           </h3>
@@ -136,22 +132,18 @@ export default function TemporalHomePage() {
             {/* PLAN GRATUITO: THE INQUIRER */}
             <div className="bg-white border border-[#e5e7eb] p-6 flex flex-col justify-between rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
               <div>
-                {/* Tag de plan oscurecido */}
                 <h4 className="text-base font-bold uppercase tracking-wide text-[#000f37] mt-1">
                   Free Use
                 </h4>
                 <div className="mt-4 flex items-baseline text-[#000f37]">
                   <span className="text-3xl font-bold tracking-tight">$0</span>
-                  {/* Duración de plan oscurecido */}
                   <span className="ml-1 text-[10px] uppercase tracking-wider text-[#4b5563]">/ forever</span>
                 </div>
                 
-                {/* 🖋️ TEXTO OSCURECIDO */}
                 <p className="mt-4 text-sm text-[#4b5563] leading-relaxed text-left">
                   Designed for casual examiners of the scriptures seeking to test the dogmatic precision.
                 </p>
 
-                {/* Checks de lista oscurecidos */}
                 <ul className="mt-6 space-y-2 border-t border-[#e5e7eb] pt-4 text-[10px] uppercase tracking-widest text-[#000f37] font-medium">
                   <li className="flex items-center gap-2">
                     <span className="text-[#4b5563]">✓</span> Limited query credits
@@ -177,13 +169,12 @@ export default function TemporalHomePage() {
 
             {/* PLAN PREMIUM: THE WATCHMAN */}
             <div className="bg-white border-2 border-[#000f37] p-6 flex flex-col justify-between rounded-lg relative overflow-hidden shadow-sm">
-              {/* 🎨 CORRECCIÓN: Modificado color de fondo de bg-[#000f37] a bg-[#2d65f6] */}
+              {/* Modificado color de fondo a bg-[#2d65f6] */}
               <div className="absolute top-0 right-0 bg-[#2d65f6] text-[#f9fafb] text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 rounded-bl">
                 PRO Version
               </div>
 
               <div>
-                {/* Tag de plan oscurecido */}
                 <h4 className="text-base font-bold uppercase tracking-wide text-[#000f37] mt-1">
                   Supporter
                 </h4>
@@ -192,7 +183,6 @@ export default function TemporalHomePage() {
                   <span className="ml-1 text-[10px] uppercase tracking-wider text-[#4b5563]">/ month</span>
                 </div>
                 
-                {/* 🖋️ TEXTO OSCURECIDO */}
                 <p className="mt-4 text-sm text-[#4b5563] leading-relaxed text-left">
                   For serious students of the Word, approved workmen, and theologians requiring deep, unhindered pipeline execution.
                 </p>
