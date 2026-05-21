@@ -16,7 +16,9 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
 
-    const supabase = createBrowserClient(
+    // ANTES: const supabase = createBrowserClient(...
+    // AHORA CORREGIDO: Usamos la función que ya tienes importada arriba
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
