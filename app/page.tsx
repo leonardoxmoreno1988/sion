@@ -45,14 +45,13 @@ export default function TemporalHomePage() {
           </h2>
         </div>
 
-        {/* TEXTO OSCURECIDO DE #6b7280 A #4b5563 */}
+        {/* TEXTO INFORMATIVO #4b5563 */}
         <p className="text-base leading-relaxed text-[#4b5563] text-left max-w-2xl mb-12">
           Designed for deep academic inquiry and theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational theology.
         </p>
 
         {/* PRIMARY CALL TO ACTION */}
         <div className="mb-16 flex flex-col items-start w-full">
-          {/* 🔘 CORRECCIÓN: Modificado a rounded-[6px] para un ratio corner de exactamente 6px */}
           <Link 
             href="/login" 
             className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[6px] transition-all duration-300 hover:bg-[#000f37]/90"
@@ -70,8 +69,8 @@ export default function TemporalHomePage() {
 
         {/* PRODUCT BENEFITS / SYSTEM PILLARS */}
         <section className="border-t border-[#e5e7eb] pt-12 mb-16">
-          {/* 🎨 CORRECCIÓN: Título suavizado al color gris pizarra text-[#4b5563] */}
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[#4b5563] mb-8 font-serif">
+          {/* 🎨 CORRECCIÓN: Título aclarado a un sutil gris pizarra claro text-[#6b7280] */}
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
             Architecture Pillars
           </h3>
           
@@ -122,8 +121,8 @@ export default function TemporalHomePage() {
 
         {/* INTEGRATED PRICING SECTION */}
         <section className="border-t border-[#e5e7eb] pt-12 pb-8">
-          {/* 🎨 CORRECCIÓN: Título suavizado al color gris pizarra text-[#4b5563] */}
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[#4b5563] mb-8 font-serif">
+          {/* 🎨 CORRECCIÓN: Título aclarado a un sutil gris pizarra claro text-[#6b7280] */}
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
             Subscriptions & Access
           </h3>
 
