@@ -85,9 +85,9 @@ function LoginForm() {
 
   return (
     <div>
-      {/* 🏛️ TITULO DINÁMICO DE ESTADO: Ubicado debajo del logo/cabecera */}
-      <div className="text-center mt-6">
-        <h2 className="text-xl font-medium tracking-wide text-[#000f37]">
+      {/* 🏛️ CORRECCIÓN: Título dinámico alineado a la izquierda (text-left) */}
+      <div className="text-left mt-6 px-1">
+        <h2 className="text-xl font-bold tracking-wide text-[#000f37]">
           {isSignUp ? 'Sign Up' : 'Sign In'}
         </h2>
       </div>
@@ -123,11 +123,11 @@ function LoginForm() {
         )}
 
         <div className="flex flex-col gap-4 pt-2">
-          {/* BOTÓN PRINCIPAL ADAPTATIVO */}
+          {/* 🔘 CORRECCIÓN: Botón Principal con ratio corner a 6px (rounded-[6px]) */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-lg transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-[6px] transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {loading ? 'PROCESSING...' : (isSignUp ? 'SIGN UP' : 'SIGN IN')}
           </button>
@@ -138,12 +138,12 @@ function LoginForm() {
             <div className="flex-1 h-[1px] bg-[#000f37]/10" />
           </div>
 
-          {/* BOTÓN GOOGLE */}
+          {/* 🔘 CORRECCIÓN: Botón Google con ratio corner a 6px (rounded-[6px]) */}
           <button
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-lg transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+            className="w-full border border-[#000f37]/10 bg-white py-3 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#000f37] rounded-[6px] transition-all hover:bg-gray-50 flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" className="shrink-0">
               <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.29 1.53-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.65-5.17 3.65-8.58z"/>
@@ -154,7 +154,7 @@ function LoginForm() {
             {loading ? 'CONNECTING...' : 'CONTINUE WITH GOOGLE'}
           </button>
           
-          {/* 🔗 ENLACES DE CONMUTACIÓN: Incrementados dos puntos de escala tipográfica (de text-[11px] a text-sm) */}
+          {/* ENLACES DE CONMUTACIÓN */}
           <div className="text-center mt-3">
             {isSignUp ? (
               <p className="text-sm text-gray-400 font-medium tracking-wide">
@@ -190,7 +190,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#f4f5f6] px-4 relative overflow-hidden text-[#000f37]">
       
-      {/* 📦 CAJA DE LOGIN: Minimalismo puro, sin stroke, sin sombras */}
+      {/* 📦 CAJA DE LOGIN */}
       <div className="w-full max-w-[400px] bg-white p-10 border-none rounded-none shadow-none">
         
         <div className="text-center">
