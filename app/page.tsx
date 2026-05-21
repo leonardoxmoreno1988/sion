@@ -215,22 +215,25 @@ export default function TemporalHomePage() {
           </div>
         </section>
 
-        {/* 🛠️ NUEVA SECCIÓN: FAQS CON ACORDEONES EXPANDIBLES */}
+        {/* 🛠️ SECCIÓN REFINADA: FAQS CON ACORDEONES MINIMALISTAS */}
         <section className="border-t border-[#e5e7eb] pt-12 pb-8">
-          {/* Título unificado en gris claro text-[#6b7280] y tipografía serif */}
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
             FAQs
           </h3>
 
+          {/* ✂️ REMOVIDO: border-t inicial para evitar la doble línea gris después del título */}
           <div className="flex flex-col border-b border-[#e5e7eb]">
+            
             {/* PREGUNTA 1 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                <h4 className="text-sm font-bold uppercase tracking-wide">
+                {/* 🖋️ CAMBIO: Formato regular con solo la primera en mayúscula */}
+                <h4 className="text-sm font-semibold tracking-wide text-left">
                   What is the primary manuscript lineage used by Patmos?
                 </h4>
-                <span className="relative size-5 shrink-0">
-                  <span className="absolute inset-0 rounded-full bg-transparent border border-[#000f37]/20 group-open:rotate-180 transition-transform duration-300 flex items-center justify-center font-mono text-xs text-[#4b5563]">&darr;</span>
+                {/* 🔘 CAMBIO: Flecha clásica pura sin círculo contenedor que rota al abrir */}
+                <span className="text-xs text-[#4b5563] group-open:rotate-180 transition-transform duration-300 ease-in-out shrink-0 select-none">
+                  ▼
                 </span>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
@@ -241,11 +244,13 @@ export default function TemporalHomePage() {
             {/* PREGUNTA 2 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                <h4 className="text-sm font-bold uppercase tracking-wide">
+                {/* 🖋️ CAMBIO: Formato regular */}
+                <h4 className="text-sm font-semibold tracking-wide text-left">
                   How does the system enforce dispensational theology?
                 </h4>
-                <span className="relative size-5 shrink-0">
-                  <span className="absolute inset-0 rounded-full bg-transparent border border-[#000f37]/20 group-open:rotate-180 transition-transform duration-300 flex items-center justify-center font-mono text-xs text-[#4b5563]">&darr;</span>
+                {/* 🔘 CAMBIO: Flecha clásica pura */}
+                <span className="text-xs text-[#4b5563] group-open:rotate-180 transition-transform duration-300 ease-in-out shrink-0 select-none">
+                  ▼
                 </span>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
@@ -256,11 +261,13 @@ export default function TemporalHomePage() {
             {/* PREGUNTA 3 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                <h4 className="text-sm font-bold uppercase tracking-wide">
+                {/* 🖋️ CAMBIO: Formato regular */}
+                <h4 className="text-sm font-semibold tracking-wide text-left">
                   What happens when my free pipeline query allotment runs out?
                 </h4>
-                <span className="relative size-5 shrink-0">
-                  <span className="absolute inset-0 rounded-full bg-transparent border border-[#000f37]/20 group-open:rotate-180 transition-transform duration-300 flex items-center justify-center font-mono text-xs text-[#4b5563]">&darr;</span>
+                {/* 🔘 CAMBIO: Flecha clásica pura */}
+                <span className="text-xs text-[#4b5563] group-open:rotate-180 transition-transform duration-300 ease-in-out shrink-0 select-none">
+                  ▼
                 </span>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
@@ -271,11 +278,13 @@ export default function TemporalHomePage() {
             {/* PREGUNTA 4 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                <h4 className="text-sm font-bold uppercase tracking-wide">
+                {/* 🖋️ CAMBIO: Formato regular */}
+                <h4 className="text-sm font-semibold tracking-wide text-left">
                   Can I manage my billing or cancel my subscription dynamically?
                 </h4>
-                <span className="relative size-5 shrink-0">
-                  <span className="absolute inset-0 rounded-full bg-transparent border border-[#000f37]/20 group-open:rotate-180 transition-transform duration-300 flex items-center justify-center font-mono text-xs text-[#4b5563]">&darr;</span>
+                {/* 🔘 CAMBIO: Flecha clásica pura */}
+                <span className="text-xs text-[#4b5563] group-open:rotate-180 transition-transform duration-300 ease-in-out shrink-0 select-none">
+                  ▼
                 </span>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
