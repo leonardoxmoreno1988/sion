@@ -515,7 +515,7 @@ export default function PatmosChat() {
                 }}
               >
                 <span style={{ 
-                  fontSize: isMobile ? '11px' : '14px', 
+                  fontSize: isMobile ? '12px' : '15px', 
                   color: theme.textMain, 
                   fontWeight: '500', 
                   whiteSpace: 'nowrap', 
@@ -526,7 +526,7 @@ export default function PatmosChat() {
                 }}>
                   {session.user_query}
                 </span>
-                <span style={{ fontSize: isMobile ? '8px' : '11px', color: theme.textMuted, fontFamily: theme.fontSans }}>
+                <span style={{ fontSize: isMobile ? '10px' : '13px', color: theme.textMuted, fontFamily: theme.fontSans }}>
                   {new Date(session.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </button>
@@ -581,7 +581,7 @@ export default function PatmosChat() {
               {userEmail && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 0 0' }}>
                   <p style={{ 
-                    fontSize: isMobile ? '9px' : '11px', 
+                    fontSize: isMobile ? '11px' : '13px', 
                     color: theme.textMuted, 
                     margin: 0, 
                     fontFamily: theme.fontSans, 
@@ -599,7 +599,7 @@ export default function PatmosChat() {
                     <span style={{
                       backgroundColor: '#2d65f6',
                       color: '#ffffff',
-                      fontSize: isMobile ? '7px' : '10px',
+                      fontSize: isMobile ? '9px' : '12px',
                       fontWeight: '800',
                       letterSpacing: '1px',
                       padding: '2px 4px',
