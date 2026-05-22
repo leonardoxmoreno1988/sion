@@ -55,7 +55,7 @@ export default function HomePage() {
         <div className="mt-10 flex flex-col sm:flex-row gap-4">
           <Link 
             href="/login" 
-            className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-base font-semibold px-10 py-5 rounded-lg hover:bg-black transition-all"  // ← Radio reducido
+            className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-base font-semibold px-10 py-5 rounded-lg hover:bg-black transition-all"
           >
             Start Asking the KJV Now →
           </Link>
@@ -65,15 +65,14 @@ export default function HomePage() {
           Free: 40 questions per day • Pro: Unlimited for $7/month
         </p>
 
-        {/* Imagen sin bordes redondeados */}
         <img 
           src="https://www.leonardoxmoreno.com/files/patmos-illustration.jpg" 
           alt="Patmos Platform Preview" 
-          className="w-full h-auto mt-10"   // ← Espacio reducido
+          className="w-full h-auto mt-10"
         />
 
         {/* BENEFITS SECTION */}
-        <section className="mt-16 border-t border-[#e5e7eb] pt-12">   {/* ← Espacio reducido después de la imagen */}
+        <section className="mt-16 border-t border-[#e5e7eb] pt-12">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
             Built Exclusively for KJV-Only Believers
           </h3>
@@ -115,7 +114,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Free Plan */}
-            <div className="bg-white border border-[#e5e7eb] p-8 rounded-lg">   {/* ← Radio reducido */}
+            <div className="bg-white border border-[#e5e7eb] p-8 rounded-lg">
               <h4 className="text-xl font-semibold">Free</h4>
               <div className="mt-4 flex items-baseline">
                 <span className="text-5xl font-bold">$0</span>
@@ -131,14 +130,14 @@ export default function HomePage() {
               </ul>
               <Link 
                 href="/login"
-                className="block w-full text-center mt-10 border border-[#000f37] py-4 font-semibold rounded-lg hover:bg-gray-50"   {/* ← Radio reducido */}
+                className="block w-full text-center mt-10 border border-[#000f37] py-4 font-semibold rounded-lg hover:bg-gray-50"
               >
                 Start Free
               </Link>
             </div>
 
             {/* Pro Plan */}
-            <div className="bg-white border-2 border-[#000f37] p-8 rounded-lg relative">   {/* ← Radio reducido */}
+            <div className="bg-white border-2 border-[#000f37] p-8 rounded-lg relative">
               <div className="absolute -top-3 right-6 bg-[#2d65f6] text-white text-xs px-4 py-1 rounded-full font-medium">
                 RECOMMENDED
               </div>
@@ -158,7 +157,7 @@ export default function HomePage() {
               </ul>
               <a 
                 href="/api/checkout"
-                className="block w-full text-center mt-10 bg-[#000f37] text-white py-4 font-semibold rounded-lg hover:bg-black"   {/* ← Radio reducido */}
+                className="block w-full text-center mt-10 bg-[#000f37] text-white py-4 font-semibold rounded-lg hover:bg-black"
               >
                 Upgrade to Pro
               </a>
