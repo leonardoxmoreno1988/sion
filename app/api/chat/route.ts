@@ -3,7 +3,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import OpenAI from 'openai'; // 👈 RESTAURADO: SDK para el motor de embeddings vectoriales
+import OpenAI from 'openai';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       console.error('⚠️ Paywall Shield Error (Running defensively):', gateError);
     }
 
-    // 3. 🎯 RESTAURADO: Obtener Embedding de la consulta e inyectarlo en el RPC de Supabase
+    // 3. Obtener Embedding de la consulta e inyectarlo en el RPC de Supabase
     let contextText = '';
     try {
       const embeddingResponse = await openai.embeddings.create({
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
       // Ejecutar búsqueda vectorial HNSW en el Arsenal Teológico con la firma vectorial real
       const { data: semanticResults, error: rpcError } = await supabase
         .rpc('match_documents', {
-          query_embedding: queryEmbedding, // 👈 Vector dinámico real mapeado
+          query_embedding: queryEmbedding,
           match_threshold: 0.25,
           match_count: 14
         });
@@ -118,9 +118,10 @@ Provided Context (Your ONLY source of truth and final authority):
 ${contextText ? contextText : "No specific context blocks retrieved. Apply internal fundamental received text axioms."}
 `;
 
-    // 5. Mapeo de Historial al formato de Anthropic
+    // 5. 🛠️ VALIDACIÓN DE ALTERNANCIA EXCLUSIVA PARA ANTHROPIC CLAUDE
+    // Filtramos mensajes vacíos o de sistema iniciales para asegurar que la conversación empiece siempre con un rol 'user'
     const anthropicMessages = messages
-      .filter((m: any) => m.role === 'user' || m.role === 'assistant')
+      .filter((m: any) => (m.role === 'user' || m.role === 'assistant') && m.id !== 'welcome' && m.content.trim() !== '')
       .map((m: any) => ({
         role: m.role,
         content: m.content,
