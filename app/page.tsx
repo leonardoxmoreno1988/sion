@@ -174,10 +174,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 🛠️ REINTEGRACIÓN: SECCIÓN DE FAQS REFINADA AL FINAL */}
+        {/* 🏛️ FAQS CON RE-RESTRUCTURACIÓN DE PROSA Y LENGUAJE DOCTRINAL */}
         <section className="mt-20 border-t border-[#e5e7eb] pt-12 pb-8">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
-            FAQs
+            Frequently Examined
           </h3>
 
           <div className="flex flex-col border-b border-[#e5e7eb]">
@@ -186,7 +186,7 @@ export default function HomePage() {
             <details className="group py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
-                  What is the primary manuscript lineage used by Patmos?
+                  Does Patmos remain strictly anchored to the Textus Receptus lineage?
                 </h4>
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
@@ -196,7 +196,7 @@ export default function HomePage() {
                 </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
-                Patmos maps out strict biblical context utilizing exclusively the Textus Receptus lineage through the authorized King James Version (KJV), ensuring zero modern lexical modification.
+                Yes. Patmos maps out strict biblical context utilizing exclusively the Textus Receptus lineage through the authorized King James Version (KJV), ensuring zero modern lexical modification or ecumenical alterations.
               </p>
             </details>
 
@@ -204,7 +204,7 @@ export default function HomePage() {
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
-                  How does the system enforce dispensational theology?
+                  How does the architecture enforce the right division of truth?
                 </h4>
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
@@ -214,7 +214,7 @@ export default function HomePage() {
                 </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
-                Every prompt execution runs through native filters that align data structures with right division metrics, parsing structural typology, biblical boundaries, and audience separation rules.
+                Every prompt execution runs through native algorithmic filters that align data structures with right division metrics, rigidly partitioning target audiences, structural typology, and dispensational boundaries.
               </p>
             </details>
 
@@ -222,7 +222,7 @@ export default function HomePage() {
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
-                  What happens when my free pipeline query allotment runs out?
+                  What happens once my daily quota of scriptural inquiries is exhausted?
                 </h4>
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
@@ -232,7 +232,7 @@ export default function HomePage() {
                 </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
-                Once the initial free inquiry credit barrier is met, access will lock automatically. You can sustain the pipeline structure by becoming a Supporter at any time.
+                Once the 40 daily question barrier is reached, the pipeline locks automatically to protect computational resources. You can sustain unhindered and uncapped pipeline access by becoming a Supporter at any time.
               </p>
             </details>
 
@@ -240,7 +240,7 @@ export default function HomePage() {
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
-                  Can I manage my billing or cancel my subscription dynamically?
+                  Can I manage my supporter contribution and archiving preferences dynamically?
                 </h4>
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
@@ -250,7 +250,7 @@ export default function HomePage() {
                 </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
-                Yes. Supporter accounts gain immediate access to a secure Stripe Customer Portal integrated right into the control panel header to update credentials, download past due invoices, or adjust tiers.
+                Yes. Supporter accounts gain immediate access to a secure Stripe Customer Portal integrated right into the interface header to alter credentials, manage continuous archiving, or adjust tiers.
               </p>
             </details>
 
