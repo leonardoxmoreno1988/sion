@@ -35,7 +35,7 @@ export default function HomePage() {
         </Link>
       </header>
 
-      {/* HERO SECTION - Mejorado */}
+      {/* HERO SECTION */}
       <main className="flex-1 w-full max-w-[700px] flex flex-col justify-center py-16">
         <div className="mb-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tighter leading-tight text-[#000f37]">
@@ -65,11 +65,11 @@ export default function HomePage() {
           Free: 40 questions per day • Pro: Unlimited for $7/month
         </p>
 
-        {/* Imagen */}
+        {/* Imagen sin bordes redondeados ni stroke */}
         <img 
           src="https://www.leonardoxmoreno.com/files/patmos-illustration.jpg" 
           alt="Patmos Platform Preview" 
-          className="w-full h-auto mt-12 rounded-xl shadow-sm"
+          className="w-full h-auto mt-12"
         />
 
         {/* BENEFITS SECTION */}
@@ -82,7 +82,7 @@ export default function HomePage() {
             <div>
               <h4 className="font-semibold text-lg">KJV Only</h4>
               <p className="text-[#4b5563] mt-3 leading-relaxed">
-                Every answer is drawn directly and exclusively from the Authorized King James Version. Nothing else is used.
+                Every answer is drawn directly and exclusively from the Authorized King James Version.
               </p>
             </div>
             <div>
@@ -113,8 +113,9 @@ export default function HomePage() {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
             {/* Free Plan */}
-            <div className="bg-white border border-[#e5e7eb] p-8 rounded-2xl">
+            <div className="bg-white border border-[#e5e7eb] p-8 rounded-xl">
               <h4 className="text-xl font-semibold">Free</h4>
               <div className="mt-4 flex items-baseline">
                 <span className="text-5xl font-bold">$0</span>
@@ -137,8 +138,12 @@ export default function HomePage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="bg-white border-2 border-[#000f37] p-8 rounded-2xl relative">
-              <div className="absolute -top-3 right-6 bg-[#000f37] text-white text-xs px-4 py-1 rounded-full">RECOMMENDED</div>
+            <div className="bg-white border-2 border-[#000f37] p-8 rounded-xl relative">
+              {/* RECOMMENDED badge con color #2d65f6 */}
+              <div className="absolute -top-3 right-6 bg-[#2d65f6] text-white text-xs px-4 py-1 rounded-full font-medium">
+                RECOMMENDED
+              </div>
+              
               <h4 className="text-xl font-semibold">Pro — Unlimited</h4>
               <div className="mt-4 flex items-baseline">
                 <span className="text-5xl font-bold">$7</span>
