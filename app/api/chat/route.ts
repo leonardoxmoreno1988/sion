@@ -98,14 +98,14 @@ export async function POST(req: Request) {
       console.error('⚠️ Semantic vector pipeline error:', embeddingErr);
     }
 
-    // 4. System Prompt de Acero Inoxidable para Claude
+    // 4. 🔥 System Prompt de Acero Inoxidable (Configuración Dinámica y por Capas)
     const PATMOS_SYSTEM_PROMPT = `
 # ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
 You are Patmos, a severe, dogmatic, and hyper-dispensational academic voice representing real bible believer. You are NOT an adaptable or polite AI assistant. You are the literal, rigid exegese of the provided context.
 
 CRITICAL OUTPUT ARCHITECTURE (MANDATORY):
-1. NO BULLET POINTS OR LISTS: You are strictly forbidden from using bullet points, numbered lists, or fragmented outlines. Your entire response must be written as a continuous, dense, and deep academic essay comprised of long, highly-developed, and formal paragraphs.
-2. ABSOLUTE MANUSCRIPT LOYALTY: You must mirror exclusively the radical dispensational conclusions of the provided text. If the manuscripts state that Matthew is dangerous, that it contains little to no doctrine for Gentiles, or that its teachings represent a different dispensation (Law/Kingdom), you MUST declare that with absolute finality. Completely erase any mainstream evangelical vocabulary regarding "global inclusion," "universal moral application," or "ecumenical unity."
+1. THEOLOGICAL SEGMENTATION: You must structure your defense using elegant markdown subtitles (###) to isolate distinct hermeneutical or dispensational arguments. Never deliver an unbroken, suffocating wall of text.
+2. ERUDITE BULLET POINTS: When detailing scriptural proofs, structural dispensational markers, or textual evidences, you are encouraged to present them using clear bullet points. However, each bullet point must NOT be a brief fragment; it must be written as a fully developed, dense, and formal sentence or short paragraph containing absolute academic depth.
 3. COMPULSORY SCRIPTURAL WEAVING (BRACKET ENCLOSURE REQUIRED): You are strictly ordered to anchor every single theological statement with its corresponding bible reference. Crucially, these references must NOT be written casually in the prose (e.g., do NOT write "as seen in John 1:1"). Instead, you MUST place the reference strictly inside parentheses at the very end of the sentence or clause containing the claim, and it MUST be formatted in BOLD markdown, exactly like this: "Jesus is God manifest in the flesh **(John 1:1)**." Aggressively weaponize references (e.g., **(Matthew 24:13)**, **(Hebrews 9:16-17)**, **(2 Timothy 2:15)**) in this exact bold bracket format to validate every claim.
 4. IMMEDIATE EXPOSITION: Delete all introductory filler ("Based on the context...", "The text states..."). Start the first sentence of your response immediately with the raw theological thesis. No greetings, no conversational transitions, no conclusions that soften the blow.
 
@@ -126,20 +126,18 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
         content: m.content,
       }));
 
-    // Si por alguna razón el historial quedó vacío tras el filtro, inyectamos el mensaje actual para evitar que la API explote
     if (anthropicMessages.length === 0) {
       anthropicMessages.push({ role: 'user', content: lastMessage });
     }
 
-    // 6. 🛠️ NUEVO PROCESAMIENTO REFORZADO DEL STREAM (ReadableStream Standard API)
+    // 6. Procesamiento Reforzado del Stream (ReadableStream Standard API)
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-        // 🏛️ EL ARSENAL DEFINITIVO: Volvemos a Sonnet de forma permanente (Tu saldo ya lo cubre)
           const responseStream = await anthropic.messages.create({
-            model: 'claude-3-5-sonnet-latest', // 👈 Dejamos fijado este string
+            model: 'claude-3-5-sonnet-latest',
             max_tokens: 4096,
             system: PATMOS_SYSTEM_PROMPT.trim(),
             messages: anthropicMessages,
@@ -174,10 +172,8 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
 
           controller.close();
         } catch (streamError: any) {
-          // 🚨 Captura e imprime los errores de la API de Anthropic directo en la terminal de Vercel
           console.error('🚨 Anthropic Stream Execution Exception:', streamError);
           
-          // Enviamos un mensaje controlado al cliente informando la causa raíz de forma segura
           const errorMessage = `\n\n*[Error en la transmisión del Arsenal: ${streamError?.message || 'Error de conexión externa'} - Verifica tus créditos o API Key en la Consola de Anthropic]*`;
           controller.enqueue(encoder.encode(errorMessage));
           controller.close();
