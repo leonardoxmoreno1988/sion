@@ -137,10 +137,9 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // Solicitamos el stream de Anthropic de manera controlada de mutuo acuerdo
-          // 🏛️ CORREGIDO: Cambiamos el string del modelo por la versión oficial reconocida
+         // 🧪 PRUEBA DE DIAGNÓSTICO: Cambiamos temporalmente al modelo Haiku (Abre todos los Tiers)
           const responseStream = await anthropic.messages.create({
-            model: 'claude-3-5-sonnet-latest', // 👈 Cambiado aquí
+            model: 'claude-3-5-haiku-latest', // 👈 Reemplaza por este string
             max_tokens: 4096,
             system: PATMOS_SYSTEM_PROMPT.trim(),
             messages: anthropicMessages,
