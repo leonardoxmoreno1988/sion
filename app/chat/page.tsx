@@ -30,7 +30,7 @@ export default function PatmosChat() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
-  // 📱 ESTADO RESPONSIVO: Detectar si el usuario está en móvil
+  // 📱 ESTADO RESPONSIVO
   const [isMobile, setIsMobile] = useState(false);
   
   // ⚙️ ESTADOS EXTRA: Control de utilidades y menús
@@ -86,22 +86,16 @@ export default function PatmosChat() {
       link.rel = 'stylesheet';
       document.head.appendChild(link);
 
-      // 📱 DETECTAR BREAKPOINT RESPONSIVO EN EL MONTAJE
-      const mediaQuery = window.matchMedia('(max-width: 768px)');
-      setIsMobile(mediaQuery.matches);
-      
-      // Cerrar sidebar por defecto en móviles para no asfixiar la UI inicial
-      if (mediaQuery.matches) {
-        setSidebarOpen(false);
-      }
-
-      const handleResize = (e: MediaQueryListEvent) => {
-        setIsMobile(e.matches);
-        if (e.matches) setSidebarOpen(false);
-        else setSidebarOpen(true);
+      // 📱 ESCUCHA DE BREAKPOINT MEJORADA
+      const checkDevice = () => {
+        const mobile = window.innerWidth <= 768;
+        setIsMobile(mobile);
+        // Si es escritorio lo dejamos abierto, si es móvil lo cerramos por defecto
+        setSidebarOpen(!mobile);
       };
-      
-      mediaQuery.addEventListener('change', handleResize);
+
+      checkDevice();
+      window.addEventListener('resize', checkDevice);
 
       const { data: { session }, error } = await supabase.auth.getSession();
       
@@ -174,7 +168,7 @@ export default function PatmosChat() {
 
       return () => {
         authSub.unsubscribe();
-        mediaQuery.removeEventListener('change', handleResize);
+        window.removeEventListener('resize', checkDevice);
       };
     };
     initPage();
@@ -214,7 +208,7 @@ export default function PatmosChat() {
     setMessages([
       { id: 'welcome', role: "assistant", content: "Welcome. How may I assist your Bible inquiry today?" }
     ]);
-    if (isMobile) setSidebarOpen(false); // Cierra menú al iniciar hilo en móvil
+    if (isMobile) setSidebarOpen(false);
   };
 
   const loadSession = (session: ChatSession) => {
@@ -223,7 +217,7 @@ export default function PatmosChat() {
       { id: `${session.id}-user`, role: "user", content: session.user_query },
       { id: `${session.id}-bot`, role: "assistant", content: session.bot_response }
     ]);
-    if (isMobile) setSidebarOpen(false); // Cierra menú al seleccionar hilo en móvil
+    if (isMobile) setSidebarOpen(false);
   };
 
   const handleClearHistory = async () => {
@@ -389,24 +383,16 @@ export default function PatmosChat() {
     }
   };
 
-  // 📐 CÁLCULO DE ANCHOS DINÁMICOS RESPONSIVOS (Móvil vs Desktop)
-  const getSidebarWidth = () => {
-    if (!sidebarOpen) return '0px';
-    return isMobile ? '30vw' : '260px'; // 👈 30% de la pantalla en móvil
-  };
-
-  const getMainWidth = () => {
-    if (!isMobile) return '100%';
-    return sidebarOpen ? '70vw' : '100vw'; // 👈 70% de la pantalla en móvil al abrirse
-  };
-
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: theme.bg, transition: 'all 0.4s ease', overflowX: 'hidden' }}>
+    // 🏛️ SOLUCIÓN FLEXBOX: Manejo robusto de la distribución horizontal en pantalla completa
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: theme.bg, transition: 'all 0.4s ease', overflow: 'hidden' }}>
       
       {/* SIDEBAR ARCHIVE */}
       <aside style={{
-        width: getSidebarWidth(),
-        minWidth: sidebarOpen && !isMobile ? '260px' : 'none',
+        // Matemática exacta: Si está abierto en móvil toma el 30%, en desktop fija 260px. Si está cerrado, 0px.
+        width: sidebarOpen ? (isMobile ? '30%' : '260px') : '0px',
+        // Evitamos que en escritorio se encoja al redimensionar
+        flexShrink: 0,
         backgroundColor: theme.sidebarBg,
         borderRight: sidebarOpen ? `1px solid ${theme.borderSion}` : 'none',
         display: 'flex',
@@ -437,7 +423,7 @@ export default function PatmosChat() {
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '15px 4px' : '15px 10px', position: 'relative' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '15px 6px' : '15px 10px', position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px', marginBottom: '12px', position: 'relative' }}>
             <p style={{ fontSize: isMobile ? '9px' : '11px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', margin: 0, fontFamily: 'serif' }}>
               Historical Records
@@ -518,7 +504,7 @@ export default function PatmosChat() {
                   textAlign: 'left',
                   background: activeSessionId === session.id ? (isDarkMode ? '#1e293b' : '#e5e7eb') : 'transparent',
                   border: 'none',
-                  padding: isMobile ? '8px 4px' : '10px',
+                  padding: isMobile ? '8px 6px' : '10px',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   marginBottom: '5px',
@@ -551,7 +537,9 @@ export default function PatmosChat() {
 
       {/* MAIN CONTAINER */}
       <main style={{
-        width: getMainWidth(),
+        // Si está abierto en móvil toma el 70% restante, si está cerrado toma el 100%. En desktop se expande libremente.
+        width: isMobile ? (sidebarOpen ? '70%' : '100%') : '100%',
+        flexGrow: 1,
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
@@ -599,7 +587,7 @@ export default function PatmosChat() {
                     fontFamily: theme.fontSans, 
                     textTransform: 'uppercase', 
                     letterSpacing: '0.5px',
-                    maxWidth: isMobile ? '100px' : 'none',
+                    maxWidth: isMobile ? '90px' : 'none',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
@@ -611,7 +599,7 @@ export default function PatmosChat() {
                     <span style={{
                       backgroundColor: '#2d65f6',
                       color: '#ffffff',
-                      fontSize: isMobile ? '8px' : '10px',
+                      fontSize: isMobile ? '7px' : '10px',
                       fontWeight: '800',
                       letterSpacing: '1px',
                       padding: '2px 4px',
@@ -825,7 +813,6 @@ export default function PatmosChat() {
 
             </div>
           ))}
-          {/* 🛠️ CORRECCIÓN: 'justifycontent' cambiado a 'justifyContent' */}
           {isLoading && (
             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
               <div style={{ color: theme.textMuted, fontSize: '14px', fontStyle: 'italic', marginLeft: '10px', fontFamily: theme.fontSans }}>
