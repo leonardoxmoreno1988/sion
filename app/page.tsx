@@ -66,14 +66,16 @@ export default function HomePage() {
         </p>
 
         {/* Imagen */}
+        {/* 🛠️ AJUSTE: Se añade 'block' y 'mb-0' para eliminar cualquier separación inferior oculta */}
         <img 
           src="https://www.leonardoxmoreno.com/files/patmos-illustration.jpg" 
           alt="Patmos Platform Preview" 
-          className="w-full h-auto mt-8"        // Espacio reducido
+          className="w-full h-auto mt-8 block mb-0"
         />
 
-        {/* BENEFITS SECTION - Espacio mínimo después de la imagen */}
-        <section className="mt-12 border-t border-[#e5e7eb] pt-12">   {/* mt-12 + pt-12 = espacio mínimo */}
+        {/* BENEFITS SECTION - Espacio colapsado a 0 entre la imagen y la línea */}
+        {/* 🛠️ AJUSTE: Cambiado 'mt-12' a 'mt-0' para pegar el separador exactamente al borde inferior de la imagen */}
+        <section className="mt-0 border-t border-[#e5e7eb] pt-12">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
             Built Exclusively for KJV-Only Believers
           </h3>
