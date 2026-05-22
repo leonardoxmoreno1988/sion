@@ -66,7 +66,6 @@ export default function HomePage() {
         </p>
 
         {/* Imagen */}
-        {/* 🛠️ AJUSTE: Se añade 'block' y 'mb-0' para eliminar cualquier separación inferior oculta */}
         <img 
           src="https://www.leonardoxmoreno.com/files/patmos-illustration.jpg" 
           alt="Patmos Platform Preview" 
@@ -74,7 +73,6 @@ export default function HomePage() {
         />
 
         {/* BENEFITS SECTION - Espacio colapsado a 0 entre la imagen y la línea */}
-        {/* 🛠️ AJUSTE: Cambiado 'mt-12' a 'mt-0' para pegar el separador exactamente al borde inferior de la imagen */}
         <section className="mt-0 border-t border-[#e5e7eb] pt-12">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
             Built Exclusively for KJV-Only Believers
@@ -117,20 +115,23 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Free Plan */}
-            <div className="bg-white border border-[#e5e7eb] p-8 rounded-xl">
-              <h4 className="text-xl font-semibold">Free</h4>
-              <div className="mt-4 flex items-baseline">
-                <span className="text-5xl font-bold">$0</span>
-                <span className="ml-2 text-gray-500">/ forever</span>
+            {/* 🛠️ AJUSTE: Cambiado border-[#e5e7eb] a border-[#cbd5e1] para oscurecer sutilmente el stroke */}
+            <div className="bg-white border border-[#cbd5e1] p-8 rounded-xl flex flex-col justify-between">
+              <div>
+                <h4 className="text-xl font-semibold">Free</h4>
+                <div className="mt-4 flex items-baseline">
+                  <span className="text-5xl font-bold">$0</span>
+                  <span className="ml-2 text-gray-500">/ forever</span>
+                </div>
+                <p className="mt-6 text-[#4b5563]">
+                  Perfect for testing and daily use.
+                </p>
+                <ul className="mt-8 space-y-3 text-sm">
+                  <li className="flex items-center gap-2">✓ 40 questions per day</li>
+                  <li className="flex items-center gap-2">✓ Full KJV answers</li>
+                  <li className="flex items-center gap-2">✓ Pre-trib defense</li>
+                </ul>
               </div>
-              <p className="mt-6 text-[#4b5563]">
-                Perfect for testing and daily use.
-              </p>
-              <ul className="mt-8 space-y-3 text-sm">
-                <li className="flex items-center gap-2">✓ 40 questions per day</li>
-                <li className="flex items-center gap-2">✓ Full KJV answers</li>
-                <li className="flex items-center gap-2">✓ Pre-trib defense</li>
-              </ul>
               <Link 
                 href="/login"
                 className="block w-full text-center mt-10 border border-[#000f37] py-4 font-semibold rounded-xl hover:bg-gray-50"
@@ -140,24 +141,32 @@ export default function HomePage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="bg-white border-2 border-[#000f37] p-8 rounded-xl relative">
+            <div className="bg-white border-2 border-[#000f37] p-8 rounded-xl relative flex flex-col justify-between">
               <div className="absolute -top-3 right-6 bg-[#2d65f6] text-white text-xs px-4 py-1 rounded-full font-medium">
                 RECOMMENDED
               </div>
               
-              <h4 className="text-xl font-semibold">Pro — Unlimited</h4>
-              <div className="mt-4 flex items-baseline">
-                <span className="text-5xl font-bold">$7</span>
-                <span className="ml-2 text-gray-500">/ month</span>
+              <div>
+                {/* 🛠️ AJUSTE: Título actualizado a 'Become a Supporter' */}
+                <h4 className="text-xl font-semibold">Become a Supporter</h4>
+                <div className="mt-4 flex items-baseline">
+                  <span className="text-5xl font-bold">$7</span>
+                  <span className="ml-2 text-gray-500">/ month</span>
+                </div>
+                <p className="text-sm text-gray-500">or $69/year (save 18%)</p>
+                
+                {/* 🛠️ AJUSTE: Inyección de la frase de valor e impacto global */}
+                <p className="mt-4 text-xs italic leading-relaxed text-[#4b5563]">
+                  "Your support helps keep Patmos pure, independent, and focused only on the KJV for believers around the world."
+                </p>
+                
+                <ul className="mt-6 space-y-3 text-sm">
+                  <li className="flex items-center gap-2">✓ Unlimited questions</li>
+                  <li className="flex items-center gap-2">✓ Faster responses</li>
+                  <li className="flex items-center gap-2">✓ Full conversation history</li>
+                  <li className="flex items-center gap-2">✓ Priority access</li>
+                </ul>
               </div>
-              <p className="text-sm text-gray-500">or $69/year (save 18%)</p>
-              
-              <ul className="mt-8 space-y-3 text-sm">
-                <li className="flex items-center gap-2">✓ Unlimited questions</li>
-                <li className="flex items-center gap-2">✓ Faster responses</li>
-                <li className="flex items-center gap-2">✓ Full conversation history</li>
-                <li className="flex items-center gap-2">✓ Priority access</li>
-              </ul>
               <a 
                 href="/api/checkout"
                 className="block w-full text-center mt-10 bg-[#000f37] text-white py-4 font-semibold rounded-xl hover:bg-black"
