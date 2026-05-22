@@ -136,14 +136,31 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const responseStream = await anthropic.messages.create({
-            model: 'claude-3-5-sonnet-latest',
-            max_tokens: 4096,
-            system: PATMOS_SYSTEM_PROMPT.trim(),
-            messages: anthropicMessages,
-            temperature: 0,
-            stream: true,
-          });
+          // 🏛️ CAPA DE EJECUCIÓN REDUNDANTE CONTRA ERRORES 404
+          let responseStream;
+          try {
+            // Intentamos invocar el modelo Sonnet con su ID de versión fijo de producción
+            responseStream = await anthropic.messages.create({
+              model: 'claude-3-5-sonnet-20241022',
+              max_tokens: 4096,
+              system: PATMOS_SYSTEM_PROMPT.trim(),
+              messages: anthropicMessages,
+              temperature: 0,
+              stream: true,
+            });
+          } catch (firstModelError: any) {
+            console.warn('⚠️ Sonnet rebotado por la API de Anthropic, aplicando fallback a Haiku...', firstModelError);
+            
+            // Fallback inmediato a Haiku usando su identificador fijo
+            responseStream = await anthropic.messages.create({
+              model: 'claude-3-5-haiku-20241022',
+              max_tokens: 4096,
+              system: PATMOS_SYSTEM_PROMPT.trim(),
+              messages: anthropicMessages,
+              temperature: 0,
+              stream: true,
+            });
+          }
 
           let completeBotResponse = '';
 
