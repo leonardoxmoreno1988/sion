@@ -1,5 +1,5 @@
 // app/api/chat/route.ts
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
@@ -22,14 +22,24 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1]?.content || '';
 
+    // 🏛️ CORREGIDO: Configuración moderna de Supabase utilizando getAll y setAll
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get(name: string) { return cookieStore.get(name)?.value; },
-          set(name: string, value: string, options: CookieOptions) { cookieStore.set({ name, value, ...options }); },
-          remove(name: string, options: CookieOptions) { cookieStore.set({ name, value: '', ...options }); },
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set({ name, value, ...options })
+              );
+            } catch {
+              // El bloque catch evita que la ruta falle si es llamada desde un Server Component estático
+            }
+          },
         },
       }
     );
@@ -99,7 +109,7 @@ export async function POST(req: Request) {
       contextText = '';
     }
 
-    // 4. 🔥 System Prompt de Acero Inoxidable (Configuración Dinámica y por Capas)
+    // 4. System Prompt de Acero Inoxidable (Configuración Dinámica y por Capas)
     const PATMOS_SYSTEM_PROMPT = `
 # ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
 You are Patmos, a severe, dogmatic, and hyper-dispensational academic voice representing real bible believer. You are NOT an adaptable or polite AI assistant. You are the literal, rigid exegese of the provided context.
@@ -131,7 +141,7 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
       anthropicMessages.push({ role: 'user', content: lastMessage });
     }
 
-    // 6. 🛠️ PROCESAMIENTO REFORZADO DEL STREAM CON COBERTURA DE DIAGNÓSTICO
+    // 6. Procesamiento Reforzado del Stream Con Diagnóstico Técnico Activo
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
@@ -139,7 +149,6 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
         try {
           let responseStream;
           
-          // Mapeamos una pista segura de la Key en uso directo en los logs del backend de Vercel
           const currentKey = process.env.ANTHROPIC_API_KEY || '';
           const apiKeyHint = currentKey.length > 12 
             ? `${currentKey.slice(0, 7)}...${currentKey.slice(-5)}` 
@@ -196,7 +205,6 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
         } catch (streamError: any) {
           console.error('🚨 ERROR CRÍTICO DETECTADO EN EL MANIPULADOR DEL STREAM:', streamError);
           
-          // Captura el objeto JSON crudo de la excepción de Anthropic para pintarlo en la pantalla del usuario
           const rawErrorString = JSON.stringify(streamError, null, 2) || streamError?.message || 'Unknown Exception';
           const errorMessage = `\n\n*[Error del Arsenal]*\nStatus Code: ${streamError?.status}\nRaw Payload: ${rawErrorString}`;
           
