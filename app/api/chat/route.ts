@@ -79,13 +79,12 @@ export async function POST(req: Request) {
         const { data: semanticResults, error: rpcError } = await supabase
           .rpc('match_documents', {
             query_embedding: queryEmbedding,
-            match_threshold: 0.15, // 👈 Bajamos el umbral a 0.15 para ser más tolerantes en la búsqueda
+            match_threshold: 0.15,
             match_count: 14
           });
 
         if (rpcError) throw rpcError;
 
-        // 🏛️ SOLUCIÓN: Si no hay resultados, inyectamos un array vacío seguro en lugar de romper el bucle
         contextText = (semanticResults || [])
           .map((doc: any) => {
             const type = String(doc.metadata?.type || 'scripture').toUpperCase();
@@ -93,11 +92,11 @@ export async function POST(req: Request) {
             const author = doc.metadata?.author ? ` | Author: ${doc.metadata.author}` : '';
             return `[Type: ${type} | Resource: ${book}${author}]\n${doc.content}`;
           })
-          .join('\n\n---\n\n') || ''; // Fallback a string vacío si viene null
+          .join('\n\n---\n\n') || '';
       }
     } catch (embeddingErr) {
       console.error('⚠️ Semantic vector pipeline error, running on internal axioms:', embeddingErr);
-      contextText = ''; // Fallback de seguridad absoluta
+      contextText = '';
     }
 
     // 4. 🔥 System Prompt de Acero Inoxidable (Configuración Dinámica y por Capas)
@@ -132,16 +131,22 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
       anthropicMessages.push({ role: 'user', content: lastMessage });
     }
 
-    // 6. Procesamiento Reforzado del Stream (ReadableStream Standard API)
+    // 6. 🛠️ PROCESAMIENTO REFORZADO DEL STREAM CON COBERTURA DE DIAGNÓSTICO
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // 🏛️ CAPA DE EJECUCIÓN REDUNDANTE CONTRA ERRORES 404
           let responseStream;
+          
+          // Mapeamos una pista segura de la Key en uso directo en los logs del backend de Vercel
+          const currentKey = process.env.ANTHROPIC_API_KEY || '';
+          const apiKeyHint = currentKey.length > 12 
+            ? `${currentKey.slice(0, 7)}...${currentKey.slice(-5)}` 
+            : 'VACÍA/NOT_FOUND';
+          console.log(`📡 Pipeline activado. Inicializando conexión con Anthropic Key: ${apiKeyHint}`);
+
           try {
-            // Intentamos invocar el modelo Sonnet con su ID de versión fijo de producción
             responseStream = await anthropic.messages.create({
               model: 'claude-3-5-sonnet-20241022',
               max_tokens: 4096,
@@ -151,9 +156,8 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
               stream: true,
             });
           } catch (firstModelError: any) {
-            console.warn('⚠️ Sonnet rebotado por la API de Anthropic, aplicando fallback a Haiku...', firstModelError);
+            console.warn('⚠️ Falló Sonnet en producción. Activando fallback estructural a Haiku...', firstModelError?.message);
             
-            // Fallback inmediato a Haiku usando su identificador fijo
             responseStream = await anthropic.messages.create({
               model: 'claude-3-5-haiku-20241022',
               max_tokens: 4096,
@@ -174,7 +178,6 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
             }
           }
 
-          // Guardado asíncrono no-bloqueante al finalizar exitosamente la transmisión
           if (completeBotResponse.trim()) {
             supabase
               .from('chat_history')
@@ -191,9 +194,12 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
 
           controller.close();
         } catch (streamError: any) {
-          console.error('🚨 Anthropic Stream Execution Exception:', streamError);
+          console.error('🚨 ERROR CRÍTICO DETECTADO EN EL MANIPULADOR DEL STREAM:', streamError);
           
-          const errorMessage = `\n\n*[Error en la transmisión del Arsenal: ${streamError?.message || 'Error de conexión externa'} - Verifica tus créditos o API Key en la Consola de Anthropic]*`;
+          // Captura el objeto JSON crudo de la excepción de Anthropic para pintarlo en la pantalla del usuario
+          const rawErrorString = JSON.stringify(streamError, null, 2) || streamError?.message || 'Unknown Exception';
+          const errorMessage = `\n\n*[Error del Arsenal]*\nStatus Code: ${streamError?.status}\nRaw Payload: ${rawErrorString}`;
+          
           controller.enqueue(encoder.encode(errorMessage));
           controller.close();
         }
