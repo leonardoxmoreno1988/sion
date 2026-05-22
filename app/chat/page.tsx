@@ -587,7 +587,7 @@ export default function PatmosChat() {
                     fontFamily: theme.fontSans, 
                     textTransform: 'uppercase', 
                     letterSpacing: '0.5px',
-                    maxWidth: isMobile ? '90px' : 'none',
+                    maxWidth: isMobile ? '120px' : 'none',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
