@@ -72,7 +72,7 @@ export default function HomePage() {
           className="w-full h-auto mt-8 block mb-0"
         />
 
-        {/* BENEFITS SECTION - Espacio colapsado a 0 entre la imagen y la línea */}
+        {/* BENEFITS SECTION */}
         <section className="mt-0 border-t border-[#e5e7eb] pt-12">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
             Built Exclusively for KJV-Only Believers
@@ -115,7 +115,6 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Free Plan */}
-            {/* 🛠️ AJUSTE: Cambiado border-[#e5e7eb] a border-[#cbd5e1] para oscurecer sutilmente el stroke */}
             <div className="bg-white border border-[#cbd5e1] p-8 rounded-xl flex flex-col justify-between">
               <div>
                 <h4 className="text-xl font-semibold">Free</h4>
@@ -147,7 +146,6 @@ export default function HomePage() {
               </div>
               
               <div>
-                {/* 🛠️ AJUSTE: Título actualizado a 'Become a Supporter' */}
                 <h4 className="text-xl font-semibold">Become a Supporter</h4>
                 <div className="mt-4 flex items-baseline">
                   <span className="text-5xl font-bold">$7</span>
@@ -155,7 +153,6 @@ export default function HomePage() {
                 </div>
                 <p className="text-sm text-gray-500">or $69/year (save 18%)</p>
                 
-                {/* 🛠️ AJUSTE: Inyección de la frase de valor e impacto global */}
                 <p className="mt-4 text-xs italic leading-relaxed text-[#4b5563]">
                   "Your support helps keep Patmos pure, independent, and focused only on the KJV for believers around the world."
                 </p>
@@ -176,6 +173,90 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* 🛠️ REINTEGRACIÓN: SECCIÓN DE FAQS REFINADA AL FINAL */}
+        <section className="mt-20 border-t border-[#e5e7eb] pt-12 pb-8">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
+            FAQs
+          </h3>
+
+          <div className="flex flex-col border-b border-[#e5e7eb]">
+            
+            {/* PREGUNTA 1 */}
+            <details className="group py-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
+                <h4 className="text-base font-semibold tracking-wide text-left">
+                  What is the primary manuscript lineage used by Patmos?
+                </h4>
+                <svg 
+                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </summary>
+              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+                Patmos maps out strict biblical context utilizing exclusively the Textus Receptus lineage through the authorized King James Version (KJV), ensuring zero modern lexical modification.
+              </p>
+            </details>
+
+            {/* PREGUNTA 2 */}
+            <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
+                <h4 className="text-base font-semibold tracking-wide text-left">
+                  How does the system enforce dispensational theology?
+                </h4>
+                <svg 
+                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </summary>
+              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+                Every prompt execution runs through native filters that align data structures with right division metrics, parsing structural typology, biblical boundaries, and audience separation rules.
+              </p>
+            </details>
+
+            {/* PREGUNTA 3 */}
+            <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
+                <h4 className="text-base font-semibold tracking-wide text-left">
+                  What happens when my free pipeline query allotment runs out?
+                </h4>
+                <svg 
+                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </summary>
+              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+                Once the initial free inquiry credit barrier is met, access will lock automatically. You can sustain the pipeline structure by becoming a Supporter at any time.
+              </p>
+            </details>
+
+            {/* PREGUNTA 4 */}
+            <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
+                <h4 className="text-base font-semibold tracking-wide text-left">
+                  Can I manage my billing or cancel my subscription dynamically?
+                </h4>
+                <svg 
+                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </summary>
+              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+                Yes. Supporter accounts gain immediate access to a secure Stripe Customer Portal integrated right into the control panel header to update credentials, download past due invoices, or adjust tiers.
+              </p>
+            </details>
+
+          </div>
+        </section>
+
       </main>
 
       {/* FOOTER */}
