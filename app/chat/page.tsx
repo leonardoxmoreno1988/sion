@@ -515,7 +515,7 @@ export default function PatmosChat() {
                 }}
               >
                 <span style={{ 
-                  fontSize: isMobile ? '12px' : '15px', 
+                  fontSize: isMobile ? '12px' : '13px', 
                   color: theme.textMain, 
                   fontWeight: '500', 
                   whiteSpace: 'nowrap', 
@@ -599,7 +599,7 @@ export default function PatmosChat() {
                     <span style={{
                       backgroundColor: '#2d65f6',
                       color: '#ffffff',
-                      fontSize: isMobile ? '10px' : '11px',
+                      fontSize: isMobile ? '10px' : '10px',
                       fontWeight: '800',
                       letterSpacing: '1px',
                       padding: '2px 4px',
