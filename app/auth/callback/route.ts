@@ -61,7 +61,7 @@ export async function GET(request: Request) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       
       if (!error) {
-        // Retornamos la respuesta con las cookies ya grabadas físicamente
+        // Retornamos la re-respuesta con las cookies ya grabadas físicamente
         return response;
       }
       console.error("Supabase Session Exchange Error:", error.message);
