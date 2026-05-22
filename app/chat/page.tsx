@@ -30,6 +30,9 @@ export default function PatmosChat() {
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
+  // 📱 ESTADO RESPONSIVO: Detectar si el usuario está en móvil
+  const [isMobile, setIsMobile] = useState(false);
+  
   // ⚙️ ESTADOS EXTRA: Control de utilidades y menús
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
@@ -82,6 +85,23 @@ export default function PatmosChat() {
       link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap';
       link.rel = 'stylesheet';
       document.head.appendChild(link);
+
+      // 📱 DETECTAR BREAKPOINT RESPONSIVO EN EL MONTAJE
+      const mediaQuery = window.matchMedia('(max-width: 768px)');
+      setIsMobile(mediaQuery.matches);
+      
+      // Cerrar sidebar por defecto en móviles para no asfixiar la UI inicial
+      if (mediaQuery.matches) {
+        setSidebarOpen(false);
+      }
+
+      const handleResize = (e: MediaQueryListEvent) => {
+        setIsMobile(e.matches);
+        if (e.matches) setSidebarOpen(false);
+        else setSidebarOpen(true);
+      };
+      
+      mediaQuery.addEventListener('change', handleResize);
 
       const { data: { session }, error } = await supabase.auth.getSession();
       
@@ -154,6 +174,7 @@ export default function PatmosChat() {
 
       return () => {
         authSub.unsubscribe();
+        mediaQuery.removeEventListener('change', handleResize);
       };
     };
     initPage();
@@ -193,6 +214,7 @@ export default function PatmosChat() {
     setMessages([
       { id: 'welcome', role: "assistant", content: "Welcome. How may I assist your Bible inquiry today?" }
     ]);
+    if (isMobile) setSidebarOpen(false); // Cierra menú al iniciar hilo en móvil
   };
 
   const loadSession = (session: ChatSession) => {
@@ -201,6 +223,7 @@ export default function PatmosChat() {
       { id: `${session.id}-user`, role: "user", content: session.user_query },
       { id: `${session.id}-bot`, role: "assistant", content: session.bot_response }
     ]);
+    if (isMobile) setSidebarOpen(false); // Cierra menú al seleccionar hilo en móvil
   };
 
   const handleClearHistory = async () => {
@@ -366,18 +389,31 @@ export default function PatmosChat() {
     }
   };
 
+  // 📐 CÁLCULO DE ANCHOS DINÁMICOS RESPONSIVOS (Móvil vs Desktop)
+  const getSidebarWidth = () => {
+    if (!sidebarOpen) return '0px';
+    return isMobile ? '30vw' : '260px'; // 👈 30% de la pantalla en móvil
+  };
+
+  const getMainWidth = () => {
+    if (!isMobile) return '100%';
+    return sidebarOpen ? '70vw' : '100vw'; // 👈 70% de la pantalla en móvil al abrirse
+  };
+
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: theme.bg, transition: 'all 0.4s ease' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: theme.bg, transition: 'all 0.4s ease', overflowX: 'hidden' }}>
       
       {/* SIDEBAR ARCHIVE */}
       <aside style={{
-        width: sidebarOpen ? '260px' : '0px',
+        width: getSidebarWidth(),
+        minWidth: sidebarOpen && !isMobile ? '260px' : 'none',
         backgroundColor: theme.sidebarBg,
         borderRight: sidebarOpen ? `1px solid ${theme.borderSion}` : 'none',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
         transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        zIndex: 20
       }}>
         <div style={{ padding: '24px 20px', borderBottom: `1px solid ${theme.borderSion}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <button 
@@ -401,9 +437,9 @@ export default function PatmosChat() {
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '15px 10px', position: 'relative' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '15px 4px' : '15px 10px', position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px', marginBottom: '12px', position: 'relative' }}>
-            <p style={{ fontSize: '11px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', margin: 0, fontFamily: 'serif' }}>
+            <p style={{ fontSize: isMobile ? '9px' : '11px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', margin: 0, fontFamily: 'serif' }}>
               Historical Records
             </p>
             
@@ -482,7 +518,7 @@ export default function PatmosChat() {
                   textAlign: 'left',
                   background: activeSessionId === session.id ? (isDarkMode ? '#1e293b' : '#e5e7eb') : 'transparent',
                   border: 'none',
-                  padding: '10px',
+                  padding: isMobile ? '8px 4px' : '10px',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   marginBottom: '5px',
@@ -493,7 +529,7 @@ export default function PatmosChat() {
                 }}
               >
                 <span style={{ 
-                  fontSize: '14px', 
+                  fontSize: isMobile ? '11px' : '14px', 
                   color: theme.textMain, 
                   fontWeight: '500', 
                   whiteSpace: 'nowrap', 
@@ -504,7 +540,7 @@ export default function PatmosChat() {
                 }}>
                   {session.user_query}
                 </span>
-                <span style={{ fontSize: '11px', color: theme.textMuted, fontFamily: theme.fontSans }}>
+                <span style={{ fontSize: isMobile ? '8px' : '11px', color: theme.textMuted, fontFamily: theme.fontSans }}>
                   {new Date(session.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </button>
@@ -515,12 +551,14 @@ export default function PatmosChat() {
 
       {/* MAIN CONTAINER */}
       <main style={{
-        flex: 1,
+        width: getMainWidth(),
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
         alignItems: 'center',
-        padding: '0 20px',
+        padding: isMobile ? '0 12px' : '0 20px',
+        transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        zIndex: 10
       }}>
         <div style={{
           width: '100%',
@@ -532,7 +570,7 @@ export default function PatmosChat() {
           padding: '20px 0',
           marginBottom: '10px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '15px' }}>
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.textMain, fontSize: '18px', padding: 0 }}
@@ -542,40 +580,42 @@ export default function PatmosChat() {
             </button>
             <div>
               <h1 style={{ 
-                fontSize: '18px', 
+                fontSize: isMobile ? '16px' : '18px', 
                 textTransform: 'uppercase', 
                 color: theme.textMain, 
                 fontFamily: 'Georgia, serif', 
                 fontWeight: 300, 
-                letterSpacing: '4px',
+                letterSpacing: isMobile ? '2px' : '4px',
                 margin: 0 
               }}>
                 PATMOS
               </h1>
               {userEmail && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '4px 0 0 0' }}>
-                  {/* Correo Electrónico */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 0 0' }}>
                   <p style={{ 
-                    fontSize: '11px', 
+                    fontSize: isMobile ? '9px' : '11px', 
                     color: theme.textMuted, 
                     margin: 0, 
                     fontFamily: theme.fontSans, 
                     textTransform: 'uppercase', 
-                    letterSpacing: '0.5px' 
+                    letterSpacing: '0.5px',
+                    maxWidth: isMobile ? '100px' : 'none',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}>
                     {userEmail}
                   </p>
                   
-                  {/* 🔒 INSIGNIA PRO DINÁMICA: Solo se renderiza si el usuario tiene la suscripción premium activa */}
                   {isPremium && (
                     <span style={{
                       backgroundColor: '#2d65f6',
                       color: '#ffffff',
-                      fontSize: '10px',
+                      fontSize: isMobile ? '8px' : '10px',
                       fontWeight: '800',
                       letterSpacing: '1px',
-                      padding: '4px 6px',
-                      borderRadius: '6px',
+                      padding: '2px 4px',
+                      borderRadius: '4px',
                       fontFamily: theme.fontSans,
                       textTransform: 'uppercase',
                       userSelect: 'none',
@@ -589,7 +629,7 @@ export default function PatmosChat() {
             </div>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '15px' }}>
             <button 
               onClick={() => setIsDarkMode(!isDarkMode)}
               style={{ 
@@ -606,12 +646,12 @@ export default function PatmosChat() {
               title="Toggle Theme"
             >
               {isDarkMode ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="4"/>
                   <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
                 </svg>
               ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
                 </svg>
               )}
@@ -621,31 +661,31 @@ export default function PatmosChat() {
               <a 
                 href="/api/portal"
                 style={{
-                  fontSize: '10px',
+                  fontSize: '9px',
                   fontWeight: '700',
                   color: subscriptionStatus === 'past_due' ? '#f87171' : theme.textMain,
                   textDecoration: 'none',
                   background: 'transparent',
                   border: `1px solid ${subscriptionStatus === 'past_due' ? '#f87171' : theme.textMain}`,
-                  padding: '4px 8px',
+                  padding: '4px 6px',
                   fontFamily: theme.fontSans,
                   textTransform: 'uppercase',
                   transition: 'all 0.2s'
                 }}
               >
-                {subscriptionStatus === 'past_due' ? 'Fix Billing' : 'Billing'}
+                {subscriptionStatus === 'past_due' ? 'Fix' : 'Bill'}
               </a>
             )}
 
             <button 
               onClick={handleLogout}
               style={{
-                fontSize: '10px',
+                fontSize: '9px',
                 fontWeight: '700',
                 color: theme.textMain,
                 background: 'transparent',
                 border: `1px solid ${theme.textMain}`,
-                padding: '4px 8px',
+                padding: '4px 6px',
                 cursor: 'pointer',
                 fontFamily: theme.fontSans,
                 textTransform: 'uppercase'
@@ -675,7 +715,7 @@ export default function PatmosChat() {
                 maxWidth: '90%',
                 padding: '12px 20px',
                 borderRadius: m.role === 'user' ? '16px 16px 0 16px' : '16px 16px 16px 0',
-                fontSize: '15px',
+                fontSize: isMobile ? '14px' : '15px',
                 lineHeight: '1.6',
                 fontFamily: theme.fontSans,
                 backgroundColor: m.role === 'user' ? theme.bubbleUser : theme.bubbleSion,
@@ -703,7 +743,7 @@ export default function PatmosChat() {
                 </ReactMarkdown>
               </div>
 
-              {/* 🛠️ BARRA DE ACCIONES CON VECTORES SVG VECTORIALES */}
+              {/* BARRA DE ACCIONES */}
               {m.role === 'assistant' && m.id !== 'welcome' && m.content.trim() !== "" && (
                 <div style={{
                   display: 'flex',
@@ -717,7 +757,6 @@ export default function PatmosChat() {
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px'
                 }}>
-                  {/* Botón Copiar con Icono Adaptativo */}
                   <button
                     onClick={() => handleCopyText(m.id, m.content)}
                     style={{
@@ -731,7 +770,7 @@ export default function PatmosChat() {
                       fontWeight: '700',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px',
+                      gap: '5px',
                       transition: 'color 0.2s'
                     }}
                   >
@@ -755,7 +794,6 @@ export default function PatmosChat() {
 
                   <span style={{ color: theme.borderSion, userSelect: 'none' }}>|</span>
 
-                  {/* Botón Imprimir con Icono Geométrico */}
                   <button
                     onClick={() => handlePrintMessage(m.content)}
                     style={{
@@ -769,7 +807,7 @@ export default function PatmosChat() {
                       fontWeight: '700',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px',
+                      gap: '5px',
                       transition: 'color 0.2s'
                     }}
                     onMouseOver={(e) => (e.currentTarget.style.color = theme.textMain)}
@@ -787,6 +825,7 @@ export default function PatmosChat() {
 
             </div>
           ))}
+          {/* 🛠️ CORRECCIÓN: 'justifycontent' cambiado a 'justifyContent' */}
           {isLoading && (
             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
               <div style={{ color: theme.textMuted, fontSize: '14px', fontStyle: 'italic', marginLeft: '10px', fontFamily: theme.fontSans }}>
