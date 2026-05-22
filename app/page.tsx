@@ -21,14 +21,12 @@ export default function TemporalHomePage() {
     <div className="min-h-screen bg-[#f9fafb] text-[#000f37] flex flex-col items-center justify-between antialiased selection:bg-[#e5e7eb] px-6 md:px-0" style={{ fontFamily: '"Inter", sans-serif' }}>
       {/* MINIMALIST HEADER */}
       <header className="w-full max-w-[700px] py-6 flex justify-between items-center mt-4">
-        {/* Logotipo: Fuente Georgia con grosor 300, interletrado de 4px y color #000f37 */}
         <span 
           className="text-xl uppercase text-[#000f37]" 
           style={{ fontFamily: 'Georgia, serif', fontWeight: 300, letterSpacing: '4px' }}
         >
           PATMOS
         </span>
-        {/* Retornamos el ratio corner a cero usando rounded-none */}
         <Link 
           href="/login" 
           className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded-none transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
@@ -45,13 +43,13 @@ export default function TemporalHomePage() {
           </h2>
         </div>
 
-        {/* TEXTO INFORMATIVO #4b5563 */}
         <p className="text-base leading-relaxed text-[#4b5563] text-left max-w-2xl mb-12">
           Designed for deep academic inquiry and theological context utilizing strictly the Textus Receptus lineage through the King James Version (KJV). Every query is filtered under unwavering dispensational theology.
         </p>
 
         {/* PRIMARY CALL TO ACTION */}
-        <div className="mb-16 flex flex-col items-start w-full">
+        {/* 🛠️ AJUSTE: Cambiamos mb-16 a mb-0 para eliminar la separación inferior del contenedor */}
+        <div className="mb-0 flex flex-col items-start w-full">
           <Link 
             href="/login" 
             className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-sm font-bold uppercase tracking-widest px-8 py-4 rounded-[6px] transition-all duration-300 hover:bg-[#000f37]/90"
@@ -59,18 +57,19 @@ export default function TemporalHomePage() {
             Start Free &rarr;
           </Link>
           
-          {/* 🖼️ CAMBIO DE IMAGEN: Se ha actualizado la ruta de la fuente (src) */}
+          {/* 🖼️ AJUSTE IMAGEN: Se eliminó el mt-6 y se forzó la remoción de márgenes basales con block */}
           <img 
             src="https://www.leonardoxmoreno.com/files/patmos-illustration.jpg" 
             alt="Patmos Platform Preview" 
-            className="w-full h-auto mt-6 object-cover"
+            className="w-full h-auto mt-6 block object-cover"
           />
         </div>
 
         {/* PRODUCT BENEFITS / SYSTEM PILLARS */}
-        <section className="border-t border-[#e5e7eb] pt-12 mb-16">
-          {/* Título aclarado a un sutil gris pizarra claro text-[#6b7280] */}
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
+        {/* 🛠️ AJUSTE SECCIÓN: Cambiamos pt-12 a pt-0 para eliminar el espacio sobre el separador gris */}
+        <section className="border-t border-[#e5e7eb] pt-0 mt-0 mb-16">
+          {/* Añadimos un mt-12 aquí para que los títulos de los pilares sigan respirando bien respecto a la línea */}
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mt-12 mb-8 font-serif">
             Architecture Pillars
           </h3>
           
@@ -121,7 +120,6 @@ export default function TemporalHomePage() {
 
         {/* INTEGRATED PRICING SECTION */}
         <section className="border-t border-[#e5e7eb] pt-12 pb-12">
-          {/* Título aclarado a un sutil gris pizarra claro text-[#6b7280] */}
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
             Subscriptions & Access
           </h3>
@@ -168,7 +166,6 @@ export default function TemporalHomePage() {
 
             {/* PLAN PREMIUM: THE WATCHMAN */}
             <div className="bg-white border-2 border-[#000f37] p-6 flex flex-col justify-between rounded-lg relative overflow-hidden shadow-sm">
-              {/* Modificado color de fondo a bg-[#2d65f6] */}
               <div className="absolute top-0 right-0 bg-[#2d65f6] text-[#f9fafb] text-[8px] uppercase tracking-[0.2em] font-bold py-1 px-3 rounded-bl">
                 PRO Version
               </div>
@@ -215,23 +212,18 @@ export default function TemporalHomePage() {
           </div>
         </section>
 
-        {/* 🛠️ SECCIÓN REFINADA: FAQS SIN LÍNEA INICIAL Y CON ICONOS OUTLINED */}
+        {/* FAQS SECTION */}
         <section className="border-t border-[#e5e7eb] pt-12 pb-8">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8 font-serif">
             FAQs
           </h3>
 
           <div className="flex flex-col border-b border-[#e5e7eb]">
-            
-            {/* PREGUNTA 1 */}
-            {/* ✂️ REMOVIDO: border-t inicial para eliminar el separador superior de la primera pregunta */}
             <details className="group py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                {/* 🔍 TEXTO: Sube de text-sm a text-base */}
                 <h4 className="text-base font-semibold tracking-wide text-left">
                   What is the primary manuscript lineage used by Patmos?
                 </h4>
-                {/* 🔘 ICONO: Versión Outlined / Lineal pura con SVG que rota */}
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
@@ -244,14 +236,11 @@ export default function TemporalHomePage() {
               </p>
             </details>
 
-            {/* PREGUNTA 2 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                {/* 🔍 TEXTO: text-base */}
                 <h4 className="text-base font-semibold tracking-wide text-left">
                   How does the system enforce dispensational theology?
                 </h4>
-                {/* 🔘 ICONO: Outlined */}
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
@@ -264,14 +253,11 @@ export default function TemporalHomePage() {
               </p>
             </details>
 
-            {/* PREGUNTA 3 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                {/* 🔍 TEXTO: text-base */}
                 <h4 className="text-base font-semibold tracking-wide text-left">
                   What happens when my free pipeline query allotment runs out?
                 </h4>
-                {/* 🔘 ICONO: Outlined */}
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
@@ -284,14 +270,11 @@ export default function TemporalHomePage() {
               </p>
             </details>
 
-            {/* PREGUNTA 4 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                {/* 🔍 TEXTO: text-base */}
                 <h4 className="text-base font-semibold tracking-wide text-left">
                   Can I manage my billing or cancel my subscription dynamically?
                 </h4>
-                {/* 🔘 ICONO: Outlined */}
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
