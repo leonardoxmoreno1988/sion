@@ -61,7 +61,6 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* 🛠️ AJUSTE: Oferta reducida a 15 preguntas en el subtítulo del Hero */}
         <p className="text-sm text-gray-500 mt-4">
           Free: 15 questions per day • Pro: Unlimited for $7/month
         </p>
@@ -127,7 +126,6 @@ export default function HomePage() {
                   Perfect for testing and daily use.
                 </p>
                 <ul className="mt-8 space-y-3 text-sm">
-                  {/* 🛠️ AJUSTE: Límitación explícita a 15 preguntas en la viñeta del Plan Gratuito */}
                   <li className="flex items-center gap-2">✓ 15 questions per day</li>
                   <li className="flex items-center gap-2">✓ Full KJV answers</li>
                   <li className="flex items-center gap-2">✓ Pre-trib defense</li>
@@ -155,8 +153,9 @@ export default function HomePage() {
                 </div>
                 <p className="text-sm text-gray-500">or $69/year (save 18%)</p>
                 
-                <p className="mt-4 text-xs italic leading-relaxed text-[#4b5563]">
-                  "Your support helps keep Patmos pure, independent, and focused only on the KJV for believers around the world."
+                {/* 🛠️ AJUSTE: Removidas comillas y la clase 'italic' */}
+                <p className="mt-4 text-xs leading-relaxed text-[#4b5563]">
+                  Your support helps keep Patmos pure, independent, and focused only on the KJV for believers around the world.
                 </p>
                 
                 <ul className="mt-6 space-y-3 text-sm">
@@ -233,7 +232,6 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
-              {/* 🛠️ AJUSTE: Sincronizada la respuesta de la FAQ con el nuevo límite de 15 preguntas */}
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 Once the 15 daily question barrier is reached, the pipeline locks automatically to protect computational resources. You can sustain unhindered and uncapped pipeline access by becoming a Supporter at any time.
               </p>
