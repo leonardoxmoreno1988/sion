@@ -138,8 +138,9 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
       async start(controller) {
         try {
           // Solicitamos el stream de Anthropic de manera controlada de mutuo acuerdo
+          // 🏛️ CORREGIDO: Cambiamos el string del modelo por la versión oficial reconocida
           const responseStream = await anthropic.messages.create({
-            model: 'claude-3-5-sonnet-20241022',
+            model: 'claude-3-5-sonnet-latest', // 👈 Cambiado aquí
             max_tokens: 4096,
             system: PATMOS_SYSTEM_PROMPT.trim(),
             messages: anthropicMessages,
