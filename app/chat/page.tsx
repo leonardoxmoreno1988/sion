@@ -581,7 +581,7 @@ export default function PatmosChat() {
               {userEmail && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 0 0' }}>
                   <p style={{ 
-                    fontSize: isMobile ? '11px' : '13px', 
+                    fontSize: isMobile ? '11px' : '11px', 
                     color: theme.textMuted, 
                     margin: 0, 
                     fontFamily: theme.fontSans, 
@@ -599,7 +599,7 @@ export default function PatmosChat() {
                     <span style={{
                       backgroundColor: '#2d65f6',
                       color: '#ffffff',
-                      fontSize: isMobile ? '10px' : '13px',
+                      fontSize: isMobile ? '10px' : '11px',
                       fontWeight: '800',
                       letterSpacing: '1px',
                       padding: '2px 4px',
