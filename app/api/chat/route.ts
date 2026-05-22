@@ -3,12 +3,18 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai'; // 👈 RESTAURADO: SDK para el motor de embeddings vectoriales
 
 export const dynamic = 'force-dynamic';
 
 // Inicializamos Anthropic apuntando a la nueva llave de entorno
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+// Inicializamos OpenAI exclusivamente para el procesamiento matemático de embeddings (micro-centavos)
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function POST(req: Request) {
@@ -61,20 +67,24 @@ export async function POST(req: Request) {
       console.error('⚠️ Paywall Shield Error (Running defensively):', gateError);
     }
 
-    // 3. Obtener el Contexto Vectorial (Mantenemos tu RPC de Supabase intacto)
-    // Nota: Como la búsqueda vectorial HNSW depende de embeddings, recuerda seguir usando OpenAI 
-    // exclusivamente para generar el vector numérico corto de la consulta (gasta micro-centavos), 
-    // o puedes pasarle un embedding teológico si lo migraste. Aquí procesamos directo el match:
+    // 3. 🎯 RESTAURADO: Obtener Embedding de la consulta e inyectarlo en el RPC de Supabase
     let contextText = '';
     try {
-      // Si mantienes el pipeline de OpenAI solo para embeddings, puedes llamarlo aquí.
-      // Si no, jalamos directo bajo un fallback defensivo para que Claude responda con sus axiomas internos.
-      const { data: semanticResults } = await supabase
+      const embeddingResponse = await openai.embeddings.create({
+        model: 'text-embedding-3-small',
+        input: lastMessage,
+      });
+      const queryEmbedding = embeddingResponse.data[0].embedding;
+
+      // Ejecutar búsqueda vectorial HNSW en el Arsenal Teológico con la firma vectorial real
+      const { data: semanticResults, error: rpcError } = await supabase
         .rpc('match_documents', {
-          query_embedding: new Array(1536).fill(0), // Reemplazar con tu fetching de embedding si es necesario
+          query_embedding: queryEmbedding, // 👈 Vector dinámico real mapeado
           match_threshold: 0.25,
           match_count: 14
         });
+
+      if (rpcError) throw rpcError;
 
       contextText = (semanticResults || [])
         .map((doc: any) => {
@@ -85,7 +95,7 @@ export async function POST(req: Request) {
         })
         .join('\n\n---\n\n');
     } catch (embeddingErr) {
-      console.error('⚠️ Semantic fetch omitted, running on axioms:', embeddingErr);
+      console.error('⚠️ Semantic vector pipeline error, running on internal axioms:', embeddingErr);
     }
 
     // 4. System Prompt de Acero Inoxidable para Claude
@@ -108,7 +118,7 @@ Provided Context (Your ONLY source of truth and final authority):
 ${contextText ? contextText : "No specific context blocks retrieved. Apply internal fundamental received text axioms."}
 `;
 
-    // 5. Mapeo de Historial al formato de Anthropic (Claude requiere alternancia estricta user/assistant)
+    // 5. Mapeo de Historial al formato de Anthropic
     const anthropicMessages = messages
       .filter((m: any) => m.role === 'user' || m.role === 'assistant')
       .map((m: any) => ({
@@ -120,7 +130,7 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
     const responseStream = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 4096,
-      system: PATMOS_SYSTEM_PROMPT.trim(), // Anthropic maneja el system prompt en un parámetro dedicado
+      system: PATMOS_SYSTEM_PROMPT.trim(),
       messages: anthropicMessages,
       temperature: 0,
       stream: true,
@@ -133,7 +143,6 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
         const encoder = new TextEncoder();
         try {
           for await (const chunk of responseStream) {
-            // Estructura de chunks nativa de Anthropic
             if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
               const content = chunk.delta.text || '';
               completeBotResponse += content;
@@ -141,7 +150,7 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
             }
           }
 
-          // 💾 Auto-guardado en Supabase tras cerrar el buffer del stream
+          // 💾 Auto-guardado persistente en Supabase tras cerrar el buffer del stream
           if (completeBotResponse.trim()) {
             await supabase
               .from('chat_history')
