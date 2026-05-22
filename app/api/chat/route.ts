@@ -7,21 +7,20 @@ import OpenAI from 'openai';
 
 export const dynamic = 'force-dynamic';
 
-// Inicializamos Anthropic apuntando a la nueva llave de entorno
+// Inicializamos los SDKs apuntando a las variables de entorno de Vercel
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
-// Inicializamos OpenAI exclusivamente para el procesamiento matemático de embeddings (micro-centavos)
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || '',
 });
 
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
     const { messages } = await req.json();
-    const lastMessage = messages[messages.length - 1].content;
+    const lastMessage = messages[messages.length - 1]?.content || '';
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -64,38 +63,39 @@ export async function POST(req: Request) {
         }
       }
     } catch (gateError) {
-      console.error('⚠️ Paywall Shield Error (Running defensively):', gateError);
+      console.error('⚠️ Paywall Shield Error:', gateError);
     }
 
-    // 3. Obtener Embedding de la consulta e inyectarlo en el RPC de Supabase
+    // 3. Obtener Embedding de la consulta
     let contextText = '';
     try {
-      const embeddingResponse = await openai.embeddings.create({
-        model: 'text-embedding-3-small',
-        input: lastMessage,
-      });
-      const queryEmbedding = embeddingResponse.data[0].embedding;
-
-      // Ejecutar búsqueda vectorial HNSW en el Arsenal Teológico con la firma vectorial real
-      const { data: semanticResults, error: rpcError } = await supabase
-        .rpc('match_documents', {
-          query_embedding: queryEmbedding,
-          match_threshold: 0.25,
-          match_count: 14
+      if (lastMessage.trim()) {
+        const embeddingResponse = await openai.embeddings.create({
+          model: 'text-embedding-3-small',
+          input: lastMessage,
         });
+        const queryEmbedding = embeddingResponse.data[0].embedding;
 
-      if (rpcError) throw rpcError;
+        const { data: semanticResults, error: rpcError } = await supabase
+          .rpc('match_documents', {
+            query_embedding: queryEmbedding,
+            match_threshold: 0.25,
+            match_count: 14
+          });
 
-      contextText = (semanticResults || [])
-        .map((doc: any) => {
-          const type = String(doc.metadata?.type || 'scripture').toUpperCase();
-          const book = doc.metadata?.book || 'Scripture';
-          const author = doc.metadata?.author ? ` | Author: ${doc.metadata.author}` : '';
-          return `[Type: ${type} | Resource: ${book}${author}]\n${doc.content}`;
-        })
-        .join('\n\n---\n\n');
+        if (rpcError) throw rpcError;
+
+        contextText = (semanticResults || [])
+          .map((doc: any) => {
+            const type = String(doc.metadata?.type || 'scripture').toUpperCase();
+            const book = doc.metadata?.book || 'Scripture';
+            const author = doc.metadata?.author ? ` | Author: ${doc.metadata.author}` : '';
+            return `[Type: ${type} | Resource: ${book}${author}]\n${doc.content}`;
+          })
+          .join('\n\n---\n\n');
+      }
     } catch (embeddingErr) {
-      console.error('⚠️ Semantic vector pipeline error, running on internal axioms:', embeddingErr);
+      console.error('⚠️ Semantic vector pipeline error:', embeddingErr);
     }
 
     // 4. System Prompt de Acero Inoxidable para Claude
@@ -118,31 +118,37 @@ Provided Context (Your ONLY source of truth and final authority):
 ${contextText ? contextText : "No specific context blocks retrieved. Apply internal fundamental received text axioms."}
 `;
 
-    // 5. 🛠️ VALIDACIÓN DE ALTERNANCIA EXCLUSIVA PARA ANTHROPIC CLAUDE
-    // Filtramos mensajes vacíos o de sistema iniciales para asegurar que la conversación empiece siempre con un rol 'user'
+    // 5. Mapeo higiénico de mensajes con alternancia obligatoria para Anthropic
     const anthropicMessages = messages
-      .filter((m: any) => (m.role === 'user' || m.role === 'assistant') && m.id !== 'welcome' && m.content.trim() !== '')
+      .filter((m: any) => (m.role === 'user' || m.role === 'assistant') && m.id !== 'welcome' && m.content && m.content.trim() !== '')
       .map((m: any) => ({
         role: m.role,
         content: m.content,
       }));
 
-    // 6. Iniciar Stream con Claude 3.5 Sonnet
-    const responseStream = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 4096,
-      system: PATMOS_SYSTEM_PROMPT.trim(),
-      messages: anthropicMessages,
-      temperature: 0,
-      stream: true,
-    });
+    // Si por alguna razón el historial quedó vacío tras el filtro, inyectamos el mensaje actual para evitar que la API explote
+    if (anthropicMessages.length === 0) {
+      anthropicMessages.push({ role: 'user', content: lastMessage });
+    }
 
-    let completeBotResponse = '';
+    // 6. 🛠️ NUEVO PROCESAMIENTO REFORZADO DEL STREAM (ReadableStream Standard API)
+    const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
-        const encoder = new TextEncoder();
         try {
+          // Solicitamos el stream de Anthropic de manera controlada de mutuo acuerdo
+          const responseStream = await anthropic.messages.create({
+            model: 'claude-3-5-sonnet-20241022',
+            max_tokens: 4096,
+            system: PATMOS_SYSTEM_PROMPT.trim(),
+            messages: anthropicMessages,
+            temperature: 0,
+            stream: true,
+          });
+
+          let completeBotResponse = '';
+
           for await (const chunk of responseStream) {
             if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
               const content = chunk.delta.text || '';
@@ -151,20 +157,29 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
             }
           }
 
-          // 💾 Auto-guardado persistente en Supabase tras cerrar el buffer del stream
+          // Guardado asíncrono no-bloqueante al finalizar exitosamente la transmisión
           if (completeBotResponse.trim()) {
-            await supabase
+            supabase
               .from('chat_history')
               .insert({
                 user_id: user.id,
                 user_query: lastMessage,
                 bot_response: completeBotResponse,
                 created_at: new Date().toISOString()
+              })
+              .then(({ error }) => {
+                if (error) console.error('⚠️ Error al auto-guardar historial:', error);
               });
           }
-        } catch (err) {
-          controller.error(err);
-        } finally {
+
+          controller.close();
+        } catch (streamError: any) {
+          // 🚨 Captura e imprime los errores de la API de Anthropic directo en la terminal de Vercel
+          console.error('🚨 Anthropic Stream Execution Exception:', streamError);
+          
+          // Enviamos un mensaje controlado al cliente informando la causa raíz de forma segura
+          const errorMessage = `\n\n*[Error en la transmisión del Arsenal: ${streamError?.message || 'Error de conexión externa'} - Verifica tus créditos o API Key en la Consola de Anthropic]*`;
+          controller.enqueue(encoder.encode(errorMessage));
           controller.close();
         }
       },
@@ -178,7 +193,7 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
     });
 
   } catch (error: any) {
-    console.error('❌ Patmos Anthropic Core Fatal Error:', error);
+    console.error('❌ Patmos API Route Critical Crash:', error);
     return new NextResponse('Internal Error within the Anthropic Dogmatic Arsenal.', { status: 500 });
   }
 }
