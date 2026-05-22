@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       console.error('⚠️ Paywall Shield Error:', gateError);
     }
 
-    // 3. Obtener Embedding de la consulta
+    // 3. Obtener Contexto Teológico (Búsqueda Vectorial Tolerante)
     let contextText = '';
     try {
       if (lastMessage.trim()) {
@@ -79,12 +79,13 @@ export async function POST(req: Request) {
         const { data: semanticResults, error: rpcError } = await supabase
           .rpc('match_documents', {
             query_embedding: queryEmbedding,
-            match_threshold: 0.25,
+            match_threshold: 0.15, // 👈 Bajamos el umbral a 0.15 para ser más tolerantes en la búsqueda
             match_count: 14
           });
 
         if (rpcError) throw rpcError;
 
+        // 🏛️ SOLUCIÓN: Si no hay resultados, inyectamos un array vacío seguro en lugar de romper el bucle
         contextText = (semanticResults || [])
           .map((doc: any) => {
             const type = String(doc.metadata?.type || 'scripture').toUpperCase();
@@ -92,10 +93,11 @@ export async function POST(req: Request) {
             const author = doc.metadata?.author ? ` | Author: ${doc.metadata.author}` : '';
             return `[Type: ${type} | Resource: ${book}${author}]\n${doc.content}`;
           })
-          .join('\n\n---\n\n');
+          .join('\n\n---\n\n') || ''; // Fallback a string vacío si viene null
       }
     } catch (embeddingErr) {
-      console.error('⚠️ Semantic vector pipeline error:', embeddingErr);
+      console.error('⚠️ Semantic vector pipeline error, running on internal axioms:', embeddingErr);
+      contextText = ''; // Fallback de seguridad absoluta
     }
 
     // 4. 🔥 System Prompt de Acero Inoxidable (Configuración Dinámica y por Capas)
