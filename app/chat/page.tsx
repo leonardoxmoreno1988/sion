@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface ChatMessage {
   id: string;
@@ -90,7 +91,6 @@ export default function PatmosChat() {
       const checkDevice = () => {
         const mobile = window.innerWidth <= 768;
         setIsMobile(mobile);
-        // Si es escritorio lo dejamos abierto, si es móvil lo cerramos por defecto
         setSidebarOpen(!mobile);
       };
 
@@ -143,15 +143,15 @@ export default function PatmosChat() {
             ]);
           } else {
             setIsPremium(false);
-            setHasCredits(currentHistory.length < 5);
+            setHasCredits(currentHistory.length < 15);
           }
         } else {
           setIsPremium(false);
-          setHasCredits(currentHistory.length < 5);
+          setHasCredits(currentHistory.length < 15);
         }
       } catch (subErr) {
         console.error("Error checking subscription tier:", subErr);
-        setHasCredits(currentHistory.length < 5);
+        setHasCredits(currentHistory.length < 15);
       }
 
       const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, currentSession) => {
@@ -186,7 +186,7 @@ export default function PatmosChat() {
         const data = await res.json();
         setHistory(data);
         if (!isPremium && subscriptionStatus !== 'past_due') {
-          setHasCredits(data.length < 5);
+          setHasCredits(data.length < 15);
         }
         if (data.length > 0 && !activeSessionId) {
           setActiveSessionId(data[0].id);
@@ -317,7 +317,7 @@ export default function PatmosChat() {
     e.preventDefault();
     if (!customInput.trim() || isLoading || !hasCredits) return;
 
-    const userQuery = customInput;
+    const userQuery = customInput.trim();
     setCustomInput("");
     setIsLoading(true);
 
@@ -384,14 +384,11 @@ export default function PatmosChat() {
   };
 
   return (
-    // 🏛️ SOLUCIÓN FLEXBOX: Manejo robusto de la distribución horizontal en pantalla completa
     <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: theme.bg, transition: 'all 0.4s ease', overflow: 'hidden' }}>
       
       {/* SIDEBAR ARCHIVE */}
       <aside style={{
-        // Matemática exacta: Si está abierto en móvil toma el 30%, en desktop fija 260px. Si está cerrado, 0px.
         width: sidebarOpen ? (isMobile ? '30%' : '260px') : '0px',
-        // Evitamos que en escritorio se encoja al redimensionar
         flexShrink: 0,
         backgroundColor: theme.sidebarBg,
         borderRight: sidebarOpen ? `1px solid ${theme.borderSion}` : 'none',
@@ -537,7 +534,6 @@ export default function PatmosChat() {
 
       {/* MAIN CONTAINER */}
       <main style={{
-        // Si está abierto en móvil toma el 70% restante, si está cerrado toma el 100%. En desktop se expande libremente.
         width: isMobile ? (sidebarOpen ? '70%' : '100%') : '100%',
         flexGrow: 1,
         display: 'flex',
@@ -566,18 +562,15 @@ export default function PatmosChat() {
             >
               ☰
             </button>
-            <div>
-              <h1 style={{ 
-                fontSize: isMobile ? '16px' : '18px', 
-                textTransform: 'uppercase', 
-                color: theme.textMain, 
-                fontFamily: 'Georgia, serif', 
-                fontWeight: 300, 
-                letterSpacing: isMobile ? '2px' : '4px',
-                margin: 0 
-              }}>
-                PATMOS
-              </h1>
+            <div className="flex flex-col">
+              {/* 🛠️ MODIFICADO: Bloque con el logo SVG oficial configurado en h-4 */}
+              <Link href="/" className="transition-opacity duration-200 hover:opacity-80 block align-middle">
+                <img 
+                  src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
+                  alt="Patmos Research Logo" 
+                  className="h-4 w-auto object-contain text-left"
+                />
+              </Link>
               {userEmail && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 0 0' }}>
                   <p style={{ 
@@ -602,7 +595,7 @@ export default function PatmosChat() {
                       fontSize: isMobile ? '10px' : '10px',
                       fontWeight: '800',
                       letterSpacing: '1px',
-                      padding: '4px 4px',
+                      padding: '2px 4px',
                       borderRadius: '4px',
                       fontFamily: theme.fontSans,
                       textTransform: 'uppercase',
@@ -701,11 +694,10 @@ export default function PatmosChat() {
               {/* Globo contenedor de mensaje */}
               <div style={{
                 maxWidth: '90%',
-                // 📝 Reemplaza la línea de padding por esto:
-paddingTop: '12px',
-paddingRight: '20px',
-paddingBottom: '0px',  // 👈 Bajamos drásticamente el espacio inferior extra
-paddingLeft: '20px',
+                paddingTop: '12px',
+                paddingRight: '20px',
+                paddingBottom: '4px',
+                paddingLeft: '20px',
                 borderRadius: m.role === 'user' ? '16px 16px 0 16px' : '16px 16px 16px 0',
                 fontSize: isMobile ? '14px' : '15px',
                 lineHeight: '1.6',
@@ -720,7 +712,7 @@ paddingLeft: '20px',
                   remarkPlugins={[remarkGfm]}
                   components={{
                     p: ({ children }) => (
-                      <p style={{ marginBottom: '16px', marginTop: '0px', textAlign: 'left', whiteSpace: 'pre-wrap' }}>
+                      <p style={{ margin: '0 0 12px 0', padding: 0, textAlign: 'left', whiteSpace: 'pre-wrap' }}>
                         {children}
                       </p>
                     ),
