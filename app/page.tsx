@@ -188,7 +188,7 @@ export default function HomePage() {
             <details className="group py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
-                  Does Patmos remain strictly anchored to the Textus Receptus lineage?
+                  What does Patmos teach from the Bible?
                 </h4>
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
@@ -198,7 +198,7 @@ export default function HomePage() {
                 </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
-                Yes. Patmos maps out strict biblical context utilizing exclusively the Textus Receptus lineage through the authorized King James Version (KJV), ensuring zero modern lexical modification or ecumenical alterations.
+                It holds that the supreme, exclusive, and final authority for all faith and ministry execution is the flawless, structurally preserved word of God—embodied strictly within the Authorized King James Holy Bible for the English-speaking world. It operates on the absolute conviction that all modern translations introduce theological distortions and systemic corruptions (Psalms 12:6-7).
               </p>
             </details>
 
@@ -206,7 +206,7 @@ export default function HomePage() {
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
-                  How does the architecture enforce the right division of truth?
+                  What does Patmos teach about God?
                 </h4>
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
@@ -216,7 +216,7 @@ export default function HomePage() {
                 </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
-                Every prompt execution runs through native algorithmic filters that align data structures with right division metrics, rigidly partitioning target audiences, structural typology, and dispensational boundaries.
+                It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 John 5:7).
               </p>
             </details>
 
@@ -224,7 +224,7 @@ export default function HomePage() {
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
-                  What happens once my daily quota of scriptural inquiries is exhausted?
+                  What does Patmos teach about Jesus Christ?
                 </h4>
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
@@ -234,7 +234,7 @@ export default function HomePage() {
                 </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
-                Once the 15 daily question barrier is reached, the pipeline locks automatically to protect computational resources. You can sustain unhindered and uncapped pipeline access by becoming a Supporter at any time.
+                It affirms the absolute Deity of Jesus Christ, His precise virgin birth, His vicarious substitutionary death for sinners, His literal, physical resurrection, and His literal, bodily ascension into the heavens (1 Timothy 3:16).
               </p>
             </details>
 
@@ -242,7 +242,7 @@ export default function HomePage() {
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
-                  Can I manage my supporter contribution and archiving preferences dynamically?
+                  What does Patmos teach about the Last Days?
                 </h4>
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
@@ -252,7 +252,7 @@ export default function HomePage() {
                 </svg>
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
-                Yes. Supporter accounts gain immediate access to a secure Stripe Customer Portal integrated right into the interface header to alter credentials, manage continuous archiving, or adjust tiers.
+                It holds to the imminent return of the Lord Jesus Christ to rapture the Church prior to the Tribulation period. At the culmination of the Tribulation, Christ will return physically to earth, establish His sovereign reign from the historic city of Jerusalem, and fully confirm His kingship over the earthly Messianic Kingdom promised unconditionally to the nation of Israel (Luke 21:21-23; 1 Thessalonians 5:9; Romans 11:25-29; Revelation 19:11-16; 20:1-6).
               </p>
             </details>
 
