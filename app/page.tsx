@@ -21,12 +21,13 @@ export default function HomePage() {
       
       {/* HEADER */}
       <header className="w-full max-w-[700px] py-6 flex justify-between items-center mt-4">
-        <span 
-          className="text-xl uppercase text-[#000f37]" 
-          style={{ fontFamily: 'Georgia, serif', fontWeight: 300, letterSpacing: '4px' }}
-        >
-          PATMOS
-        </span>
+        <Link href="/" className="flex items-center transition-opacity duration-200 hover:opacity-80">
+          <img 
+            src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
+            alt="Patmos Research Logo" 
+            className="h-8 w-auto object-contain"
+          />
+        </Link>
         <Link 
           href="/login" 
           className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded-none transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
