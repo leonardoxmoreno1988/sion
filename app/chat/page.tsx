@@ -576,11 +576,11 @@ export default function PatmosChat() {
                 />
               </Link>
               {userEmail && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 0 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '8px 0 0 0' }}>
                   <p style={{ 
                     fontSize: isMobile ? '11px' : '11px', 
                     color: theme.textMuted, 
-                    margin: 4, 
+                    margin: 0, 
                     fontFamily: theme.fontSans, 
                     textTransform: 'uppercase', 
                     letterSpacing: '0.5px',
