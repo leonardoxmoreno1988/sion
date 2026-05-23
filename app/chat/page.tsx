@@ -704,7 +704,7 @@ export default function PatmosChat() {
                 // 📝 Reemplaza la línea de padding por esto:
 paddingTop: '12px',
 paddingRight: '20px',
-paddingBottom: '2px',  // 👈 Bajamos drásticamente el espacio inferior extra
+paddingBottom: '0px',  // 👈 Bajamos drásticamente el espacio inferior extra
 paddingLeft: '20px',
                 borderRadius: m.role === 'user' ? '16px 16px 0 16px' : '16px 16px 16px 0',
                 fontSize: isMobile ? '14px' : '15px',
