@@ -205,7 +205,7 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
     });
 
   } catch (error: any) {
-    console.error('❌ Patmos API Route Critical Crash (OpenAI Engine):', error);
+    console.error('❌ Patmos Research API Route Critical Crash (OpenAI Engine):', error);
     return new NextResponse('Internal Error within the OpenAI Dogmatic Arsenal.', { status: 500 });
   }
 }
