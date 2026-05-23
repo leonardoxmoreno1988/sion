@@ -40,13 +40,12 @@ export default function HomePage() {
       <main className="flex-1 w-full max-w-[700px] flex flex-col justify-center py-16">
         <div className="mb-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tighter leading-tight text-[#000f37]">
-            Ask the KJV Bible 
-<br/>Anything
+            Your KJV Bible Assistant
           </h1>
         </div>
 
         <p className="text-2xl font-medium text-[#000f37] max-w-xl">
-          An AI assistant built exclusively on the <span className="font-semibold">Authorized King James Version</span>.
+          Clear, faithful answers from the <span className="font-semibold">Authorized King James Version only</span>.
         </p>
 
         <p className="text-lg leading-relaxed text-[#374151] mt-6 max-w-2xl">
