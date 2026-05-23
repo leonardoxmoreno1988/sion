@@ -40,7 +40,8 @@ export default function HomePage() {
       <main className="flex-1 w-full max-w-[700px] flex flex-col justify-center py-16">
         <div className="mb-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tighter leading-tight text-[#000f37]">
-            The KJV Bible<br/>at Your Command
+            Ask the KJV Bible 
+<br/>Anything
           </h1>
         </div>
 
@@ -76,7 +77,7 @@ export default function HomePage() {
         {/* BENEFITS SECTION */}
         <section className="mt-0 border-t border-[#e5e7eb] pt-12">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
-            Built Exclusively for KJV-Only Believers
+            Built Exclusively for Bible Believers
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
