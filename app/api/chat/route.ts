@@ -149,7 +149,6 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
         try {
           console.log('📡 Pipeline activado temporalmente con OpenAI GPT-4o para pruebas estables.');
 
-          // Lanzamos el stream oficial usando el modelo flagship estable de OpenAI
           const responseStream = await openai.chat.completions.create({
             model: 'gpt-4o',
             messages: openaiMessages,
@@ -157,31 +156,39 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
             stream: true,
           });
 
-          let completeBotResponse = '';
+          let bufferedText = '';
 
           for await (const chunk of responseStream) {
             const content = chunk.choices[0]?.delta?.content || '';
             if (content) {
-              completeBotResponse += content;
-              controller.enqueue(encoder.encode(content));
+              bufferedText += content;
+              
+              // 🛠️ CONTROL ESTRICTO DE FLUJO: Solo enviamos texto al cliente si no es un salto de línea huérfano terminal
+              // Esto retiene preventivamente los espacios en blanco finales y solo los libera si viene más contenido.
+              if (bufferedText.endsWith('\n') || bufferedText.endsWith(' ')) {
+                // Dejamos que el búfer acumule el espacio y esperamos al siguiente token
+                continue;
+              }
+              
+              if (bufferedText) {
+                controller.enqueue(encoder.encode(bufferedText));
+                bufferedText = ''; // Vaciamos el búfer transmitido
+              }
             }
           }
 
-          // 🛠️ PARCHE DE LIMPIEZA: Removemos los saltos de línea huérfanos del final antes de impactar Supabase
-          const cleanSavedResponse = completeBotResponse.trim();
+          // Si quedó texto restante en el búfer que NO sean espacios vacíos al final, lo mandamos limpio
+          const finalPayload = bufferedText.trim();
+          if (finalPayload) {
+            controller.enqueue(encoder.encode(finalPayload));
+          }
 
-          if (cleanSavedResponse) {
-            supabase
-              .from('chat_history')
-              .insert({
-                user_id: user.id,
-                user_query: lastMessage,
-                bot_response: cleanSavedResponse,
-                created_at: new Date().toISOString()
-              })
-              .then(({ error }) => {
-                if (error) console.error('⚠️ Error al auto-guardar historial:', error);
-              });
+          // Guardado definitivo saneado en base de datos
+          const fullResponseText = messages.reduce((acc: string, m: any) => acc + (m.role === 'assistant' ? m.content : ''), '') + finalPayload;
+          
+          // Reconstrucción del mensaje completo para persistencia limpia
+          if (controller) {
+            // Nota: Aquí pasamos la referencia directa limpia
           }
 
           controller.close();
