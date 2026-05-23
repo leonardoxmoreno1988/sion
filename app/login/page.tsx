@@ -4,6 +4,7 @@
 import { useState, Suspense } from 'react'; 
 import { createBrowserClient } from '@supabase/ssr'; 
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -193,11 +194,16 @@ export default function LoginPage() {
       {/* 📦 CAJA DE LOGIN */}
       <div className="w-full max-w-[400px] bg-white p-10 border-none rounded-none shadow-none">
         
-        <div className="text-center">
-          <h1 className="text-4xl font-light tracking-[0.25em] text-[#000f37] font-serif">
-             PATMOS
-          </h1>
-          <div className="mt-2 h-[1px] w-full bg-gradient-to-r from-transparent via-[#000f37]/20 to-transparent" />
+        {/* 🛠️ MODIFICADO: Bloque de marca con el isotipo SVG oficial centrado */}
+        <div className="text-center flex flex-col items-center">
+          <Link href="/" className="transition-opacity duration-200 hover:opacity-80 block mb-1">
+            <img 
+              src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
+              alt="Patmos Research Logo" 
+              className="h-10 w-auto object-contain mx-auto"
+            />
+          </Link>
+          <div className="mt-3 h-[1px] w-full bg-gradient-to-r from-transparent via-[#000f37]/20 to-transparent" />
           <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-gray-400">
             The Watchman of Final Authority
           </p>
