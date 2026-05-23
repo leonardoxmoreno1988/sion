@@ -90,7 +90,6 @@ export default function PatmosChat() {
       const checkDevice = () => {
         const mobile = window.innerWidth <= 768;
         setIsMobile(mobile);
-        // Si es escritorio lo dejamos abierto, si es móvil lo cerramos por defecto
         setSidebarOpen(!mobile);
       };
 
@@ -143,15 +142,17 @@ export default function PatmosChat() {
             ]);
           } else {
             setIsPremium(false);
-            setHasCredits(currentHistory.length < 5);
+            // 🛠️ SINCRONIZADO: Cambiado de 5 a 15 para calzar de forma exacta con tu backend y base de datos
+            setHasCredits(currentHistory.length < 15);
           }
         } else {
           setIsPremium(false);
-          setHasCredits(currentHistory.length < 5);
+          // 🛠️ SINCRONIZADO: Cambiado de 5 a 15 para usuarios sin registro premium activo
+          setHasCredits(currentHistory.length < 15);
         }
       } catch (subErr) {
         console.error("Error checking subscription tier:", subErr);
-        setHasCredits(currentHistory.length < 5);
+        setHasCredits(currentHistory.length < 15);
       }
 
       const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, currentSession) => {
@@ -186,7 +187,8 @@ export default function PatmosChat() {
         const data = await res.json();
         setHistory(data);
         if (!isPremium && subscriptionStatus !== 'past_due') {
-          setHasCredits(data.length < 5);
+          // 🛠️ SINCRONIZADO: Ajustado el contador a 15 en la recarga del historial bajo demanda
+          setHasCredits(data.length < 15);
         }
         if (data.length > 0 && !activeSessionId) {
           setActiveSessionId(data[0].id);
@@ -317,7 +319,8 @@ export default function PatmosChat() {
     e.preventDefault();
     if (!customInput.trim() || isLoading || !hasCredits) return;
 
-    const userQuery = customInput;
+    // 🛠️ SANEAMIENTO: Limpiamos espacios y saltos fantasma que tú escribas al presionar Enter
+    const userQuery = customInput.trim();
     setCustomInput("");
     setIsLoading(true);
 
@@ -384,14 +387,11 @@ export default function PatmosChat() {
   };
 
   return (
-    // 🏛️ SOLUCIÓN FLEXBOX: Manejo robusto de la distribución horizontal en pantalla completa
     <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: theme.bg, transition: 'all 0.4s ease', overflow: 'hidden' }}>
       
       {/* SIDEBAR ARCHIVE */}
       <aside style={{
-        // Matemática exacta: Si está abierto en móvil toma el 30%, en desktop fija 260px. Si está cerrado, 0px.
         width: sidebarOpen ? (isMobile ? '30%' : '260px') : '0px',
-        // Evitamos que en escritorio se encoja al redimensionar
         flexShrink: 0,
         backgroundColor: theme.sidebarBg,
         borderRight: sidebarOpen ? `1px solid ${theme.borderSion}` : 'none',
@@ -537,7 +537,6 @@ export default function PatmosChat() {
 
       {/* MAIN CONTAINER */}
       <main style={{
-        // Si está abierto en móvil toma el 70% restante, si está cerrado toma el 100%. En desktop se expande libremente.
         width: isMobile ? (sidebarOpen ? '70%' : '100%') : '100%',
         flexGrow: 1,
         display: 'flex',
@@ -581,7 +580,7 @@ export default function PatmosChat() {
               {userEmail && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 0 0' }}>
                   <p style={{ 
-                    fontSize: isMobile ? '11px' : '11px', 
+                    fontSize: '11px', 
                     color: theme.textMuted, 
                     margin: 0, 
                     fontFamily: theme.fontSans, 
@@ -599,7 +598,7 @@ export default function PatmosChat() {
                     <span style={{
                       backgroundColor: '#2d65f6',
                       color: '#ffffff',
-                      fontSize: isMobile ? '10px' : '10px',
+                      fontSize: '10px',
                       fontWeight: '800',
                       letterSpacing: '1px',
                       padding: '2px 4px',
@@ -698,9 +697,12 @@ export default function PatmosChat() {
           {messages.map((m) => (
             <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
               
-              {/* Globo contenedor de mensaje */}
+              {/* 🏛️ CORREGIDO: Ajustes de alturas fluidas y reseteo de márgenes del Markdown */}
               <div style={{
                 maxWidth: '90%',
+                width: 'auto',
+                height: 'auto',
+                minHeight: '0px',
                 padding: '12px 20px',
                 borderRadius: m.role === 'user' ? '16px 16px 0 16px' : '16px 16px 16px 0',
                 fontSize: isMobile ? '14px' : '15px',
@@ -715,8 +717,9 @@ export default function PatmosChat() {
                 <ReactMarkdown 
                   remarkPlugins={[remarkGfm]}
                   components={{
+                    // 🛠️ QUIRÚRGICO: Forzamos margin-bottom cero en el último párrafo para liquidar el espacio inferior extra
                     p: ({ children }) => (
-                      <p style={{ marginBottom: '16px', marginTop: '0px', textAlign: 'left', whiteSpace: 'pre-wrap' }}>
+                      <p style={{ margin: '0 0 12px 0', padding: 0, textAlign: 'left', whiteSpace: 'pre-wrap' }}>
                         {children}
                       </p>
                     ),
