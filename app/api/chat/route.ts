@@ -141,13 +141,13 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
     // Inyectamos el System Prompt como primer mensaje estructurado para asegurar dominancia absoluta
     openaiMessages.unshift({ role: 'system', content: PATMOS_SYSTEM_PROMPT.trim() });
 
-    // 6. 🚀 PROCESAMIENTO REFORZADO DEL STREAM UTILIZANDO OPENAI GPT-4O
+    // 6. 🚀 PROCESAMIENTO DEL STREAM ESTABLE CON AUTO-GUARDADO SEGURO
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          console.log('📡 Pipeline activado temporalmente con OpenAI GPT-4o para pruebas estables.');
+          console.log('📡 Pipeline activado con OpenAI GPT-4o. Transmisión limpia en progreso.');
 
           const responseStream = await openai.chat.completions.create({
             model: 'gpt-4o',
@@ -156,39 +156,31 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
             stream: true,
           });
 
-          let bufferedText = '';
+          let completeBotResponse = '';
 
           for await (const chunk of responseStream) {
             const content = chunk.choices[0]?.delta?.content || '';
             if (content) {
-              bufferedText += content;
-              
-              // 🛠️ CONTROL ESTRICTO DE FLUJO: Solo enviamos texto al cliente si no es un salto de línea huérfano terminal
-              // Esto retiene preventivamente los espacios en blanco finales y solo los libera si viene más contenido.
-              if (bufferedText.endsWith('\n') || bufferedText.endsWith(' ')) {
-                // Dejamos que el búfer acumule el espacio y esperamos al siguiente token
-                continue;
-              }
-              
-              if (bufferedText) {
-                controller.enqueue(encoder.encode(bufferedText));
-                bufferedText = ''; // Vaciamos el búfer transmitido
-              }
+              completeBotResponse += content;
+              controller.enqueue(encoder.encode(content));
             }
           }
 
-          // Si quedó texto restante en el búfer que NO sean espacios vacíos al final, lo mandamos limpio
-          const finalPayload = bufferedText.trim();
-          if (finalPayload) {
-            controller.enqueue(encoder.encode(finalPayload));
-          }
+          // Saneamos la respuesta completa removiendo espacios antes de guardarla en Supabase
+          const cleanSavedResponse = completeBotResponse.trim();
 
-          // Guardado definitivo saneado en base de datos
-          const fullResponseText = messages.reduce((acc: string, m: any) => acc + (m.role === 'assistant' ? m.content : ''), '') + finalPayload;
-          
-          // Reconstrucción del mensaje completo para persistencia limpia
-          if (controller) {
-            // Nota: Aquí pasamos la referencia directa limpia
+          if (cleanSavedResponse) {
+            supabase
+              .from('chat_history')
+              .insert({
+                user_id: user.id,
+                user_query: lastMessage,
+                bot_response: cleanSavedResponse,
+                created_at: new Date().toISOString()
+              })
+              .then(({ error }) => {
+                if (error) console.error('⚠️ Error al auto-guardar historial:', error);
+              });
           }
 
           controller.close();
