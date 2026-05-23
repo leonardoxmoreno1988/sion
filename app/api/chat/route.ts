@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1]?.content || '';
 
-    // 🏛️ CORREGIDO: Configuración moderna de Supabase utilizando getAll y setAll
+    // 🏛️ CONFIGURACIÓN: Sistema moderno de Supabase utilizando getAll y setAll
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // 2. Control de Seguridad (Paywall Guard)
+    // 2. Control de Seguridad (Paywall Guard calibrado a 15)
     try {
       const { data: subscription } = await supabase
         .from('subscriptions')
@@ -68,6 +68,7 @@ export async function POST(req: Request) {
 
         if (countError) throw countError;
 
+        // 🛠️ SINCRONIZADO: Cambiado a 15 para calzar de forma exacta con la nueva oferta de tu landing page
         if (count !== null && count >= 15) {
           return new NextResponse('Inquiry Locked. Subscription required to expand the Manuscript pipeline.', { status: 402 });
         }
@@ -106,7 +107,7 @@ export async function POST(req: Request) {
       }
     } catch (embeddingErr) {
       console.error('⚠️ Semantic vector pipeline error, running on internal axioms:', embeddingErr);
-      contextText = '';
+      contextText = ''; // Fallback de seguridad si OpenAI no tiene fondos
     }
 
     // 4. System Prompt de Acero Inoxidable (Configuración Dinámica y por Capas)
@@ -141,7 +142,7 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
       anthropicMessages.push({ role: 'user', content: lastMessage });
     }
 
-    // 6. Procesamiento Reforzado del Stream Con Diagnóstico Técnico Activo
+    // 6. 🚀 PROCESAMIENTO REFORZADO DEL STREAM CON REDIRECCIÓN UNIVERSAL
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
@@ -156,8 +157,9 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
           console.log(`📡 Pipeline activado. Inicializando conexión con Anthropic Key: ${apiKeyHint}`);
 
           try {
+            // 🛠️ REFORZADO: Forzamos el uso del alias global universal 'latest' para Sonnet
             responseStream = await anthropic.messages.create({
-              model: 'claude-3-5-sonnet-20241022',
+              model: 'claude-3-5-sonnet-latest',
               max_tokens: 4096,
               system: PATMOS_SYSTEM_PROMPT.trim(),
               messages: anthropicMessages,
@@ -167,8 +169,9 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
           } catch (firstModelError: any) {
             console.warn('⚠️ Falló Sonnet en producción. Activando fallback estructural a Haiku...', firstModelError?.message);
             
+            // 🛠️ REFORZADO: Forzamos el uso del alias global universal 'latest' para Haiku
             responseStream = await anthropic.messages.create({
-              model: 'claude-3-5-haiku-20241022',
+              model: 'claude-3-5-haiku-latest',
               max_tokens: 4096,
               system: PATMOS_SYSTEM_PROMPT.trim(),
               messages: anthropicMessages,
