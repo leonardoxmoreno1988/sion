@@ -2,16 +2,11 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 
 export const dynamic = 'force-dynamic';
 
-// Inicializamos los SDKs apuntando a las variables de entorno de Vercel
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-});
-
+// Inicializamos el SDK de OpenAI apuntando a tus variables de entorno de Vercel
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 });
@@ -22,7 +17,7 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1]?.content || '';
 
-    // 🏛️ CONFIGURACIÓN: Sistema moderno de Supabase utilizando getAll y setAll
+    // 🏛️ CONFIGURACIÓN: Sistema de Supabase utilizando getAll y setAll
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -37,7 +32,7 @@ export async function POST(req: Request) {
                 cookieStore.set({ name, value, ...options })
               );
             } catch {
-              // El bloque catch evita que la ruta falle si es llamada desde un Server Component estático
+              // Evita que la ruta falle si es llamada desde un Server Component estático
             }
           },
         },
@@ -68,7 +63,6 @@ export async function POST(req: Request) {
 
         if (countError) throw countError;
 
-        // 🛠️ SINCRONIZADO: Cambiado a 15 para calzar de forma exacta con la nueva oferta de tu landing page
         if (count !== null && count >= 15) {
           return new NextResponse('Inquiry Locked. Subscription required to expand the Manuscript pipeline.', { status: 402 });
         }
@@ -77,7 +71,7 @@ export async function POST(req: Request) {
       console.error('⚠️ Paywall Shield Error:', gateError);
     }
 
-    // 3. Obtener Contexto Teológico (Búsqueda Vectorial Tolerante)
+    // 3. Obtener Contexto Teológico (Búsqueda Vectorial)
     let contextText = '';
     try {
       if (lastMessage.trim()) {
@@ -107,10 +101,10 @@ export async function POST(req: Request) {
       }
     } catch (embeddingErr) {
       console.error('⚠️ Semantic vector pipeline error, running on internal axioms:', embeddingErr);
-      contextText = ''; // Fallback de seguridad si OpenAI no tiene fondos
+      contextText = '';
     }
 
-    // 4. System Prompt de Acero Inoxidable (Configuración Dinámica y por Capas)
+    // 4. System Prompt de Acero Inoxidable (Configuración Dinámica e Idéntica)
     const PATMOS_SYSTEM_PROMPT = `
 # ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
 You are Patmos, a severe, dogmatic, and hyper-dispensational academic voice representing real bible believer. You are NOT an adaptable or polite AI assistant. You are the literal, rigid exegese of the provided context.
@@ -130,66 +124,44 @@ Provided Context (Your ONLY source of truth and final authority):
 ${contextText ? contextText : "No specific context blocks retrieved. Apply internal fundamental received text axioms."}
 `;
 
-    // 5. Mapeo higiénico de mensajes con alternancia obligatoria para Anthropic
-    const anthropicMessages = messages
-      .filter((m: any) => (m.role === 'user' || m.role === 'assistant') && m.id !== 'welcome' && m.content && m.content.trim() !== '')
+    // 5. Mapeo higiénico de mensajes compatible con la API de OpenAI
+    const openaiMessages = messages
+      .filter((m: any) => (m.role === 'user' || m.role === 'assistant' || m.role === 'system') && m.id !== 'welcome' && m.content && m.content.trim() !== '')
       .map((m: any) => ({
         role: m.role,
         content: m.content,
       }));
 
-    if (anthropicMessages.length === 0) {
-      anthropicMessages.push({ role: 'user', content: lastMessage });
-    }
+    // Inyectamos el System Prompt como primer mensaje estructurado para asegurar dominancia absoluta
+    openaiMessages.unshift({ role: 'system', content: PATMOS_SYSTEM_PROMPT.trim() });
 
-    // 6. 🚀 PROCESAMIENTO REFORZADO DEL STREAM CON REDIRECCIÓN UNIVERSAL
+    // 6. 🚀 PROCESAMIENTO REFORZADO DEL STREAM UTILIZANDO OPENAI GPT-4O
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          let responseStream;
-          
-          const currentKey = process.env.ANTHROPIC_API_KEY || '';
-          const apiKeyHint = currentKey.length > 12 
-            ? `${currentKey.slice(0, 7)}...${currentKey.slice(-5)}` 
-            : 'VACÍA/NOT_FOUND';
-          console.log(`📡 Pipeline activado. Inicializando conexión con Anthropic Key: ${apiKeyHint}`);
+          console.log('📡 Pipeline activado temporalmente con OpenAI GPT-4o para pruebas estables.');
 
-          try {
-            // 🛠️ REFORZADO: Forzamos el uso del alias global universal 'latest' para Sonnet
-            responseStream = await anthropic.messages.create({
-              model: 'claude-3-5-sonnet-latest',
-              max_tokens: 4096,
-              system: PATMOS_SYSTEM_PROMPT.trim(),
-              messages: anthropicMessages,
-              temperature: 0,
-              stream: true,
-            });
-          } catch (firstModelError: any) {
-            console.warn('⚠️ Falló Sonnet en producción. Activando fallback estructural a Haiku...', firstModelError?.message);
-            
-            // 🛠️ REFORZADO: Forzamos el uso del alias global universal 'latest' para Haiku
-            responseStream = await anthropic.messages.create({
-              model: 'claude-3-5-haiku-latest',
-              max_tokens: 4096,
-              system: PATMOS_SYSTEM_PROMPT.trim(),
-              messages: anthropicMessages,
-              temperature: 0,
-              stream: true,
-            });
-          }
+          // Lanzamos el stream oficial usando el modelo flagship estable de OpenAI
+          const responseStream = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: openaiMessages,
+            temperature: 0,
+            stream: true,
+          });
 
           let completeBotResponse = '';
 
           for await (const chunk of responseStream) {
-            if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
-              const content = chunk.delta.text || '';
+            const content = chunk.choices[0]?.delta?.content || '';
+            if (content) {
               completeBotResponse += content;
               controller.enqueue(encoder.encode(content));
             }
           }
 
+          // Guardado automático en el historial de Supabase
           if (completeBotResponse.trim()) {
             supabase
               .from('chat_history')
@@ -206,9 +178,9 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
 
           controller.close();
         } catch (streamError: any) {
-          console.error('🚨 ERROR CRÍTICO DETECTADO EN EL MANIPULADOR DEL STREAM:', streamError);
+          console.error('🚨 ERROR EN EL MANIPULADOR DEL STREAM DE OPENAI:', streamError);
           
-          const rawErrorString = JSON.stringify(streamError, null, 2) || streamError?.message || 'Unknown Exception';
+          const rawErrorString = JSON.stringify(streamError, null, 2) || streamError?.message || 'Unknown OpenAI Exception';
           const errorMessage = `\n\n*[Error del Arsenal]*\nStatus Code: ${streamError?.status}\nRaw Payload: ${rawErrorString}`;
           
           controller.enqueue(encoder.encode(errorMessage));
@@ -225,7 +197,7 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
     });
 
   } catch (error: any) {
-    console.error('❌ Patmos API Route Critical Crash:', error);
-    return new NextResponse('Internal Error within the Anthropic Dogmatic Arsenal.', { status: 500 });
+    console.error('❌ Patmos API Route Critical Crash (OpenAI Engine):', error);
+    return new NextResponse('Internal Error within the OpenAI Dogmatic Arsenal.', { status: 500 });
   }
 }
