@@ -25,7 +25,7 @@ export default function HomePage() {
           <img 
             src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
             alt="Patmos Research Logo" 
-            className="h-8 w-auto object-contain"
+            className="h-4 w-auto object-contain"
           />
         </Link>
         <Link 
