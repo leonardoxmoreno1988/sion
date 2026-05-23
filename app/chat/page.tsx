@@ -576,7 +576,7 @@ export default function PatmosChat() {
                   <p style={{ 
                     fontSize: isMobile ? '11px' : '11px', 
                     color: theme.textMuted, 
-                    margin: 2, 
+                    margin: 4, 
                     fontFamily: theme.fontSans, 
                     textTransform: 'uppercase', 
                     letterSpacing: '0.5px',
