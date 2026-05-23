@@ -568,7 +568,7 @@ export default function PatmosChat() {
                 <img 
                   src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
                   alt="Patmos Research Logo" 
-                  className="h-3 w-auto object-contain text-left"
+                  className="h-3.5 w-auto object-contain text-left"
                 />
               </Link>
               {userEmail && (
