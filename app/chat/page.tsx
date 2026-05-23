@@ -602,7 +602,7 @@ export default function PatmosChat() {
                       fontSize: isMobile ? '10px' : '10px',
                       fontWeight: '800',
                       letterSpacing: '1px',
-                      padding: '2px 4px',
+                      padding: '4px 4px',
                       borderRadius: '4px',
                       fontFamily: theme.fontSans,
                       textTransform: 'uppercase',
