@@ -563,12 +563,12 @@ export default function PatmosChat() {
               ☰
             </button>
             <div className="flex flex-col">
-              {/* 🛠️ MODIFICADO: Bloque con el logo SVG oficial configurado en h-3 */}
+              {/* 🛠️ MODIFICADO: Agregada la clase "dark:invert" para cambiar dinámicamente el logo a color blanco en Modo Oscuro */}
               <Link href="/" className="transition-opacity duration-200 hover:opacity-80 block align-middle">
                 <img 
                   src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
                   alt="Patmos Research Logo" 
-                  className="h-3.5 w-auto object-contain text-left"
+                  className="h-3.5 w-auto object-contain text-left dark:invert"
                 />
               </Link>
               {userEmail && (
@@ -576,7 +576,7 @@ export default function PatmosChat() {
                   <p style={{ 
                     fontSize: isMobile ? '11px' : '11px', 
                     color: theme.textMuted, 
-                    margin: 4, 
+                    margin: 0, 
                     fontFamily: theme.fontSans, 
                     textTransform: 'uppercase', 
                     letterSpacing: '0.5px',
