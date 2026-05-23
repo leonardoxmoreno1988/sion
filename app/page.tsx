@@ -188,7 +188,7 @@ export default function HomePage() {
             <details className="group py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
-                  What does Patmos teach from the Bible?
+                  What does Patmos teach about the Bible?
                 </h4>
                 <svg 
                   className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
