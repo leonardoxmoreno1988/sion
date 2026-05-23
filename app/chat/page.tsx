@@ -609,7 +609,7 @@ export default function PatmosChat() {
                       userSelect: 'none',
                       lineHeight: '1'
                     }}>
-                      SUPPORTER
+                      PRO
                     </span>
                   )}
                 </div>
