@@ -197,7 +197,7 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
-              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+              <p className="mt-4 text-m leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 It holds that the supreme, exclusive, and final authority for all faith and ministry execution is the flawless, structurally preserved word of God—embodied strictly within the Authorized King James Holy Bible for the English-speaking world. It operates on the absolute conviction that all modern translations introduce theological distortions and systemic corruptions (Psalms 12:6-7).
               </p>
             </details>
@@ -215,7 +215,7 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
-              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+              <p className="mt-4 text-m leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 John 5:7).
               </p>
             </details>
@@ -233,7 +233,7 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
-              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+              <p className="mt-4 text-m leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 It affirms the absolute Deity of Jesus Christ, His precise virgin birth, His vicarious substitutionary death for sinners, His literal, physical resurrection, and His literal, bodily ascension into the heavens (1 Timothy 3:16).
               </p>
             </details>
@@ -251,7 +251,7 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
-              <p className="mt-4 text-sm leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+              <p className="mt-4 text-m leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 It holds to the imminent return of the Lord Jesus Christ to rapture the Church prior to the Tribulation period. At the culmination of the Tribulation, Christ will return physically to earth, establish His sovereign reign from the historic city of Jerusalem, and fully confirm His kingship over the earthly Messianic Kingdom promised unconditionally to the nation of Israel (Luke 21:21-23; 1 Thessalonians 5:9; Romans 11:25-29; Revelation 19:11-16; 20:1-6).
               </p>
             </details>
