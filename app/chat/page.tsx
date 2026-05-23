@@ -414,7 +414,7 @@ export default function PatmosChat() {
               letterSpacing: '1px',
               cursor: 'pointer',
               fontFamily: theme.fontSans
-            }}
+}}
           >
             + New Inquiry
           </button>
@@ -563,12 +563,16 @@ export default function PatmosChat() {
               ☰
             </button>
             <div className="flex flex-col">
-              {/* 🛠️ MODIFICADO: Agregada la clase "dark:invert" para cambiar dinámicamente el logo a color blanco en Modo Oscuro */}
+              {/* 🛠️ SOLUCIÓN MAESTRA CROMÁTICA: Si es modo oscuro, aplicamos un filtro inline controlado por JS 
+                   para forzar blanco puro impecable sin pasar por la distorsión del invert nativo */}
               <Link href="/" className="transition-opacity duration-200 hover:opacity-80 block align-middle">
                 <img 
                   src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
                   alt="Patmos Research Logo" 
-                  className="h-3.5 w-auto object-contain text-left dark:invert"
+                  className="h-3.5 w-auto object-contain text-left"
+                  style={{
+                    filter: isDarkMode ? 'brightness(0) invert(1)' : 'none'
+                  }}
                 />
               </Link>
               {userEmail && (
