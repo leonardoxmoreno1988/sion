@@ -58,7 +58,7 @@ export default function HomePage() {
             href="/login" 
             className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-base font-semibold px-10 py-5 rounded-xl hover:bg-black transition-all"
           >
-            Start Asking the KJV Now →
+            Start Asking Patmos Now →
           </Link>
         </div>
 
@@ -179,7 +179,7 @@ export default function HomePage() {
         {/* FAQS */}
         <section className="mt-20 border-t border-[#e5e7eb] pt-12 pb-8">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
-            Frequently Examined
+            FAQs
           </h3>
 
           <div className="flex flex-col border-b border-[#e5e7eb]">
