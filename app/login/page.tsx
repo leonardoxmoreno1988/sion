@@ -200,7 +200,7 @@ export default function LoginPage() {
             <img 
               src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
               alt="Patmos Research Logo" 
-              className="h-5 w-auto object-contain mx-auto"
+              className="h-6 w-auto object-contain mx-auto"
             />
           </Link>
           <div className="mt-3 h-[1px] w-full bg-gradient-to-r from-transparent via-[#000f37]/20 to-transparent" />
