@@ -849,7 +849,7 @@ export default function PatmosChat() {
                   letterSpacing: '1.5px', 
                   color: subscriptionStatus === 'past_due' ? '#ef4444' : (isDarkMode ? '#94a3b8' : '#cbd5e1'), 
                   margin: '0 0 4px 0', 
-                  fontFamily: 'serif' 
+                  fontFamily: theme.fontSans 
                 }}>
                   {subscriptionStatus === 'past_due' ? 'Payment Settlement Required' : 'Free Inquiry Limit Reached'}
                 </h5>
