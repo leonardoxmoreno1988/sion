@@ -103,16 +103,9 @@ export default function PatmosChat() {
         return;
       }
 
-      setUserEmail(session.user.email ?? 'Vigilante');
+      const emailSession = session.user.email ?? 'Vigilante';
+      setUserEmail(emailSession);
 
-      // 🛠️ BYPASS DE EMERGENCIA INYECTADO AQUÍ:
-      // Si el correo coincide, te da superpoderes Pro ignorando las tablas rotas de la DB
-      if (session.user.email === 'lenn.moreno@gmail.com') {
-        setIsPremium(true);
-        setHasCredits(true);
-        setSubscriptionStatus('active');
-      }
-      
       let currentHistory: ChatSession[] = [];
       try {
         const res = await fetch('/api/history');
@@ -124,42 +117,48 @@ export default function PatmosChat() {
         console.error("Error fetching history:", err);
       }
 
-      // 🛡️ REESTRUCTURACIÓN DE COMPROBACIÓN DE PAYWALL EN TESTING
-      try {
-        const { data: subscription } = await supabase
-          .from('subscriptions')
-          .select('status')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+      // 🛡️ COMPROBACIÓN DE PAYWALL OPTIMIZADA CON PROTECCIÓN DE BYPASS
+      if (emailSession === 'lenn.moreno@gmail.com') {
+        setIsPremium(true);
+        setHasCredits(true);
+        setSubscriptionStatus('active');
+      } else {
+        try {
+          const { data: subscription } = await supabase
+            .from('subscriptions')
+            .select('status')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
 
-        if (subscription) {
-          const currentStatus = subscription.status;
-          setSubscriptionStatus(currentStatus);
+          if (subscription) {
+            const currentStatus = subscription.status;
+            setSubscriptionStatus(currentStatus);
 
-          if (currentStatus === 'active' || currentStatus === 'trialing') {
-            setIsPremium(true);
-            setHasCredits(true); // 🚀 Forzado inmediato si la DB dice active
-          } else if (currentStatus === 'past_due') {
-            setIsPremium(false);
-            setHasCredits(false);
-            setMessages([
-              { 
-                id: 'system-past-due', 
-                role: 'assistant', 
-                content: "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed. Access has been temporarily restricted. Please visit the **Billing** portal above to update your payment method." 
-              }
-            ]);
+            if (currentStatus === 'active' || currentStatus === 'trialing') {
+              setIsPremium(true);
+              setHasCredits(true);
+            } else if (currentStatus === 'past_due') {
+              setIsPremium(false);
+              setHasCredits(false);
+              setMessages([
+                { 
+                  id: 'system-past-due', 
+                  role: 'assistant', 
+                  content: "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed. Access has been temporarily restricted. Please visit the **Billing** portal above to update your payment method." 
+                }
+              ]);
+            } else {
+              setIsPremium(false);
+              setHasCredits(currentHistory.length < 15);
+            }
           } else {
             setIsPremium(false);
             setHasCredits(currentHistory.length < 15);
           }
-        } else {
-          setIsPremium(false);
+        } catch (subErr) {
+          console.error("Error checking subscription tier:", subErr);
           setHasCredits(currentHistory.length < 15);
         }
-      } catch (subErr) {
-        console.error("Error checking subscription tier:", subErr);
-        setHasCredits(currentHistory.length < 15);
       }
 
       const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, currentSession) => {
@@ -194,10 +193,11 @@ export default function PatmosChat() {
         const data = await res.json();
         setHistory(data);
         
-        // 🛠️ COMPUERTA DE SEGURIDAD PARA EL BYPASS:
-        // Si tu correo es el de administrador, mantenemos barra libre de créditos pase lo que pase
+        // 🛠️ COMPUERTA ANTIPISADO PARA EL BYPASS DE ADMINISTRADOR
         if (userEmail === 'lenn.moreno@gmail.com') {
+          setIsPremium(true);
           setHasCredits(true);
+          setSubscriptionStatus('active');
         } else if (!isPremium && subscriptionStatus !== 'past_due') {
           setHasCredits(data.length < 15);
         }
