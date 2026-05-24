@@ -152,10 +152,10 @@ export default function HomePage() {
                   <span className="text-5xl font-bold">$7</span>
                   <span className="ml-2 text-gray-500">/ month</span>
                 </div>
-                <p className="text-sm text-gray-500">or $69/year (save 18%)</p>
+            
                 
                 {/* 🛠️ AJUSTE: Removidas comillas y la clase 'italic' */}
-                <p className="mt-4 text-xs leading-relaxed text-[#4b5563]">
+                <p className="mt-4 text-s leading-relaxed text-[#4b5563]">
                   Your support helps keep Patmos pure, independent, and focused only on the KJV for believers around the world.
                 </p>
                 
