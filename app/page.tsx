@@ -40,7 +40,7 @@ export default function HomePage() {
       <main className="flex-1 w-full max-w-[700px] flex flex-col justify-center py-16">
         <div className="mb-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tighter leading-tight text-[#000f37]">
-            Ask Anything from the KJV
+            Ask Anything<br/>from the KJV
           </h1>
         </div>
 
