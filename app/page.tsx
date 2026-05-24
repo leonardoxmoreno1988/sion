@@ -50,7 +50,7 @@ export default function HomePage() {
 
         <p className="text-lg leading-relaxed text-[#374151] mt-6 max-w-2xl">
           Defends the literal, dispensational, pre-tribulational teaching of Scripture.<br/>
-          No modern translations. No human authors. No compromise.
+          No modern translations. No compromise.
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row gap-4">
