@@ -45,13 +45,17 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // 2. Control de Seguridad (Paywall Guard con Bypass definitivo para Administrador)
+    // 2. Control de Seguridad (Paywall Guard con doble blindaje para Administrador)
     let isPremiumUser = false;
 
-    // Si eres tú, te otorgamos permisos premium automáticos en el backend sin tocar Supabase
+    // 🚀 COMPUERTA DE ADMINISTRADOR BLINDADA:
+    // Al evaluar directamente sobre la raíz de 'user', evitamos que consultas de red tardías pisen el estado.
     if (user.email === 'lenn.moreno@gmail.com') {
       isPremiumUser = true;
-    } else {
+    }
+
+    // Solo si NO eres el administrador, procedemos a realizar las consultas restrictivas a Supabase
+    if (!isPremiumUser) {
       try {
         const { data: subscription } = await supabase
           .from('subscriptions')
@@ -59,7 +63,8 @@ export async function POST(req: Request) {
           .eq('user_id', user.id)
           .maybeSingle();
 
-        isPremiumUser = subscription && (subscription.status === 'active' || subscription.status === 'trialing');
+        // 🔥 SOLUCIÓN TYPESCRIPT: Forzamos evaluación booleana estricta (true/false) para evitar fugas de tipo null
+        isPremiumUser = !!subscription && (subscription.status === 'active' || subscription.status === 'trialing');
 
         if (!isPremiumUser) {
           const { count, error: countError } = await supabase
@@ -145,7 +150,7 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
         content: m.content,
       }));
 
-    // Inyectamos el System Prompt como primer mensaje estructurado para asegurar dominancia absoluta
+    // Inyectamos el System Prompt como primer message estructurado para asegurar dominancia absoluta
     openaiMessages.unshift({ role: 'system', content: PATMOS_SYSTEM_PROMPT.trim() });
 
     // 6. 🚀 PROCESAMIENTO DEL STREAM ESTABLE CON AUTO-GUARDADO SEGURO
