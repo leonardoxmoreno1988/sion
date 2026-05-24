@@ -855,8 +855,8 @@ export default function PatmosChat() {
                 </h5>
                 <p style={{ fontSize: '12px', color: subscriptionStatus === 'past_due' ? 'inherit' : '#cbd5e1', margin: 0, lineHeight: '1.4', fontFamily: theme.fontSans }}>
                   {subscriptionStatus === 'past_due' 
-                    ? "Your station access is locked due to a failed renewal payment. Update your credit card credentials to resume pipeline access immediately."
-                    : "Your manuscript pipeline allocation has concluded. Upgrade to sustain the architecture and execute unlimited Dogmatic inquiries."
+                    ? "Your access is locked due to a failed renewal payment. Update your credit card credentials to resume access immediately."
+                    : "You have reached the limit of free searches. Upgrade to the Pro version to continue your Bible study and perform unlimited searches."
                   }
                 </p>
               </div>
