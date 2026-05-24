@@ -844,14 +844,14 @@ export default function PatmosChat() {
               <div style={{ flex: 1 }}>
                 <h5 style={{ 
                   fontSize: '10px', 
-                  fontWeight: '700', 
+                  fontWeight: '900', 
                   textTransform: 'uppercase', 
                   letterSpacing: '1.5px', 
                   color: subscriptionStatus === 'past_due' ? '#ef4444' : (isDarkMode ? '#94a3b8' : '#cbd5e1'), 
                   margin: '0 0 4px 0', 
                   fontFamily: theme.fontSans 
                 }}>
-                  {subscriptionStatus === 'past_due' ? 'Payment Settlement Required' : 'Free Inquiry Limit Reached'}
+                  {subscriptionStatus === 'past_due' ? 'Payment Settlement Required' : 'Free Limit Reached'}
                 </h5>
                 <p style={{ fontSize: '12px', color: subscriptionStatus === 'past_due' ? 'inherit' : '#cbd5e1', margin: 0, lineHeight: '1.4', fontFamily: theme.fontSans }}>
                   {subscriptionStatus === 'past_due' 
