@@ -44,14 +44,15 @@ export async function POST(req: Request) {
             expand: ['items.data.price'],
           });
           
-          let userId = session.client_reference_id;
+          // 🚀 PASO A PASO: Intentamos recuperar el userId en orden de seguridad estricto
+          let userId = session.metadata?.userId || session.client_reference_id;
 
-          // Fallback en caso de que venga vacío el reference_id
+          // Fallback en caso de que los identificadores directos vengan vacíos
           if (!userId && session.customer_details?.email) {
-            console.log(`ℹ️ client_reference_id missing. Fallback SQL table search by email: ${session.customer_details.email}`);
+            console.log(`ℹ️ userId no encontrado en metadata ni en client_reference_id. Fallback buscando por email: ${session.customer_details.email}`);
             
             const { data: userData, error: userError } = await supabaseAdmin
-              .from('profiles') // Cambia a 'users' o 'customers' si usas otro nombre de tabla para tus usuarios
+              .from('profiles') 
               .select('id')
               .eq('email', session.customer_details.email)
               .maybeSingle();

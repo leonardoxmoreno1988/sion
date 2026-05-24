@@ -45,8 +45,7 @@ export default function HomePage() {
         </div>
 
         <p className="text-2xl font-medium text-[#000f37] max-w-xl">
-          Clear, faithful answers drawn exclusively from the 
- <span className="font-semibold">Authorized King James Version</span>.
+          Clear, faithful answers drawn exclusively from the <span className="font-semibold">Authorized King James Version</span>.
         </p>
 
         <p className="text-lg leading-relaxed text-[#374151] mt-6 max-w-2xl">

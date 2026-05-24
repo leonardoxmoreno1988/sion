@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       payment_method_types: ['card'],
       line_items: [
         {
-          // 🎯 Tu ID de precio real de tu catálogo de Stripe
+          // 🎯 Tu ID de precio real de tu catálogo de Stripe (Asegúrate de cambiarlo al de modo Live después)
           price: 'price_1TXptyRb2cKRI6uDvDzc6n7i', 
           quantity: 1,
         },
@@ -56,9 +56,13 @@ export async function GET(request: Request) {
       mode: 'subscription',
       customer_email: user.email,
       
-      // 🚀 LLAVE MAESTRA: Metadatos idénticos que leerá el Webhook para actualizar Supabase
+      // 🚀 LLAVE MAESTRA: client_reference_id actúa como fallback secundario
       client_reference_id: user.id, 
+      
+      // 🤝 MAPEO SIMÉTRICO PARA EL WEBHOOK:
+      // Seteamos tanto 'userId' (que lee el nuevo webhook) como 'supabase_user_id' por retrocompatibilidad
       metadata: {
+        userId: user.id,
         supabase_user_id: user.id,
       },
 
