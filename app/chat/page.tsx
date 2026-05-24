@@ -194,10 +194,11 @@ export default function PatmosChat() {
         const data = await res.json();
         setHistory(data);
         
-        // 🔥 FIX CRÍTICO: Si el estado local o de Supabase ya leyó que eres premium, nunca te quita los créditos
-        if (isPremium) {
+        // 🛠️ COMPUERTA DE SEGURIDAD PARA EL BYPASS:
+        // Si tu correo es el de administrador, mantenemos barra libre de créditos pase lo que pase
+        if (userEmail === 'lenn.moreno@gmail.com') {
           setHasCredits(true);
-        } else if (subscriptionStatus !== 'past_due') {
+        } else if (!isPremium && subscriptionStatus !== 'past_due') {
           setHasCredits(data.length < 15);
         }
         
