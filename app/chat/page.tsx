@@ -87,7 +87,6 @@ export default function PatmosChat() {
       link.rel = 'stylesheet';
       document.head.appendChild(link);
 
-      // 📱 ESCUCHA DE BREAKPOINT MEJORADA
       const checkDevice = () => {
         const mobile = window.innerWidth <= 768;
         setIsMobile(mobile);
@@ -117,6 +116,7 @@ export default function PatmosChat() {
         console.error("Error fetching history:", err);
       }
 
+      // 🛡️ REESTRUCTURACIÓN DE COMPROBACIÓN DE PAYWALL EN TESTING
       try {
         const { data: subscription } = await supabase
           .from('subscriptions')
@@ -130,7 +130,7 @@ export default function PatmosChat() {
 
           if (currentStatus === 'active' || currentStatus === 'trialing') {
             setIsPremium(true);
-            setHasCredits(true);
+            setHasCredits(true); // 🚀 Forzado inmediato si la DB dice active
           } else if (currentStatus === 'past_due') {
             setIsPremium(false);
             setHasCredits(false);
@@ -185,9 +185,14 @@ export default function PatmosChat() {
       if (res.ok) {
         const data = await res.json();
         setHistory(data);
-        if (!isPremium && subscriptionStatus !== 'past_due') {
+        
+        // 🔥 FIX CRÍTICO: Si el estado local o de Supabase ya leyó que eres premium, nunca te quita los créditos
+        if (isPremium) {
+          setHasCredits(true);
+        } else if (subscriptionStatus !== 'past_due') {
           setHasCredits(data.length < 15);
         }
+        
         if (data.length > 0 && !activeSessionId) {
           setActiveSessionId(data[0].id);
         }
@@ -414,7 +419,7 @@ export default function PatmosChat() {
               letterSpacing: '1px',
               cursor: 'pointer',
               fontFamily: theme.fontSans
-}}
+            }}
           >
             + New Inquiry
           </button>
@@ -563,8 +568,6 @@ export default function PatmosChat() {
               ☰
             </button>
             <div className="flex flex-col">
-              {/* 🛠️ SOLUCIÓN MAESTRA CROMÁTICA: Si es modo oscuro, aplicamos un filtro inline controlado por JS 
-                   para forzar blanco puro impecable sin pasar por la distorsión del invert nativo */}
               <Link href="/" className="transition-opacity duration-200 hover:opacity-80 block align-middle">
                 <img 
                   src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
@@ -576,7 +579,7 @@ export default function PatmosChat() {
                 />
               </Link>
               {userEmail && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '8px 0 0 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 0 0' }}>
                   <p style={{ 
                     fontSize: isMobile ? '11px' : '11px', 
                     color: theme.textMuted, 
@@ -894,7 +897,7 @@ export default function PatmosChat() {
                 fontSize: '15px',
                 outline: 'none',
                 backgroundColor: !hasCredits ? (isDarkMode ? '#450a0a20' : '#fef2f2') : theme.inputBg,
-                color: !hasCredits ? '#94a3b8' : theme.inputText,
+                color: !hasCredits ? '#7f8fa6' : theme.inputText,
                 fontFamily: theme.fontSans,
                 transition: 'all 0.3s ease',
                 cursor: !hasCredits ? 'not-allowed' : 'text'

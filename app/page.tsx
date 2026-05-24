@@ -63,7 +63,7 @@ export default function HomePage() {
         </div>
 
         <p className="text-sm text-gray-500 mt-4">
-          Free: 15 questions per day • Pro: Unlimited for $7/month
+          Free: 15 questions per day • Support: Unlimited for $7/month
         </p>
 
         {/* Imagen */}
