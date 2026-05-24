@@ -104,6 +104,14 @@ export default function PatmosChat() {
       }
 
       setUserEmail(session.user.email ?? 'Vigilante');
+
+      // 🛠️ BYPASS DE EMERGENCIA INYECTADO AQUÍ:
+      // Si el correo coincide, te da superpoderes Pro ignorando las tablas rotas de la DB
+      if (session.user.email === 'lenn.moreno@gmail.com') {
+        setIsPremium(true);
+        setHasCredits(true);
+        setSubscriptionStatus('active');
+      }
       
       let currentHistory: ChatSession[] = [];
       try {
