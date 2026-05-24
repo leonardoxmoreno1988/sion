@@ -45,30 +45,37 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // 2. Control de Seguridad (Paywall Guard calibrado a 15)
-    try {
-      const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('status')
-        .eq('user_id', user.id)
-        .maybeSingle();
+    // 2. Control de Seguridad (Paywall Guard con Bypass definitivo para Administrador)
+    let isPremiumUser = false;
 
-      const isPremiumUser = subscription && (subscription.status === 'active' || subscription.status === 'trialing');
+    // Si eres tú, te otorgamos permisos premium automáticos en el backend sin tocar Supabase
+    if (user.email === 'lenn.moreno@gmail.com') {
+      isPremiumUser = true;
+    } else {
+      try {
+        const { data: subscription } = await supabase
+          .from('subscriptions')
+          .select('status')
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-      if (!isPremiumUser) {
-        const { count, error: countError } = await supabase
-          .from('chat_history')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id);
+        isPremiumUser = subscription && (subscription.status === 'active' || subscription.status === 'trialing');
 
-        if (countError) throw countError;
+        if (!isPremiumUser) {
+          const { count, error: countError } = await supabase
+            .from('chat_history')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
 
-        if (count !== null && count >= 15) {
-          return new NextResponse('Inquiry Locked. Subscription required to expand the Manuscript pipeline.', { status: 402 });
+          if (countError) throw countError;
+
+          if (count !== null && count >= 15) {
+            return new NextResponse('Inquiry Locked. Subscription required to expand the Manuscript pipeline.', { status: 402 });
+          }
         }
+      } catch (gateError) {
+        console.error('⚠️ Paywall Shield Error:', gateError);
       }
-    } catch (gateError) {
-      console.error('⚠️ Paywall Shield Error:', gateError);
     }
 
     // 3. Obtener Contexto Teológico (Búsqueda Vectorial)
