@@ -879,7 +879,7 @@ export default function PatmosChat() {
                 onMouseOver={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#dc2626' : '#e2e8f0')}
                 onMouseOut={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#ef4444' : '#fff')}
               >
-                {subscriptionStatus === 'past_due' ? 'Resolve Now &rarr;' : 'Upgrade &rarr;'}
+                {subscriptionStatus === 'past_due' ? 'Resolve Now →;' : 'Upgrade →;'}
               </a>
             </div>
           )}
