@@ -111,9 +111,9 @@ export default function HomePage() {
 
         <p className="text-lg leading-relaxed text-[#374151] mt-6 max-w-2xl">
           {lang === 'es' ? (
-            <>Defiende la enseñanza literal, dispensacional y pretribulacional de las Escrituras.<br/>Sin traducciones modernas. Sin concesiones.</>
+            <>Defiende la enseñanza literal, dispensacional y pretribulacional de las Escrituras. Sin traducciones modernas. Sin concesiones.</>
           ) : (
-            <>Defends the literal, dispensational, pre-tribulational teaching of Scripture. No modern translations. No compromise.</>
+            <>Defends the literal, dispensational, pre-tribulational teaching of Scripture.<br/>No modern translations. No compromise.</>
           )}
         </p>
 
