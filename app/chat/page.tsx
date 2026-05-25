@@ -7,6 +7,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from "../context/Languagecontext";
+import Header from "@/components/Header"; // 🚀 Inyectamos el componente Header con el selector EN/ES
 
 interface ChatMessage {
   id: string;
@@ -425,36 +426,41 @@ export default function PatmosChat() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: theme.bg, transition: 'all 0.4s ease', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', backgroundColor: theme.bg, transition: 'all 0.4s ease', overflow: 'hidden' }}>
       
-      {/* SIDEBAR ARCHIVE */}
-      <aside style={{
-        width: sidebarOpen ? (isMobile ? '40%' : '260px') : '0px',
-        flexShrink: 0,
-        backgroundColor: theme.sidebarBg,
-        borderRight: sidebarOpen ? `1px solid ${theme.borderSion}` : 'none',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: 20
-      }}>
-        <div style={{ padding: '24px 20px', borderBottom: `1px solid ${theme.borderSion}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button 
-            onClick={startNewInquiry}
-            style={{
-              width: '100%',
-              backgroundColor: theme.textMain,
-              color: isDarkMode ? '#020617' : '#fff',
-              border: 'none',
-              padding: '10px',
-              borderRadius: '6px',
-              fontSize: '11px',
-              fontWeight: '700',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              cursor: 'pointer',
-              fontFamily: theme.fontSans
+      {/* 👑 HEADER GLOBAL DE LA APLICACIÓN (Con los botones EN/ES completamente visibles) */}
+      <Header />
+
+      <div style={{ display: 'flex', flex: 1, width: '100vw', overflow: 'hidden', position: 'relative' }}>
+        
+        {/* SIDEBAR ARCHIVE */}
+        <aside style={{
+          width: sidebarOpen ? (isMobile ? '40%' : '260px') : '0px',
+          flexShrink: 0,
+          backgroundColor: theme.sidebarBg,
+          borderRight: sidebarOpen ? `1px solid ${theme.borderSion}` : 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          zIndex: 20
+        }}>
+          <div style={{ padding: '24px 20px', borderBottom: `1px solid ${theme.borderSion}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button 
+              onClick={startNewInquiry}
+              style={{
+                width: '100%',
+                backgroundColor: theme.textMain,
+                color: isDarkMode ? '#020617' : '#fff',
+                border: 'none',
+                padding: '10px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                cursor: 'pointer',
+                fontFamily: theme.fontSans
             }}
           >
             {lang === 'es' ? "+ Nueva Consulta" : "+ New Inquiry"}
@@ -581,145 +587,29 @@ export default function PatmosChat() {
         flexGrow: 1,
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        height: '100%',
         alignItems: 'center',
         padding: isMobile ? '0 12px' : '0 20px',
         transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         zIndex: 10
       }}>
+        {/* 🛠️ SUB-BARRA COMPACTA: Conserva solo el botón de colapsar Sidebar para mantener control responsivo */}
         <div style={{
           width: '100%',
           maxWidth: '650px',
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-start',
           alignItems: 'center',
-          borderBottom: `1.5px solid ${theme.headerLine}`,
-          padding: '20px 0',
-          marginBottom: '10px'
+          padding: '12px 0 4px 0',
+          marginBottom: '5px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '15px' }}>
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.textMain, fontSize: '18px', padding: 0 }}
-              title="Toggle Archive"
-            >
-              ☰
-            </button>
-            <div className="flex flex-col">
-              <Link href="/" className="transition-opacity duration-200 hover:opacity-80 block align-middle">
-                <img 
-                  src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
-                  alt="Patmos Research Logo" 
-                  className="h-3.5 w-auto object-contain text-left"
-                  style={{
-                    filter: isDarkMode ? 'brightness(0) invert(1)' : 'none'
-                  }}
-                />
-              </Link>
-              {userEmail && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 0 0' }}>
-                  <p style={{ 
-                    fontSize: isMobile ? '11px' : '11px', 
-                    color: theme.textMuted, 
-                    margin: 0, 
-                    fontFamily: theme.fontSans, 
-                    textTransform: 'uppercase', 
-                    letterSpacing: '0.5px',
-                    maxWidth: isMobile ? '100px' : 'none',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {userEmail}
-                  </p>
-                  
-                  {isPremium && (
-                    <span style={{
-                      backgroundColor: '#2d65f6',
-                      color: '#ffffff',
-                      fontSize: isMobile ? '10px' : '10px',
-                      fontWeight: '800',
-                      letterSpacing: '1px',
-                      padding: '2px 4px',
-                      borderRadius: '4px',
-                      fontFamily: theme.fontSans,
-                      textTransform: 'uppercase',
-                      userSelect: 'none',
-                      lineHeight: '1'
-                    }}>
-                      PRO
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '15px' }}>
-            <button 
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              style={{ 
-                background: 'none', 
-                border: 'none', 
-                cursor: 'pointer', 
-                color: theme.textMuted, 
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '4px',
-                transition: 'color 0.2s ease'
-              }}
-              title="Toggle Theme"
-            >
-              {isDarkMode ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="4"/>
-                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-                </svg>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-                </svg>
-              )}
-            </button>
-
-            {(isPremium || subscriptionStatus === 'past_due') && (
-              <a 
-                href="/api/portal"
-                style={{
-                  fontSize: '9px',
-                  fontWeight: '700',
-                  color: subscriptionStatus === 'past_due' ? '#f87171' : theme.textMain,
-                  textDecoration: 'none',
-                  background: 'transparent',
-                  border: `1px solid ${subscriptionStatus === 'past_due' ? '#f87171' : theme.textMain}`,
-                  padding: '4px 6px',
-                  fontFamily: theme.fontSans,
-                  textTransform: 'uppercase',
-                  transition: 'all 0.2s'
-                }}
-              >
-                {subscriptionStatus === 'past_due' ? (lang === 'es' ? 'Corregir' : 'Fix') : (lang === 'es' ? 'Factura' : 'Bill')}
-              </a>
-            )}
-
-            <button 
-              onClick={handleLogout}
-              style={{
-                fontSize: '9px',
-                fontWeight: '700',
-                color: theme.textMain,
-                background: 'transparent',
-                border: `1px solid ${theme.textMain}`,
-                padding: '4px 6px',
-                cursor: 'pointer',
-                fontFamily: theme.fontSans,
-                textTransform: 'uppercase'
-              }}
-            >
-              {lang === 'es' ? "Salir" : "Exit"}
-            </button>
-          </div>
+          <button 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.textMain, fontSize: '18px', padding: 0 }}
+            title="Toggle Archive"
+          >
+            ☰
+          </button>
         </div>
 
         {/* Contenedor de Mensajes */}
@@ -731,7 +621,7 @@ export default function PatmosChat() {
           display: 'flex',
           flexDirection: 'column',
           gap: '24px',
-          padding: '20px 0'
+          padding: '10px 0'
         }}>
           {messages.map((m) => (
             <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
@@ -865,7 +755,7 @@ export default function PatmosChat() {
         </div>
 
         {/* Caja de Input + Banner del Paywall Dinámico */}
-        <div style={{ width: '100%', maxWidth: '650px', padding: '20px 0 40px 0' }}>
+        <div style={{ width: '100%', maxWidth: '650px', padding: '10px 0 30px 0' }}>
           
           {!hasCredits && (
             <div style={{
@@ -985,5 +875,6 @@ export default function PatmosChat() {
         </div>
       </main>
     </div>
+  </div>
   );
 }
