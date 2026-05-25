@@ -94,7 +94,7 @@ export default function HomePage() {
         <div className="mb-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tighter leading-tight text-[#000f37]">
             {lang === 'es' ? (
-              <>Pregunte lo que sea<br/>desde la Biblia KJV</>
+              <>Pregunte lo que sea desde la Biblia KJV</>
             ) : (
               <>Ask Anything<br/>from the KJV Bible</>
             )}
