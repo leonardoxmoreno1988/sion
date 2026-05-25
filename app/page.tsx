@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useLanguage } from "./context/Languagecontext"; // 🌐 Conexión al motor de idiomas global
 
 export default function HomePage() {
-  const { lang } = useLanguage(); // 🌐 Extraemos el idioma activo para renderizar condicionalmente
+  const { lang, setLanguage } = useLanguage(); // 🌐 Extraemos lang y setLanguage para el dropdown
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -30,12 +30,63 @@ export default function HomePage() {
             className="h-4 w-auto object-contain"
           />
         </Link>
-        <Link 
-          href="/login" 
-          className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded-none transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb]"
-        >
-          {lang === 'es' ? "Iniciar Sesión" : "Sign In"}
-        </Link>
+        
+        {/* Contenedor de Utilidades del Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          
+          {/* 🌐 DROPDOWN SELECTOR DE IDIOMA CON ICONO MAPAMUNDI (Estilo Outlined idéntico al chat) */}
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            border: '1px solid #000f37',
+            padding: '0 6px', 
+            gap: '4px',
+            backgroundColor: 'transparent',
+            height: '24px', 
+            boxSizing: 'border-box'
+          }}>
+            {/* Ícono Mapamundi SVG Nativo */}
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#000f37" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8, display: 'block' }}>
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>
+            </svg>
+            
+            {/* Selector Select Tag Sin Bordes Nativos */}
+            <select 
+              value={lang}
+              onChange={(e) => setLanguage(e.target.value as 'en' | 'es')}
+              style={{
+                fontSize: '9px',
+                fontWeight: '700',
+                color: '#000f37',
+                backgroundColor: 'transparent',
+                border: 'none',
+                outline: 'none',
+                cursor: 'pointer',
+                fontFamily: '"Inter", sans-serif',
+                textTransform: 'uppercase',
+                padding: 0,
+                margin: 0,
+                lineHeight: '24px', 
+                height: '100%',
+                WebkitAppearance: 'none', 
+                MozAppearance: 'none'     
+              }}
+            >
+              <option value="en" style={{ backgroundColor: '#fff', color: '#000f37' }}>EN</option>
+              <option value="es" style={{ backgroundColor: '#fff', color: '#000f37' }}>ES</option>
+            </select>
+          </div>
+
+          {/* Botón Sign In / Iniciar Sesión */}
+          <Link 
+            href="/login" 
+            className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded-none transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb] flex items-center"
+            style={{ height: '24px', boxSizing: 'border-box', padding: '0 16px' }}
+          >
+            {lang === 'es' ? "Iniciar Sesión" : "Sign In"}
+          </Link>
+        </div>
       </header>
 
       {/* HERO SECTION */}
