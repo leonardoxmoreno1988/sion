@@ -683,15 +683,15 @@ export default function PatmosChat() {
               )}
             </button>
 
-            {/* 🌐 DROPDOWN SELECTOR DE IDIOMA CON ICONO MAPAMUNDI (Estilo Outlined integrado) */}
+            {/* 🌐 1ER ELEMENTO: DROPDOWN SELECTOR DE IDIOMA CON ICONO MAPAMUNDI (Estilo Outlined integrado) */}
             <div style={{ 
-              display: 'flex', 
+              display: 'inline-flex', 
               alignItems: 'center', 
               border: `1px solid ${theme.textMain}`,
-              padding: '4px 6px', // 🚀 Corregido: Subimos de '3px 6px' a '4px 6px' para igualar el alto exacto de EXIT (4px)
+              padding: '0 6px', 
               gap: '4px',
               backgroundColor: 'transparent',
-              height: '19px', // 🚀 Forzamos la altura exacta de la caja para una simetría matemática perfecta
+              height: '24px', 
               boxSizing: 'border-box'
             }}>
               {/* Ícono Mapamundi SVG Nativo */}
@@ -716,7 +716,8 @@ export default function PatmosChat() {
                   textTransform: 'uppercase',
                   padding: 0,
                   margin: 0,
-                  lineHeight: '1', // 🚀 Asegura que el texto interno no empuje el contenedor
+                  lineHeight: '24px', 
+                  height: '100%',
                   WebkitAppearance: 'none', 
                   MozAppearance: 'none'     
                 }}
@@ -731,13 +732,17 @@ export default function PatmosChat() {
               <a 
                 href="/api/portal"
                 style={{
+                  display: 'inline-flex', 
+                  alignItems: 'center',
                   fontSize: '9px',
                   fontWeight: '700',
                   color: subscriptionStatus === 'past_due' ? '#f87171' : theme.textMain,
                   textDecoration: 'none',
                   background: 'transparent',
                   border: `1px solid ${subscriptionStatus === 'past_due' ? '#f87171' : theme.textMain}`,
-                  padding: '4px 6px',
+                  padding: '0 6px', 
+                  height: '24px',  
+                  boxSizing: 'border-box',
                   fontFamily: theme.fontSans,
                   textTransform: 'uppercase',
                   transition: 'all 0.2s'
@@ -751,12 +756,16 @@ export default function PatmosChat() {
             <button 
               onClick={handleLogout}
               style={{
+                display: 'inline-flex', 
+                alignItems: 'center',
                 fontSize: '9px',
                 fontWeight: '700',
                 color: theme.textMain,
                 background: 'transparent',
                 border: `1px solid ${theme.textMain}`,
-                padding: '4px 6px',
+                padding: '0 6px', 
+                height: '24px',  
+                boxSizing: 'border-box',
                 cursor: 'pointer',
                 fontFamily: theme.fontSans,
                 textTransform: 'uppercase'
@@ -946,7 +955,7 @@ export default function PatmosChat() {
                     ? (lang === 'es' 
                         ? "Su acceso está bloqueado debido a un fallo en el pago de renovación. Actualice sus credenciales de tarjeta de crédito para reanudar el acceso de inmediato."
                         : "Your access is locked due to a failed renewal payment. Update your credit card credentials to resume access immediately.")
-                    : (lang === 'es'
+                    : (lang === 'es' 
                         ? "Ha alcanzado el límite de consultas gratuitas. Pase al nivel Pro para continuar su estudio bíblico y realizar búsquedas ilimitadas."
                         : "You have reached the limit of free searches. Upgrade to the Pro version to continue your Bible study and perform unlimited searches.")
                   }
