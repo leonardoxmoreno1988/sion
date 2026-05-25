@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useLanguage } from "../context/LanguageContext"; // 🚀 Corregido: Ruta relativa explícita ajustada para el Build de Vercel
+import { useLanguage } from "@/app/context/LanguageContext";
 
 interface ChatMessage {
   id: string;
