@@ -683,17 +683,19 @@ export default function PatmosChat() {
               )}
             </button>
 
-            {/* 🌐 1ER ELEMENTO: DROPDOWN SELECTOR DE IDIOMA CON ICONO MAPAMUNDI (Estilo Outlined integrado) */}
+            {/* 🌐 DROPDOWN SELECTOR DE IDIOMA CON ICONO MAPAMUNDI (Estilo Outlined integrado) */}
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
               border: `1px solid ${theme.textMain}`,
-              padding: '3px 6px',
+              padding: '4px 6px', // 🚀 Corregido: Subimos de '3px 6px' a '4px 6px' para igualar el alto exacto de EXIT (4px)
               gap: '4px',
-              backgroundColor: 'transparent'
+              backgroundColor: 'transparent',
+              height: '19px', // 🚀 Forzamos la altura exacta de la caja para una simetría matemática perfecta
+              boxSizing: 'border-box'
             }}>
               {/* Ícono Mapamundi SVG Nativo */}
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={theme.textMain} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={theme.textMain} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8, display: 'block' }}>
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>
               </svg>
@@ -714,6 +716,7 @@ export default function PatmosChat() {
                   textTransform: 'uppercase',
                   padding: 0,
                   margin: 0,
+                  lineHeight: '1', // 🚀 Asegura que el texto interno no empuje el contenedor
                   WebkitAppearance: 'none', 
                   MozAppearance: 'none'     
                 }}
