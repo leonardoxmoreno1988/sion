@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useLanguage } from "@/app/context/LanguageContext"; // 🚀 Conectamos el motor global de traducción
 
 interface ChatMessage {
   id: string;
@@ -24,11 +25,17 @@ interface ChatSession {
 }
 
 export default function PatmosChat() {
+  const { t, lang } = useLanguage(); // 🌐 Extraemos las traducciones dinámicas y el idioma activo
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  
+  // ⚙️ ESTADOS CENTRALES DEL COMPONENTE (Arreglados para TypeScript)
+  const [customInput, setCustomInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   
   // 📱 ESTADO RESPONSIVO
   const [isMobile, setIsMobile] = useState(false);
@@ -41,12 +48,6 @@ export default function PatmosChat() {
   const [hasCredits, setHasCredits] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
-  
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: 'welcome', role: 'assistant', content: "Welcome. How may I assist your Bible inquiry today?" }
-  ]);
-  const [customInput, setCustomInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -78,6 +79,19 @@ export default function PatmosChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Inicializa o cambia el mensaje de bienvenida cuando cambia el idioma
+  useEffect(() => {
+    if (messages.length === 0 || (messages.length === 1 && messages[0].id === 'welcome')) {
+      setMessages([
+        { 
+          id: 'welcome', 
+          role: 'assistant', 
+          content: lang === 'es' ? "Bienvenido. ¿Cómo puedo asistir su investigación bíblica hoy?" : "Welcome. How may I assist your Bible inquiry today?" 
+        }
+      ]);
+    }
+  }, [lang]);
 
   useEffect(() => {
     const initPage = async () => {
@@ -143,7 +157,9 @@ export default function PatmosChat() {
                 { 
                   id: 'system-past-due', 
                   role: 'assistant', 
-                  content: "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed. Access has been temporarily restricted. Please visit the **Billing** portal above to update your payment method." 
+                  content: lang === 'es' 
+                    ? "⚠️ **Alerta de Suscripción:** Falló el pago de su factura de renovación. El acceso ha sido restringido temporalmente. Por favor, visite el portal de **Facturación** arriba para actualizar su método de pago."
+                    : "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed. Access has been temporarily restricted. Please visit the **Billing** portal above to update your payment method." 
                 }
               ]);
             } else {
@@ -178,7 +194,7 @@ export default function PatmosChat() {
       };
     };
     initPage();
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
@@ -219,7 +235,11 @@ export default function PatmosChat() {
   const startNewInquiry = () => {
     setActiveSessionId(null);
     setMessages([
-      { id: 'welcome', role: "assistant", content: "Welcome. How may I assist your Bible inquiry today?" }
+      { 
+        id: 'welcome', 
+        role: "assistant", 
+        content: lang === 'es' ? "Bienvenido. ¿Cómo puedo asistir su investigación bíblica hoy?" : "Welcome. How may I assist your Bible inquiry today?" 
+      }
     ]);
     if (isMobile) setSidebarOpen(false);
   };
@@ -235,7 +255,11 @@ export default function PatmosChat() {
 
   const handleClearHistory = async () => {
     if (!isPremium) return;
-    const confirmClear = window.confirm("Are you certain you want to purge all continuous historical archives? This structural action is absolute.");
+    const confirmMessage = lang === 'es'
+      ? "¿Está seguro de que desea purgar todos los archivos históricos continuos? Esta acción estructural es absoluta."
+      : "Are you certain you want to purge all continuous historical archives? This structural action is absolute.";
+      
+    const confirmClear = window.confirm(confirmMessage);
     if (!confirmClear) return;
     
     setSettingsOpen(false);
@@ -245,10 +269,14 @@ export default function PatmosChat() {
         setHistory([]);
         setActiveSessionId(null); 
         setMessages([
-          { id: 'welcome', role: 'assistant', content: "Welcome. How may I assist your Bible inquiry today?" }
+          { 
+            id: 'welcome', 
+            role: 'assistant', 
+            content: lang === 'es' ? "Bienvenido. ¿Cómo puedo asistir su investigación bíblica hoy?" : "Welcome. How may I assist your Bible inquiry today?" 
+          }
         ]);
       } else {
-        alert("Failed to execute pipeline purge request.");
+        alert(lang === 'es' ? "Error al ejecutar la solicitud de purga." : "Failed to execute pipeline purge request.");
       }
     } catch (err) {
       console.error("Error executing historical purge pipeline:", err);
@@ -387,7 +415,7 @@ export default function PatmosChat() {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMessageId 
-            ? { ...m, content: "Aconteció un error en el flujo de transmisión del Arsenal." } 
+            ? { ...m, content: lang === 'es' ? "Aconteció un error en el flujo de transmisión del Arsenal." : "An error occurred in the Arsenal transmission stream pipeline." } 
             : m
         )
       );
@@ -401,7 +429,7 @@ export default function PatmosChat() {
       
       {/* SIDEBAR ARCHIVE */}
       <aside style={{
-        width: sidebarOpen ? (isMobile ? '30%' : '260px') : '0px',
+        width: sidebarOpen ? (isMobile ? '40%' : '260px') : '0px',
         flexShrink: 0,
         backgroundColor: theme.sidebarBg,
         borderRight: sidebarOpen ? `1px solid ${theme.borderSion}` : 'none',
@@ -429,14 +457,14 @@ export default function PatmosChat() {
               fontFamily: theme.fontSans
             }}
           >
-            + New Inquiry
+            {lang === 'es' ? "+ Nueva Consulta" : "+ New Inquiry"}
           </button>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '15px 6px' : '15px 10px', position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px', marginBottom: '12px', position: 'relative' }}>
             <p style={{ fontSize: isMobile ? '9px' : '11px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', margin: 0, fontFamily: 'serif' }}>
-              Historical Records
+              {lang === 'es' ? "Registros Históricos" : "Historical Records"}
             </p>
             
             {isPremium && (
@@ -454,7 +482,7 @@ export default function PatmosChat() {
                     justifyContent: 'center',
                     outline: 'none'
                   }}
-                  title="Archive Preferences"
+                  title={lang === 'es' ? "Preferencias del Archivo" : "Archive Preferences"}
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="3"/>
@@ -472,7 +500,7 @@ export default function PatmosChat() {
                     borderRadius: '4px',
                     padding: '4px 0',
                     zIndex: 50,
-                    width: '160px',
+                    width: '180px',
                     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
                   }}>
                     <button
@@ -494,7 +522,7 @@ export default function PatmosChat() {
                       onMouseOver={(e) => (e.currentTarget.style.backgroundColor = isDarkMode ? '#334155' : '#f3f4f6')}
                       onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                     >
-                      Clean historical record
+                      {lang === 'es' ? "Limpiar historial continuo" : "Clean historical record"}
                     </button>
                   </div>
                 )}
@@ -503,7 +531,9 @@ export default function PatmosChat() {
           </div>
 
           {history.length === 0 ? (
-            <p style={{ fontSize: '11px', color: theme.textMuted, paddingLeft: '10px', fontStyle: 'italic', fontFamily: theme.fontSans }}>No records found.</p>
+            <p style={{ fontSize: '11px', color: theme.textMuted, paddingLeft: '10px', fontStyle: 'italic', fontFamily: theme.fontSans }}>
+              {lang === 'es' ? "No se hallaron registros." : "No records found."}
+            </p>
           ) : (
             history.map((session) => (
               <button
@@ -547,7 +577,7 @@ export default function PatmosChat() {
 
       {/* MAIN CONTAINER */}
       <main style={{
-        width: isMobile ? (sidebarOpen ? '70%' : '100%') : '100%',
+        width: isMobile ? (sidebarOpen ? '60%' : '100%') : '100%',
         flexGrow: 1,
         display: 'flex',
         flexDirection: 'column',
@@ -595,7 +625,7 @@ export default function PatmosChat() {
                     fontFamily: theme.fontSans, 
                     textTransform: 'uppercase', 
                     letterSpacing: '0.5px',
-                    maxWidth: isMobile ? '120px' : 'none',
+                    maxWidth: isMobile ? '100px' : 'none',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
@@ -669,7 +699,7 @@ export default function PatmosChat() {
                   transition: 'all 0.2s'
                 }}
               >
-                {subscriptionStatus === 'past_due' ? 'Fix' : 'Bill'}
+                {subscriptionStatus === 'past_due' ? (lang === 'es' ? 'Corregir' : 'Fix') : (lang === 'es' ? 'Factura' : 'Bill')}
               </a>
             )}
 
@@ -687,7 +717,7 @@ export default function PatmosChat() {
                 textTransform: 'uppercase'
               }}
             >
-              Exit
+              {lang === 'es' ? "Salir" : "Exit"}
             </button>
           </div>
         </div>
@@ -778,7 +808,7 @@ export default function PatmosChat() {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="20 6 9 17 4 12"/>
                         </svg>
-                        <span>Copied</span>
+                        <span>{lang === 'es' ? "Copiado" : "Copied"}</span>
                       </>
                     ) : (
                       <>
@@ -786,7 +816,7 @@ export default function PatmosChat() {
                           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                         </svg>
-                        <span>Copy</span>
+                        <span>{lang === 'es' ? "Copiar" : "Copy"}</span>
                       </>
                     )}
                   </button>
@@ -817,7 +847,7 @@ export default function PatmosChat() {
                       <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
                       <rect x="6" y="14" width="12" height="8"/>
                     </svg>
-                    <span>Print</span>
+                    <span>{lang === 'es' ? "Imprimir" : "Print"}</span>
                   </button>
                 </div>
               )}
@@ -827,7 +857,7 @@ export default function PatmosChat() {
           {isLoading && (
             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
               <div style={{ color: theme.textMuted, fontSize: '14px', fontStyle: 'italic', marginLeft: '10px', fontFamily: theme.fontSans }}>
-                Examining the scriptures...
+                {lang === 'es' ? "Examinando las escrituras..." : "Examining the scriptures..."}
               </div>
             </div>
           )}
@@ -862,12 +892,18 @@ export default function PatmosChat() {
                   margin: '0 0 4px 0', 
                   fontFamily: theme.fontSans 
                 }}>
-                  {subscriptionStatus === 'past_due' ? 'Payment Settlement Required' : 'Free Limit Reached'}
+                  {subscriptionStatus === 'past_due' 
+                    ? (lang === 'es' ? 'Liquidación de Pago Requerida' : 'Payment Settlement Required') 
+                    : (lang === 'es' ? 'Límite Gratuito Alcanzado' : 'Free Limit Reached')}
                 </h5>
                 <p style={{ fontSize: '12px', color: subscriptionStatus === 'past_due' ? 'inherit' : '#cbd5e1', margin: 0, lineHeight: '1.4', fontFamily: theme.fontSans }}>
                   {subscriptionStatus === 'past_due' 
-                    ? "Your access is locked due to a failed renewal payment. Update your credit card credentials to resume access immediately."
-                    : "You have reached the limit of free searches. Upgrade to the Pro version to continue your Bible study and perform unlimited searches."
+                    ? (lang === 'es' 
+                        ? "Su acceso está bloqueado debido a un fallo en el pago de renovación. Actualice sus credenciales de tarjeta de crédito para reanudar el acceso de inmediato."
+                        : "Your access is locked due to a failed renewal payment. Update your credit card credentials to resume access immediately.")
+                    : (lang === 'es'
+                        ? "Ha alcanzado el límite de consultas gratuitas. Pase al nivel Pro para continuar su estudio bíblico y realizar búsquedas ilimitadas."
+                        : "You have reached the limit of free searches. Upgrade to the Pro version to continue your Bible study and perform unlimited searches.")
                   }
                 </p>
               </div>
@@ -890,7 +926,9 @@ export default function PatmosChat() {
                 onMouseOver={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#dc2626' : '#e2e8f0')}
                 onMouseOut={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#ef4444' : '#fff')}
               >
-                {subscriptionStatus === 'past_due' ? 'Resolve Now →' : 'Upgrade →'}
+                {subscriptionStatus === 'past_due' 
+                  ? (lang === 'es' ? 'Resolver Ahora →' : 'Resolve Now →') 
+                  : (lang === 'es' ? 'Pasar a Pro →' : 'Upgrade →')}
               </a>
             </div>
           )}
@@ -910,7 +948,13 @@ export default function PatmosChat() {
                 transition: 'all 0.3s ease',
                 cursor: !hasCredits ? 'not-allowed' : 'text'
               }}
-              placeholder={hasCredits ? "Search the scriptures..." : (subscriptionStatus === 'past_due' ? "INQUIRY LOCKED — PAST DUE INVOICE" : "INQUIRY LOCKED — UPGRADE TO THE WATCHMAN TIER")}
+              placeholder={
+                hasCredits 
+                  ? (lang === 'es' ? "Escudriñad las escrituras..." : "Search the scriptures...") 
+                  : (subscriptionStatus === 'past_due' 
+                      ? (lang === 'es' ? "CONSULTA BLOQUEADA — FACTURA VENCIDA" : "INQUIRY LOCKED — PAST DUE INVOICE") 
+                      : (lang === 'es' ? "CONSULTA BLOQUEADA — ADQUIERA EL NIVEL WATCHMAN" : "INQUIRY LOCKED — UPGRADE TO THE WATCHMAN TIER"))
+              }
               value={customInput}
               onChange={(e) => setCustomInput(e.target.value)} 
               disabled={isLoading || !hasCredits}
@@ -936,7 +980,7 @@ export default function PatmosChat() {
             </button>
           </form>
           <p style={{ textAlign: 'center', fontSize: '11px', color: theme.textMuted, marginTop: '15px', textTransform: 'uppercase', letterSpacing: '1.5px', fontFamily: 'serif' }}>
-            Based on Rightly Dividing the Word of Truth
+            {lang === 'es' ? "Basado en Trazar Bien la Palabra de Verdad" : "Based on Rightly Dividing the Word of Truth"}
           </p>
         </div>
       </main>
