@@ -122,7 +122,7 @@ export default function HomePage() {
             href="/login" 
             className="inline-flex items-center justify-center bg-[#000f37] text-[#f9fafb] text-base font-semibold px-10 py-5 rounded-xl hover:bg-black transition-all"
           >
-            {lang === 'es' ? "Comenzar a Consultar en Patmos Ahora →" : "Start Asking Patmos Now →"}
+            {lang === 'es' ? "Usa Patmos Ahora →" : "Start Asking Patmos Now →"}
           </Link>
         </div>
 
