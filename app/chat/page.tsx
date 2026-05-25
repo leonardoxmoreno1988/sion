@@ -655,7 +655,7 @@ export default function PatmosChat() {
             </div>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '12px' }}>
             <button 
               onClick={() => setIsDarkMode(!isDarkMode)}
               style={{ 
@@ -683,6 +683,47 @@ export default function PatmosChat() {
               )}
             </button>
 
+            {/* 🌐 1ER ELEMENTO: DROPDOWN SELECTOR DE IDIOMA CON ICONO MAPAMUNDI (Estilo Outlined integrado) */}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              border: `1px solid ${theme.textMain}`,
+              padding: '3px 6px',
+              gap: '4px',
+              backgroundColor: 'transparent'
+            }}>
+              {/* Ícono Mapamundi SVG Nativo */}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={theme.textMain} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>
+              </svg>
+              
+              {/* Selector Select Tag Sin Bordes Nativos */}
+              <select 
+                value={lang}
+                onChange={(e) => setLanguage(e.target.value as 'en' | 'es')}
+                style={{
+                  fontSize: '9px',
+                  fontWeight: '700',
+                  color: theme.textMain,
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  fontFamily: theme.fontSans,
+                  textTransform: 'uppercase',
+                  padding: 0,
+                  margin: 0,
+                  WebkitAppearance: 'none', 
+                  MozAppearance: 'none'     
+                }}
+              >
+                <option value="en" style={{ backgroundColor: isDarkMode ? '#0f172a' : '#fff', color: theme.textMain }}>EN</option>
+                <option value="es" style={{ backgroundColor: isDarkMode ? '#0f172a' : '#fff', color: theme.textMain }}>ES</option>
+              </select>
+            </div>
+
+            {/* 📄 2DO ELEMENTO: FACTURA / PORTAL BILLING */}
             {(isPremium || subscriptionStatus === 'past_due') && (
               <a 
                 href="/api/portal"
@@ -703,6 +744,7 @@ export default function PatmosChat() {
               </a>
             )}
 
+            {/* 🚪 3ER ELEMENTO: SALIR / EXIT BUTTON */}
             <button 
               onClick={handleLogout}
               style={{
@@ -718,47 +760,6 @@ export default function PatmosChat() {
               }}
             >
               {lang === 'es' ? "Salir" : "Exit"}
-            </button>
-
-            {/* 🌐 CONTROLES DE IDIOMA INTEGRADOS (Mismo estilo Outlined después de EXIT) */}
-            <button 
-              onClick={() => setLanguage('en')}
-              style={{
-                fontSize: '9px',
-                fontWeight: lang === 'en' ? '900' : '500',
-                color: theme.textMain,
-                background: lang === 'en' ? (isDarkMode ? '#ffffff22' : '#00000011') : 'transparent',
-                border: `1px solid ${theme.textMain}`,
-                opacity: lang === 'en' ? 1 : 0.4,
-                padding: '4px 6px',
-                cursor: 'pointer',
-                fontFamily: theme.fontSans,
-                textTransform: 'uppercase',
-                transition: 'all 0.2s ease',
-                marginLeft: '-5px'
-              }}
-            >
-              EN
-            </button>
-
-            <button 
-              onClick={() => setLanguage('es')}
-              style={{
-                fontSize: '9px',
-                fontWeight: lang === 'es' ? '900' : '500',
-                color: theme.textMain,
-                background: lang === 'es' ? (isDarkMode ? '#ffffff22' : '#00000011') : 'transparent',
-                border: `1px solid ${theme.textMain}`,
-                opacity: lang === 'es' ? 1 : 0.4,
-                padding: '4px 6px',
-                cursor: 'pointer',
-                fontFamily: theme.fontSans,
-                textTransform: 'uppercase',
-                transition: 'all 0.2s ease',
-                marginLeft: '-10px'
-              }}
-            >
-              ES
             </button>
           </div>
         </div>
