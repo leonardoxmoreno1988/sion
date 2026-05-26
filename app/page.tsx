@@ -95,7 +95,7 @@ export default function HomePage() {
         <div className="mb-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tighter leading-tight text-[#000f37]">
             {lang === 'es' ? (
-              <>Investigación Profunda de la Biblia con AI</>
+              <>Investigación Profunda de la Biblia con IA</>
             ) : (
               <>Ask Anything<br/>from the KJV Bible</>
             )}
@@ -104,7 +104,7 @@ export default function HomePage() {
 
         <p className="text-2xl font-medium text-[#000f37] max-w-xl">
           {lang === 'es' ? (
-            <>Respuestas claras y fieles extraídas exclusivamente de la <span className="font-semibold">Versión Autorizada King James</span>.</>
+            <>Respuestas claras y fieles extraídas exclusivamente de la <span className="font-semibold">Reina Valera</span>.</>
           ) : (
             <>Clear, faithful answers drawn exclusively from the <span className="font-semibold">Authorized King James Version</span>.</>
           )}
