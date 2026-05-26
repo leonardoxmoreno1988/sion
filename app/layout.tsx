@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { LanguageProvider } from "./context/Languagecontext";
+import { PaddleProvider } from "@/components/PaddleProvider"; // 🚀 Inyectamos el cargador de la pasarela
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +37,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {/* 🌐 Envolvemos la aplicación para habilitar el diccionario global e inglés/español */}
         <LanguageProvider>
-          {children}
+          {/* 💳 Habilitamos Paddle de forma global e invisible */}
+          <PaddleProvider>
+            {children}
+          </PaddleProvider>
         </LanguageProvider>
         
         {/* Fathom Analytics - Inyectado de forma eficiente */}

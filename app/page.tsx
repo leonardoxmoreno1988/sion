@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useLanguage } from "./context/Languagecontext"; // 🌐 Conexión al motor de idiomas global
+import { openPatmosCheckout } from "@/components/OpenCheckout"; // 💳 Importamos el disparador de Paddle
 
 export default function HomePage() {
   const { lang, setLanguage } = useLanguage(); // 🌐 Extraemos lang y setLanguage para el dropdown
@@ -238,12 +239,13 @@ export default function HomePage() {
                   <li className="flex items-center gap-2">✓ {lang === 'es' ? "Acceso prioritario" : "Priority access"}</li>
                 </ul>
               </div>
-              <a 
-                href="/api/checkout"
-                className="block w-full text-center mt-10 bg-[#000f37] text-white py-4 font-semibold rounded-xl hover:bg-black"
+              {/* 💳 Cambiado de <a> nativo a <button> controlado por el SDK de Paddle v2 */}
+              <button 
+                onClick={() => openPatmosCheckout()}
+                className="block w-full text-center mt-10 bg-[#000f37] text-white py-4 font-semibold rounded-xl hover:bg-black border-none cursor-pointer outline-none"
               >
                 {lang === 'es' ? "Pasar a Pro" : "Upgrade to Pro"}
-              </a>
+              </button>
             </div>
           </div>
         </section>
@@ -271,7 +273,7 @@ export default function HomePage() {
               </summary>
               <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Sostiene que la autoridad suprema, exclusiva y final para toda fe y ejecución del ministerio es la palabra de Dios infalible y estructuralmente preservada—encarnada estrictamente dentro de la Santa Biblia Autorizada King James para el mundo de habla inglesa. Opera bajo la convicción absoluta de que todas las traducciones modernas introducen distorsiones teológicas y corrupciones sistémicas (Salmos 12:6-7)."
+                  "Sostiene que la autoridad suprema, exclusive y final para toda fe y ejecución del ministerio es la palabra de Dios infalible y estructuralmente preservada—encarnada estrictamente dentro de la Santa Biblia Autorizada King James para el mundo de habla inglesa. Opera bajo la convicción absoluta de que todas las traducciones modernas introducen distorsiones teológicas y corrupciones sistémicas (Salmos 12:6-7)."
                 ) : (
                   "It holds that the supreme, exclusive, and final authority for all faith and ministry execution is the flawless, structurally preserved word of God—embodied strictly within the Authorized King James Holy Bible for the English-speaking world. It operates on the absolute conviction that all modern translations introduce theological distortions and systemic corruptions (Psalms 12:6-7)."
                 )}

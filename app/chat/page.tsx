@@ -7,6 +7,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from "../context/Languagecontext";
+import { openPatmosCheckout } from "@/components/OpenCheckout";
 
 interface ChatMessage {
   id: string;
@@ -961,27 +962,28 @@ export default function PatmosChat() {
                   }
                 </p>
               </div>
-              <a 
-                href={subscriptionStatus === 'past_due' ? '/api/portal' : '/api/checkout'}
-                style={{
-                  backgroundColor: subscriptionStatus === 'past_due' ? '#ef4444' : '#fff',
-                  color: subscriptionStatus === 'past_due' ? '#fff' : '#000f37',
-                  fontSize: '10px',
-                  fontWeight: '700',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                  padding: '10px 16px',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                  fontFamily: theme.fontSans,
-                  transition: 'background 0.2s'
-                }}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#dc2626' : '#e2e8f0')}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#ef4444' : '#fff')}
-              >
-                {subscriptionStatus === 'past_due' ? (lang === 'es' ? 'Resolver Ahora →' : 'Resolve Now →') : (lang === 'es' ? 'Pasar a Pro →' : 'Upgrade →')}
-              </a>
+              <button 
+  onClick={() => openPatmosCheckout(userEmail)}
+  style={{
+    backgroundColor: subscriptionStatus === 'past_due' ? '#ef4444' : '#fff',
+    color: subscriptionStatus === 'past_due' ? '#fff' : '#000f37',
+    fontSize: '10px',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
+    padding: '10px 16px',
+    borderRadius: '6px',
+    whiteSpace: 'nowrap',
+    fontFamily: theme.fontSans,
+    transition: 'background 0.2s',
+    border: 'none',
+    cursor: 'pointer'
+  }}
+  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#dc2626' : '#e2e8f0')}
+  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#ef4444' : '#fff')}
+>
+  {subscriptionStatus === 'past_due' ? (lang === 'es' ? 'Resolver Ahora →' : 'Resolve Now →') : (lang === 'es' ? 'Pasar a Pro →' : 'Upgrade →')}
+</button>
             </div>
           )}
 
