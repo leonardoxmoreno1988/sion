@@ -95,7 +95,7 @@ export default function HomePage() {
         <div className="mb-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tighter leading-tight text-[#000f37]">
             {lang === 'es' ? (
-              <>Pregunte lo que sea desde la Biblia KJV</>
+              <>Investigación Profunda de la Biblia con AI</>
             ) : (
               <>Ask Anything<br/>from the KJV Bible</>
             )}
@@ -112,7 +112,7 @@ export default function HomePage() {
 
         <p className="text-lg leading-relaxed text-[#374151] mt-6 max-w-2xl">
           {lang === 'es' ? (
-            <>Defiende la enseñanza literal, dispensacional y pretribulacional de las Escrituras. Sin traducciones modernas. Sin concesiones.</>
+            <>Defiende la enseñanza literal, dispensacional y pretribulacional de las Escrituras. Sin traducciones modernas ni filosofías humanas.</>
           ) : (
             <>Defends the literal, dispensational, pre-tribulational teaching of Scripture.<br/>No modern translations. No compromise.</>
           )}
