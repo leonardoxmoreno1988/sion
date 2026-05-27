@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-/* 🎯 Configuramos las rutas de escaneo nativas de la versión 4 (Sin punto y coma final) */
-@source "../app/**/*.{js,ts,jsx,tsx,mdx}"
-@source "../components/**/*.{js,ts,jsx,tsx,mdx}"
+/* 🎯 Sintaxis oficial y estricta de Tailwind v4 con punto y coma final */
+@source url("../app/**/*.{js,ts,jsx,tsx,mdx}");
+@source url("../components/**/*.{js,ts,jsx,tsx,mdx}");
 
 :root {
   --foreground-rgb: 0, 0, 0;
