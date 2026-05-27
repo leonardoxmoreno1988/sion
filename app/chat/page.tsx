@@ -7,7 +7,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from "../context/Languagecontext";
-import { openPatmosCheckout } from "@/components/OpenCheckout";
+import { usePaddleInstance } from "@/components/PaddleProvider"; // 💳 Importamos el hook nativo de Paddle v2
 
 interface ChatMessage {
   id: string;
@@ -26,39 +26,37 @@ interface ChatSession {
 }
 
 export default function PatmosChat() {
-  const { t, lang, setLanguage } = useLanguage(); // 🌐 Extraemos t, lang y el modificador setLanguage
+  const { t, lang, setLanguage } = useLanguage(); 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null); // 🕵️ Guardamos el ID de Supabase para inyectarlo en las transacciones
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   
-  // ⚙️ ESTADOS CENTRALES DEL COMPONENTE (Arreglados para TypeScript)
   const [customInput, setCustomInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   
-  // 📱 ESTADO RESPONSIVO
   const [isMobile, setIsMobile] = useState(false);
-  
-  // ⚙️ ESTADOS EXTRA: Control de utilidades y menús
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   
-  // 🔒 ESTADOS: Control del Paywall automático y ciclo de vida de Stripe
+  // 🔒 ESTADOS: Control del Paywall automático y ciclo de vida de Paddle v2
   const [hasCredits, setHasCredits] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+  const [paddleCustomerId, setPaddleCustomerId] = useState<string | null>(null); // 💳 Requerido para el Portal de Facturación
 
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const paddle = usePaddleInstance(); // 🚀 Consumimos la instancia activa global de Paddle v2
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // 🎨 CONFIGURACIÓN DE BRANDING: Consistencia total con Patmos Core
   const theme = {
     bg: isDarkMode ? '#020617' : '#f9fafb',
     sidebarBg: isDarkMode ? '#090d16' : '#f3f4f6',
@@ -81,7 +79,6 @@ export default function PatmosChat() {
     scrollToBottom();
   }, [messages]);
 
-  // Inicializa o cambia el mensaje de bienvenida cuando cambia el idioma
   useEffect(() => {
     if (messages.length === 0 || (messages.length === 1 && messages[0].id === 'welcome')) {
       setMessages([
@@ -119,6 +116,7 @@ export default function PatmosChat() {
 
       const emailSession = session.user.email ?? 'Vigilante';
       setUserEmail(emailSession);
+      setUserId(session.user.id);
 
       let currentHistory: ChatSession[] = [];
       try {
@@ -140,18 +138,19 @@ export default function PatmosChat() {
         try {
           const { data: subscription } = await supabase
             .from('subscriptions')
-            .select('status')
+            .select('status, paddle_customer_id')
             .eq('user_id', session.user.id)
             .maybeSingle();
 
           if (subscription) {
             const currentStatus = subscription.status;
             setSubscriptionStatus(currentStatus);
+            setPaddleCustomerId(subscription.paddle_customer_id);
 
             if (currentStatus === 'active' || currentStatus === 'trialing') {
               setIsPremium(true);
               setHasCredits(true);
-            } else if (currentStatus === 'past_due') {
+            } else if (currentStatus === 'past_due' || currentStatus === 'paused') {
               setIsPremium(false);
               setHasCredits(false);
               setMessages([
@@ -159,8 +158,8 @@ export default function PatmosChat() {
                   id: 'system-past-due', 
                   role: 'assistant', 
                   content: lang === 'es' 
-                    ? "⚠️ **Alerta de Suscripción:** Falló el pago de su factura de renovación. El acceso ha sido restringido temporalmente. Por favor, visite el portal de **Facturación** arriba para actualizar su método de pago."
-                    : "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed. Access has been temporarily restricted. Please visit the **Billing** portal above to update your payment method." 
+                    ? "⚠️ **Alerta de Suscripción:** Falló el pago de su factura de renovación o su cuenta está pausada. El acceso ha sido restringido temporalmente. Por favor, visite el portal de **Facturación** arriba para actualizar su método de pago."
+                    : "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed or your account is paused. Access has been temporarily restricted. Please visit the **Billing** portal above to update your payment method." 
                 }
               ]);
             } else {
@@ -209,12 +208,11 @@ export default function PatmosChat() {
         const data = await res.json();
         setHistory(data);
         
-        // 🛠️ COMPUERTA ANTIPISADO PARA EL HISTORIAL DE CONSULTAS
         if (userEmail === 'lenn.moreno@gmail.com') {
           setIsPremium(true);
           setHasCredits(true);
           setSubscriptionStatus('active');
-        } else if (!isPremium && subscriptionStatus !== 'past_due') {
+        } else if (!isPremium && subscriptionStatus !== 'past_due' && subscriptionStatus !== 'paused') {
           setHasCredits(data.length < 15);
         }
         
@@ -225,6 +223,42 @@ export default function PatmosChat() {
     } catch (err) {
       console.error("Error fetching history:", err);
     }
+  };
+
+  // 💳 MANEJADOR DE COMPRA PARA PADDLE V2 NATIVO (Paywall)
+  const handlePaddleCheckout = () => {
+    if (!paddle) {
+      console.warn("Paddle.js no se ha inicializado por completo.");
+      return;
+    }
+
+    const PATMOS_PRICE_ID = "pri_01ksjj24ksyxjm70nsqqapaht6"; 
+
+    paddle.Checkout.open({
+      items: [
+        {
+          priceId: PATMOS_PRICE_ID,
+          quantity: 1
+        }
+      ],
+      customer: userEmail ? { email: userEmail } : undefined,
+      customData: {
+        supabase_user_id: userId 
+      },
+      settings: {
+        displayMode: "overlay",
+        theme: isDarkMode ? "dark" : "light",
+        locale: "en"
+      }
+    });
+  };
+
+  // 📄 PORTAL DE AUTOSERVICIO (Billing Directo unificado a tu estructura de rutas)
+  const handleOpenBillingPortal = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Dispara la apertura del endpoint seguro del backend en una pestaña limpia
+    window.open('/api/portal/paddle', '_blank');
   };
 
   const handleLogout = async () => {
@@ -312,31 +346,11 @@ export default function PatmosChat() {
         <head>
           <title>Patmos Research - Scripture Inquiry</title>
           <style>
-            body {
-              font-family: 'Georgia', 'Times New Roman', serif;
-              line-height: 1.8;
-              color: #000f37;
-              padding: 2cm;
-              font-size: 12pt;
-            }
+            body { font-family: 'Georgia', 'Times New Roman', serif; line-height: 1.8; color: #000f37; padding: 2cm; font-size: 12pt; }
             p { margin-bottom: 1.5em; text-align: justify; white-space: pre-wrap; }
             strong { font-weight: 700; }
-            .header {
-              text-align: center;
-              border-bottom: 2px solid #000f37;
-              padding-bottom: 10px;
-              margin-bottom: 30px;
-              letter-spacing: 4px;
-            }
-            .footer {
-              margin-top: 50px;
-              border-top: 1px solid #e5e7eb;
-              padding-top: 10px;
-              font-size: 9pt;
-              color: #4b5563;
-              text-align: center;
-              letter-spacing: 1px;
-            }
+            .header { text-align: center; border-bottom: 2px solid #000f37; padding-bottom: 10px; margin-bottom: 30px; letter-spacing: 4px; }
+            .footer { margin-top: 50px; border-top: 1px solid #e5e7eb; padding-top: 10px; font-size: 9pt; color: #4b5563; text-align: center; letter-spacing: 1px; }
           </style>
         </head>
         <body>
@@ -612,15 +626,13 @@ export default function PatmosChat() {
                   src="https://www.leonardoxmoreno.com/files/logo-patmos.svg" 
                   alt="Patmos Research Logo" 
                   className="h-3.5 w-auto object-contain text-left"
-                  style={{
-                    filter: isDarkMode ? 'brightness(0) invert(1)' : 'none'
-                  }}
+                  style={{ filter: isDarkMode ? 'brightness(0) invert(1)' : 'none' }}
                 />
               </Link>
               {userEmail && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 0 0' }}>
                   <p style={{ 
-                    fontSize: isMobile ? '11px' : '11px', 
+                    fontSize: '11px', 
                     color: theme.textMuted, 
                     margin: 0, 
                     fontFamily: theme.fontSans, 
@@ -638,7 +650,7 @@ export default function PatmosChat() {
                     <span style={{
                       backgroundColor: '#2d65f6',
                       color: '#ffffff',
-                      fontSize: isMobile ? '10px' : '10px',
+                      fontSize: '10px',
                       fontWeight: '800',
                       letterSpacing: '1px',
                       padding: '2px 4px',
@@ -684,7 +696,7 @@ export default function PatmosChat() {
               )}
             </button>
 
-            {/* 🌐 1ER ELEMENTO: DROPDOWN SELECTOR DE IDIOMA CON ICONO MAPAMUNDI (Estilo Outlined integrado) */}
+            {/* 🌐 DROPDOWN SELECTOR DE IDIOMA CON ICONO MAPAMUNDI */}
             <div style={{ 
               display: 'inline-flex', 
               alignItems: 'center', 
@@ -695,13 +707,11 @@ export default function PatmosChat() {
               height: '24px', 
               boxSizing: 'border-box'
             }}>
-              {/* Ícono Mapamundi SVG Nativo */}
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={theme.textMain} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8, display: 'block' }}>
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>
               </svg>
               
-              {/* Selector Select Tag Sin Bordes Nativos */}
               <select 
                 value={lang}
                 onChange={(e) => setLanguage(e.target.value as 'en' | 'es')}
@@ -728,32 +738,32 @@ export default function PatmosChat() {
               </select>
             </div>
 
-            {/* 📄 2DO ELEMENTO: FACTURA / PORTAL BILLING */}
-            {(isPremium || subscriptionStatus === 'past_due') && (
-              <a 
-                href="/api/portal"
+            {/* 📄 PORTAL DE AUTOSERVICIO CONECTADO A TU NUEVA RUTA DE API */}
+            {(isPremium || subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') && (
+              <button 
+                onClick={handleOpenBillingPortal}
                 style={{
                   display: 'inline-flex', 
                   alignItems: 'center',
                   fontSize: '9px',
                   fontWeight: '700',
-                  color: subscriptionStatus === 'past_due' ? '#f87171' : theme.textMain,
-                  textDecoration: 'none',
+                  color: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#f87171' : theme.textMain,
                   background: 'transparent',
-                  border: `1px solid ${subscriptionStatus === 'past_due' ? '#f87171' : theme.textMain}`,
-                  padding: '0 6px', 
+                  border: `1px solid ${(subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#f87171' : theme.textMain}`,
+                  padding: '0 16px', 
                   height: '24px',  
                   boxSizing: 'border-box',
                   fontFamily: theme.fontSans,
                   textTransform: 'uppercase',
+                  cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
               >
-                {subscriptionStatus === 'past_due' ? (lang === 'es' ? 'Corregir' : 'Fix') : (lang === 'es' ? 'Factura' : 'Bill')}
-              </a>
+                {(subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? (lang === 'es' ? 'Corregir' : 'Fix') : (lang === 'es' ? 'Factura' : 'Bill')}
+              </button>
             )}
 
-            {/* 🚪 3ER ELEMENTO: SALIR / EXIT BUTTON */}
+            {/* 🚪 SALIR */}
             <button 
               onClick={handleLogout}
               style={{
@@ -790,8 +800,6 @@ export default function PatmosChat() {
         }}>
           {messages.map((m) => (
             <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
-              
-              {/* Globo contenedor de mensaje */}
               <div style={{
                 maxWidth: '90%',
                 paddingTop: '12px',
@@ -827,7 +835,6 @@ export default function PatmosChat() {
                 </ReactMarkdown>
               </div>
 
-              {/* BARRA DE ACCIONES */}
               {m.role === 'assistant' && m.id !== 'welcome' && m.content.trim() !== "" && (
                 <div style={{
                   display: 'flex',
@@ -906,7 +913,6 @@ export default function PatmosChat() {
                   </button>
                 </div>
               )}
-
             </div>
           ))}
           {isLoading && (
@@ -919,21 +925,21 @@ export default function PatmosChat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Caja de Input + Banner del Paywall Dinámico */}
+        {/* Caja de Input + Banner del Paywall NATIVO DE PADDLE */}
         <div style={{ width: '100%', maxWidth: '650px', padding: '20px 0 40px 0' }}>
           
           {!hasCredits && (
             <div style={{
               display: 'flex',
-              flexDirection: 'window' as any === 'undefined' || window.innerWidth < 640 ? 'column' : 'row',
+              flexDirection: typeof window === 'undefined' || window.innerWidth < 640 ? 'column' : 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
-              backgroundColor: subscriptionStatus === 'past_due' ? (isDarkMode ? '#450a0a' : '#fef2f2') : (isDarkMode ? '#0f172a' : '#000f37'),
-              color: subscriptionStatus === 'past_due' ? (isDarkMode ? '#fecaca' : '#991b1b') : '#f9fafb',
+              backgroundColor: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? (isDarkMode ? '#450a0a' : '#fef2f2') : (isDarkMode ? '#0f172a' : '#000f37'),
+              color: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? (isDarkMode ? '#fecaca' : '#991b1b') : '#f9fafb',
               padding: '16px 20px',
               borderRadius: '12px',
               marginBottom: '16px',
-              border: `1px solid ${subscriptionStatus === 'past_due' ? '#ef4444' : (isDarkMode ? '#1e293b' : 'transparent')}`,
+              border: `1px solid ${(subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#ef4444' : (isDarkMode ? '#1e293b' : 'transparent')}`,
               gap: '12px',
               textAlign: 'left'
             }}>
@@ -943,16 +949,16 @@ export default function PatmosChat() {
                   fontWeight: '900', 
                   textTransform: 'uppercase', 
                   letterSpacing: '1.5px', 
-                  color: subscriptionStatus === 'past_due' ? '#ef4444' : (isDarkMode ? '#94a3b8' : '#cbd5e1'), 
+                  color: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#ef4444' : (isDarkMode ? '#94a3b8' : '#cbd5e1'), 
                   margin: '0 0 4px 0', 
                   fontFamily: theme.fontSans 
                 }}>
-                  {subscriptionStatus === 'past_due' 
+                  {(subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') 
                     ? (lang === 'es' ? 'Liquidación de Pago Requerida' : 'Payment Settlement Required') 
                     : (lang === 'es' ? 'Límite Gratuito Alcanzado' : 'Free Limit Reached')}
                 </h5>
-                <p style={{ fontSize: '12px', color: subscriptionStatus === 'past_due' ? 'inherit' : '#cbd5e1', margin: 0, lineHeight: '1.4', fontFamily: theme.fontSans }}>
-                  {subscriptionStatus === 'past_due' 
+                <p style={{ fontSize: '12px', color: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? 'inherit' : '#cbd5e1', margin: 0, lineHeight: '1.4', fontFamily: theme.fontSans }}>
+                  {(subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') 
                     ? (lang === 'es' 
                         ? "Su acceso está bloqueado debido a un fallo en el pago de renovación. Actualice sus credenciales de tarjeta de crédito para reanudar el acceso de inmediato."
                         : "Your access is locked due to a failed renewal payment. Update your credit card credentials to resume access immediately.")
@@ -962,28 +968,30 @@ export default function PatmosChat() {
                   }
                 </p>
               </div>
+              
+              {/* 💳 Botón conectado de forma reactiva y limpia a la instancia segura de Paddle */}
               <button 
-  onClick={() => openPatmosCheckout(userEmail)}
-  style={{
-    backgroundColor: subscriptionStatus === 'past_due' ? '#ef4444' : '#fff',
-    color: subscriptionStatus === 'past_due' ? '#fff' : '#000f37',
-    fontSize: '10px',
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    padding: '10px 16px',
-    borderRadius: '6px',
-    whiteSpace: 'nowrap',
-    fontFamily: theme.fontSans,
-    transition: 'background 0.2s',
-    border: 'none',
-    cursor: 'pointer'
-  }}
-  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#dc2626' : '#e2e8f0')}
-  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = subscriptionStatus === 'past_due' ? '#ef4444' : '#fff')}
->
-  {subscriptionStatus === 'past_due' ? (lang === 'es' ? 'Resolver Ahora →' : 'Resolve Now →') : (lang === 'es' ? 'Pasar a Pro →' : 'Upgrade →')}
-</button>
+                onClick={handlePaddleCheckout}
+                style={{
+                  backgroundColor: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#ef4444' : '#fff',
+                  color: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#fff' : '#000f37',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  padding: '10px 16px',
+                  borderRadius: '6px',
+                  whiteSpace: 'nowrap',
+                  fontFamily: theme.fontSans,
+                  transition: 'background 0.2s',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#dc2626' : '#e2e8f0')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#ef4444' : '#fff')}
+              >
+                {(subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? (lang === 'es' ? 'Resolver Ahora →' : 'Resolve Now →') : (lang === 'es' ? 'Pasar a Pro →' : 'Upgrade →')}
+              </button>
             </div>
           )}
 
@@ -1005,7 +1013,7 @@ export default function PatmosChat() {
               placeholder={
                 hasCredits 
                   ? (lang === 'es' ? "Escudriñad las escrituras..." : "Search the scriptures...") 
-                  : (subscriptionStatus === 'past_due' 
+                  : ((subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') 
                       ? (lang === 'es' ? "CONSULTA BLOQUEADA — FACTURA VENCIDA" : "INQUIRY LOCKED — PAST DUE INVOICE") 
                       : (lang === 'es' ? "CONSULTA BLOQUEADA — ADQUIERA EL NIVEL WATCHMAN" : "INQUIRY LOCKED — UPGRADE TO THE WATCHMAN TIER"))
               }

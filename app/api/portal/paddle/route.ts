@@ -1,4 +1,4 @@
-// app/api/portal/route.ts
+// app/api/portal/paddle/route.ts
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
