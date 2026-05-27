@@ -4,11 +4,16 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useLanguage } from "./context/Languagecontext"; // 🌐 Conexión al motor de idiomas global
 import { usePaddleInstance } from "@/components/PaddleProvider"; // 💳 Importamos el hook seguro del proveedor
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function HomePage() {
   const { lang, setLanguage } = useLanguage(); // 🌐 Extraemos lang y setLanguage para el dropdown
   const [isMounted, setIsMounted] = useState(false);
-  const paddle = usePaddleInstance(); // 🚀 Consumimos la instancia real y activa controlada por el estado de React
+  const paddle = usePaddleInstance(); // 🚀 Consumimos la instancia real y activa de Paddle v2
+  const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+);
 
   useEffect(() => {
     setIsMounted(true);
@@ -18,29 +23,52 @@ export default function HomePage() {
     document.head.appendChild(link);
   }, []);
 
-  // 💳 Manejador interactivo y blindado para abrir la pasarela
-  const handleCheckout = () => {
+  // 💳 Manejador interactivo y blindado para abrir la pasarela amarrada a Supabase
+  const handleCheckout = async () => {
     if (!paddle) {
       console.warn("Paddle aún se está inicializando... Espera un segundo.");
       return;
     }
 
-    // 🚀 Tu ID real de Sandbox verificado por captura
-    const PATMOS_PRICE_ID = "pri_01ksjj24ksyxjm70nsqqapaht6"; 
+    try {
+      // 🕵️ Recuperamos la sesión activa del usuario actual en Supabase
+      const { data: { session } } = await supabase.auth.getSession();
 
-    paddle.Checkout.open({
-      items: [
-        {
-          priceId: PATMOS_PRICE_ID,
-          quantity: 1
-        }
-      ],
-      settings: {
-        displayMode: "overlay", // Abre el modal flotante elegante
-        theme: "light",         // Mantiene el look corporativo limpio
-        locale: "en"            // Idioma internacional de cobro
+      // 🚨 CONTROL DE FLUJO SEGURO: Si no ha iniciado sesión, lo mandamos primero a autenticarse
+      if (!session || !session.user) {
+        window.location.href = '/login';
+        return;
       }
-    });
+
+      const userId = session.user.id;
+      const userEmail = session.user.email;
+
+      // 🚀 Tu ID real de Sandbox verificado
+      const PATMOS_PRICE_ID = "pri_01ksjj24ksyxjm70nsqqapaht6"; 
+
+      paddle.Checkout.open({
+        items: [
+          {
+            priceId: PATMOS_PRICE_ID,
+            quantity: 1
+          }
+        ],
+        // 📧 Seteamos el correo automáticamente para ahorrarle pasos al cliente
+        customer: userEmail ? { email: userEmail } : undefined,
+        
+        // 🔒 METADATOS METIDOS BAJO LLAVE: Esto viajará con Paddle y volverá intacto al Webhook
+        customData: {
+          supabase_user_id: userId
+        },
+        settings: {
+          displayMode: "overlay", // Abre el modal flotante elegante
+          theme: "light",         // Mantiene el look corporativo limpio
+          locale: "en"            // Idioma internacional de cobro
+        }
+      });
+    } catch (err) {
+      console.error("Error al procesar los datos de sesión para el checkout:", err);
+    }
   };
 
   if (!isMounted) return <div className="min-h-screen bg-[#f9fafb]" />;
@@ -266,7 +294,7 @@ export default function HomePage() {
                 </ul>
               </div>
               
-              {/* 💳 Botón conectado de forma reactiva mediante el hook de Paddle v2 */}
+              {/* 💳 Botón perfectamente conectado de forma reactiva y segura */}
               <button 
                 onClick={handleCheckout}
                 className="block w-full text-center mt-10 bg-[#000f37] text-white py-4 font-semibold rounded-xl hover:bg-black border-none cursor-pointer outline-none"
@@ -322,7 +350,7 @@ export default function HomePage() {
               </summary>
               <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existence, coidéntico en su naturaleza esencial, coigual en poder soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
+                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existence, coidéntico en su naturaleza essencial, coigual en poder soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
                 ) : (
                   "It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 Juan 5:7)."
                 )}
