@@ -1,6 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* 🎯 Configuramos las rutas de escaneo nativas de la versión 4 */
+@source "../app/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../components/**/*.{js,ts,jsx,tsx,mdx}";
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -11,7 +13,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 2, 6, 23; /* #020617 (Garantiza consistencia con el modo oscuro de Patmos) */
+    --background-start-rgb: 2, 6, 23; /* #020617 (Consistencia con tu modo oscuro de Patmos) */
     --background-end-rgb: 2, 6, 23;
   }
 }
