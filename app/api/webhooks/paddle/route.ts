@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
     console.log(`📡 Webhook recibido de Paddle: Evento tipo [${eventType}]`);
 
-    // Guardamos la referencia del objeto de datos interno enviado por el simulador
+    // Guardamos la referencia del objeto de datos interno enviado por Paddle
     const subscriptionData = body.data;
 
     switch (eventType) {
@@ -27,8 +27,7 @@ export async function POST(req: Request) {
       case 'subscription.updated':
         if (subscriptionData) {
           
-          // 🚀 EXTRACCIÓN EXACTA SEGÚN TU JSON:
-          // Como vimos en tu payload, 'custom_data' viene dentro del 'price' del primer ítem
+          // 🚀 EXTRACCIÓN EXACTA: 'custom_data' viene dentro del 'price' del primer ítem
           let userId = subscriptionData.items?.[0]?.price?.custom_data?.supabase_user_id;
 
           // Fallback 1: Si no está ahí, buscamos en la raíz del objeto por si acaso
@@ -91,12 +90,15 @@ export async function POST(req: Request) {
 // --- FUNCIONES AUXILIARES COMPLETAMENTE PREPARADAS PARA TU JSON ---
 
 async function upsertPaddleSubscription(supabaseAdmin: any, subscription: any, userId: string) {
-  // Extraemos el price_id exacto mapeando tu JSON (línea 7 del payload)
+  // Extraemos el price_id exacto mapeando tu JSON
   const paddlePriceId = subscription.items?.[0]?.price?.id || subscription.items?.[0]?.price_id;
 
   if (!paddlePriceId) {
     throw new Error('Missing price_id fields to bypass database strict constraints');
   }
+
+  // 💳 EXTRAEMOS EL CUSTOMER ID DE PADDLE V2 (Esencial para que funcione tu botón de Factura)
+  const paddleCustomerId = subscription.customer_id || subscription.customer?.id;
 
   // 🔒 CONTROL DE FECHAS SEGURO (Mapeando 'current_billing_period' desde tu JSON nativo)
   const rawStart = subscription.current_billing_period?.starts_at || subscription.started_at;
@@ -117,6 +119,7 @@ async function upsertPaddleSubscription(supabaseAdmin: any, subscription: any, u
     user_id: userId,                         // UUID amarrado a Supabase
     status: subscription.status,             // Estado ('active', 'canceled')
     price_id: paddlePriceId,                 // El priceId (pri_...)
+    paddle_customer_id: paddleCustomerId,     // 🚀 ¡NUEVO!: Guardamos el ID del cliente para el portal de facturas
     cancel_at_period_end: subscription.scheduled_change?.action === 'cancel',
     current_period_start: startDateIso,
     current_period_end: endDateIso,

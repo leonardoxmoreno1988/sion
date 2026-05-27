@@ -5,9 +5,10 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
-  const requestUrl = new URL(request.url);
-  const origin = requestUrl.origin;
+// 🚀 Eliminamos el parámetro 'request' no utilizado para evitar fallos de TypeScript en Vercel
+export async function GET() {
+  // Construimos el origen usando la variable de entorno de Vercel o fallback seguro de tu dominio
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.patmosresearch.com';
   const cookieStore = await cookies();
 
   // 1. Instanciamos Supabase de forma moderna (SSR) para identificar al usuario
