@@ -11,9 +11,9 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const paddle = usePaddleInstance(); // 🚀 Consumimos la instancia real y activa de Paddle v2
   const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
 
   useEffect(() => {
     setIsMounted(true);
@@ -149,7 +149,7 @@ export default function HomePage() {
         <div className="mb-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tighter leading-tight text-[#000f37]">
             {lang === 'es' ? (
-              <>Investigación Profunda de la Biblia con IA</>
+              <>Asistente de IA para Estudio Bíblico </>
             ) : (
               <>Ask Anything<br/>from the KJV Bible</>
             )}
@@ -158,7 +158,7 @@ export default function HomePage() {
 
         <p className="text-2xl font-medium text-[#000f37] max-w-xl">
           {lang === 'es' ? (
-            <>Respuestas claras y fieles extraídas exclusivamente de la <span className="font-semibold">Reina Valera</span>.</>
+            <>Respuestas claras y fieles extraídas exclusivamente de la <span className="font-semibold">Biblia</span>.</>
           ) : (
             <>Clear, faithful answers drawn exclusively from the <span className="font-semibold">Authorized King James Version</span>.</>
           )}
@@ -282,7 +282,7 @@ export default function HomePage() {
             
                 <p className="mt-4 text-sm leading-relaxed text-[#4b5563]">
                   {lang === 'es' 
-                    ? "Su apoyo ayuda a mantener a Patmos puro, independiente y enfocado únicamente en  para creyentes de todo el mundo." 
+                    ? "Su apoyo ayuda a mantener a Patmos puro, independiente y enfocado únicamente en para creyentes de todo el mundo." 
                     : "Your support helps keep Patmos pure, independent, and focused only on the KJV for believers around the world."}
                 </p>
                 
@@ -350,7 +350,7 @@ export default function HomePage() {
               </summary>
               <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existence, coidéntico en su naturaleza essencial, coigual en poder soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
+                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existence, coidéntico en su naturaleza essencial, coigual en poder sovereign y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
                 ) : (
                   "It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 Juan 5:7)."
                 )}
@@ -406,8 +406,22 @@ export default function HomePage() {
 
       </main>
 
-      {/* FOOTER */}
-      <footer className="w-full max-w-[700px] border-t border-[#e5e7eb] py-8 flex justify-center items-center">
+      {/* FOOTER - OPTIMIZADO PARA CUMPLIMIENTO LEGAL DE PADDLE V2 */}
+      <footer className="w-full max-w-[700px] border-t border-[#e5e7eb] py-8 flex flex-col items-center gap-4">
+        {/* Enlaces Legales requeridos para el Live Mode */}
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-[#6b7280]">
+          <Link href="/terms" className="hover:text-[#000f37] transition-colors duration-200">
+            {lang === 'es' ? "Términos de Servicio" : "Terms of Service"}
+          </Link>
+          <Link href="/privacy" className="hover:text-[#000f37] transition-colors duration-200">
+            {lang === 'es' ? "Política de Privacidad" : "Privacy Policy"}
+          </Link>
+          <Link href="/refund" className="hover:text-[#000f37] transition-colors duration-200">
+            {lang === 'es' ? "Reembolsos y Cancelación" : "Refund Policy"}
+          </Link>
+        </div>
+
+        {/* Copyright */}
         <p className="text-[10px] text-[#94a3b8] uppercase tracking-wider text-center">
           © {new Date().getFullYear()} Patmos Research. {lang === 'es' ? "Todos los derechos reservados." : "All Rights Reserved."}
         </p>
