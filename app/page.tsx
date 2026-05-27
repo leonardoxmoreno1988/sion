@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useLanguage } from "./context/Languagecontext"; // 🌐 Conexión al motor de idiomas global
-import { openPatmosCheckout } from "@/components/OpenCheckout"; // 💳 Importamos el disparador de Paddle
+import { usePaddleInstance } from "@/components/PaddleProvider"; // 💳 Importamos el hook seguro del proveedor
 
 export default function HomePage() {
   const { lang, setLanguage } = useLanguage(); // 🌐 Extraemos lang y setLanguage para el dropdown
   const [isMounted, setIsMounted] = useState(false);
+  const paddle = usePaddleInstance(); // 🚀 Consumimos la instancia real y activa controlada por el estado de React
 
   useEffect(() => {
     setIsMounted(true);
@@ -16,6 +17,31 @@ export default function HomePage() {
     link.rel = 'stylesheet';
     document.head.appendChild(link);
   }, []);
+
+  // 💳 Manejador interactivo y blindado para abrir la pasarela
+  const handleCheckout = () => {
+    if (!paddle) {
+      console.warn("Paddle aún se está inicializando... Espera un segundo.");
+      return;
+    }
+
+    // 🚀 Tu ID real de Sandbox verificado por captura
+    const PATMOS_PRICE_ID = "pri_01ksjj24ksyxjm70nsqqapaht6"; 
+
+    paddle.Checkout.open({
+      items: [
+        {
+          priceId: PATMOS_PRICE_ID,
+          quantity: 1
+        }
+      ],
+      settings: {
+        displayMode: "overlay", // Abre el modal flotante elegante
+        theme: "light",         // Mantiene el look corporativo limpio
+        locale: "en"            // Idioma internacional de cobro
+      }
+    });
+  };
 
   if (!isMounted) return <div className="min-h-screen bg-[#f9fafb]" />;
 
@@ -239,9 +265,10 @@ export default function HomePage() {
                   <li className="flex items-center gap-2">✓ {lang === 'es' ? "Acceso prioritario" : "Priority access"}</li>
                 </ul>
               </div>
-              {/* 💳 Cambiado de <a> nativo a <button> controlado por el SDK de Paddle v2 */}
+              
+              {/* 💳 Botón conectado de forma reactiva mediante el hook de Paddle v2 */}
               <button 
-                onClick={() => openPatmosCheckout()}
+                onClick={handleCheckout}
                 className="block w-full text-center mt-10 bg-[#000f37] text-white py-4 font-semibold rounded-xl hover:bg-black border-none cursor-pointer outline-none"
               >
                 {lang === 'es' ? "Pasar a Pro" : "Upgrade to Pro"}
@@ -273,7 +300,7 @@ export default function HomePage() {
               </summary>
               <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Sostiene que la autoridad suprema, exclusive y final para toda fe y ejecución del ministerio es la palabra de Dios infalible y estructuralmente preservada—encarnada estrictamente dentro de la Santa Biblia Autorizada King James para el mundo de habla inglesa. Opera bajo la convicción absoluta de que todas las traducciones modernas introducen distorsiones teológicas y corrupciones sistémicas (Salmos 12:6-7)."
+                  "Sostiene que la autoridad suprema, exclusive y final para toda faith y ejecución del ministerio es la palabra de Dios infalible y estructuralmente preservada—encarnada estrictamente dentro de la Santa Biblia Autorizada King James para el mundo de habla inglesa. Opera bajo la convicción absoluta de que todas las traducciones modernas introducen distorsiones teológicas y corrupciones sistémicas (Salmos 12:6-7)."
                 ) : (
                   "It holds that the supreme, exclusive, and final authority for all faith and ministry execution is the flawless, structurally preserved word of God—embodied strictly within the Authorized King James Holy Bible for the English-speaking world. It operates on the absolute conviction that all modern translations introduce theological distortions and systemic corruptions (Psalms 12:6-7)."
                 )}
@@ -295,9 +322,9 @@ export default function HomePage() {
               </summary>
               <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existencia, coidéntico en su naturaleza esencial, coigual en poder soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
+                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existence, coidéntico en su naturaleza esencial, coigual en poder soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
                 ) : (
-                  "It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 John 5:7)."
+                  "It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 Juan 5:7)."
                 )}
               </p>
             </details>
@@ -341,7 +368,7 @@ export default function HomePage() {
                 {lang === 'es' ? (
                   "Sostiene el regreso inminente del Señor Jesús para arrebatar a la Iglesia antes del período de la Tribulación. En la culminación de la Tribulación, Cristo regresará físicamente a la tierra, establecerá Su reinado soberano desde la histórica ciudad de Jerusalén y confirmará plenamente Su realeza sobre el Reino Mesiánico terrenal prometido incondicionalmente a la nación de Israel (Lucas 21:21-23; 1 Tesalonicenses 5:9; Romanos 11:25-29; Apocalipsis 19:11-16; 20:1-6)."
                 ) : (
-                  "It holds to the imminent return of the Lord Jesus Christ to rapture the Church prior to the Tribulation period. At the culmination of the Tribulation, Christ will return physically to earth, establish His sovereign reign from the historic city of Jerusalem, and fully confirm His kingship over the earthly Messianic Kingdom promised unconditionally to the nation of Israel (Luke 21:21-23; 1 Thessalonians 5:9; Romans 11:25-29; Revelation 19:11-16; 20:1-6)."
+                  "It holds to the imminent return of the Lord Jesus Christ to rapture the Church prior to the Tribulation period. At the culmination of the Tribulation, Christ will return physically to earth, establish His sovereign reign from the historic city of Jerusalem, and fully confirm His kingship over the earthly Messianic Kingdom promised unconditionally to the nation of Israel (Luke 21:21-23; 1 Thessalonians 5:9; Romanos 11:25-29; Revelation 19:11-16; 20:1-6)."
                 )}
               </p>
             </details>

@@ -3,23 +3,20 @@
 import { useEffect, createContext, useContext, useState } from 'react';
 import { initializePaddle, InitializePaddleOptions, Paddle } from '@paddle/paddle-js';
 
-// Creamos el contexto para compartir la instancia real de Paddle
 const PaddleContext = createContext<Paddle | null>(null);
 
 export function PaddleProvider({ children }: { children: React.ReactNode }) {
   const [paddle, setPaddle] = useState<Paddle | null>(null);
 
   useEffect(() => {
-    // Evitamos inicializarlo doble en Strict Mode si ya existe en el objeto window
     if ((window as any).paddle) {
       setPaddle((window as any).paddle);
       return;
     }
 
-    // 🚨 Corrección limpia: El SDK v2 de Paddle detecta automáticamente el entorno sandbox 
-    // a través del Client Token de pruebas (test_...), pero forzamos el tipado correcto aquí.
+    // 🚨 SOLUCIÓN AL ERROR DE CORS: Forzamos la propiedad estricta en la inicialización global
     const options: InitializePaddleOptions = {
-      environment: (process.env.NEXT_PUBLIC_PADDLE_ENV as 'sandbox' | 'production') || 'sandbox',
+      environment: "sandbox", 
       token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || '',
     };
 
@@ -31,7 +28,7 @@ export function PaddleProvider({ children }: { children: React.ReactNode }) {
         }
       })
       .catch((err) => {
-        console.error("Error inicializando Paddle en el cliente:", err);
+        console.error("Error inicializando Paddle en Sandbox:", err);
       });
   }, []);
 
@@ -42,5 +39,4 @@ export function PaddleProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Hook personalizado para usar Paddle de forma segura en tus componentes
 export const usePaddleInstance = () => useContext(PaddleContext);
