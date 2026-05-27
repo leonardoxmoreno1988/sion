@@ -21,7 +21,9 @@ export function openPatmosCheckout(userEmail?: string | null) {
       settings: {
         displayMode: "overlay", // Abre un modal flotante elegante y moderno
         theme: "light",         // Mantiene el look limpio corporativo
-        locale: "en"            // Mantiene el lenguaje internacional de cobro
+        locale: "en",           // Mantiene el lenguaje internacional de cobro
+        // 🚨 LA PIEZA FALTANTE: Forzamos al Checkout a saber que opera en Sandbox en producción
+        environment: "sandbox"  
       }
     });
   } else {

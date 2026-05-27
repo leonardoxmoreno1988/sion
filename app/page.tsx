@@ -228,7 +228,7 @@ export default function HomePage() {
             
                 <p className="mt-4 text-sm leading-relaxed text-[#4b5563]">
                   {lang === 'es' 
-                    ? "Su apoyo ayuda a mantener a Patmos puro, independiente y enfocado únicamente en la KJV para creyentes de todo el mundo." 
+                    ? "Su apoyo ayuda a mantener a Patmos puro, independiente y enfocado únicamente en  para creyentes de todo el mundo." 
                     : "Your support helps keep Patmos pure, independent, and focused only on the KJV for believers around the world."}
                 </p>
                 

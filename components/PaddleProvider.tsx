@@ -10,12 +10,14 @@ export function PaddleProvider({ children }: { children: React.ReactNode }) {
   const [paddle, setPaddle] = useState<Paddle | null>(null);
 
   useEffect(() => {
-    // Si ya existe en el objeto window, evitamos inicializarlo doble en Strict Mode
+    // Evitamos inicializarlo doble en Strict Mode si ya existe en el objeto window
     if ((window as any).paddle) {
       setPaddle((window as any).paddle);
       return;
     }
 
+    // 🚨 Corrección limpia: El SDK v2 de Paddle detecta automáticamente el entorno sandbox 
+    // a través del Client Token de pruebas (test_...), pero forzamos el tipado correcto aquí.
     const options: InitializePaddleOptions = {
       environment: (process.env.NEXT_PUBLIC_PADDLE_ENV as 'sandbox' | 'production') || 'sandbox',
       token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || '',
@@ -24,7 +26,6 @@ export function PaddleProvider({ children }: { children: React.ReactNode }) {
     initializePaddle(options)
       .then((paddleInstance) => {
         if (paddleInstance) {
-          // 🚀 Guardamos en el estado de React para que el Context lo distribuya
           setPaddle(paddleInstance);
           (window as any).paddle = paddleInstance;
         }
@@ -35,7 +36,6 @@ export function PaddleProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    // 🚀 Pasamos la instancia real por el valor del proveedor en lugar de 'null'
     <PaddleContext.Provider value={paddle}>
       {children}
     </PaddleContext.Provider>
