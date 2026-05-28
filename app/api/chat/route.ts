@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 
     // 🚀 COMPUERTA DE ADMINISTRADOR BLINDADA:
     // Al evaluar directamente sobre la raíz de 'user', evitamos que consultas de red tardías pisen el estado.
-    if (user.email === 'lenn.moreno@gmail.com') {
+    if (user.email === 'leonardo@ritualypropaganda.com') {
       isPremiumUser = true;
     }
 
