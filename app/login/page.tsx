@@ -205,7 +205,7 @@ export default function LoginPage() {
           </Link>
           <div className="mt-3 h-[1px] w-full bg-gradient-to-r from-transparent via-[#000f37]/20 to-transparent" />
           <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-gray-400">
-            The Watchman of Final Authority
+           Rightly Dividing the Word of Truth
           </p>
         </div>
 
