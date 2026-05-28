@@ -3,15 +3,10 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useLanguage } from "./context/Languagecontext"; // 🌐 Conexión al motor de idiomas global
-import { createBrowserClient } from '@supabase/ssr';
 
 export default function HomePage() {
   const { lang, setLanguage } = useLanguage(); // 🌐 Extraemos lang y setLanguage para el dropdown
   const [isMounted, setIsMounted] = useState(false);
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  );
 
   useEffect(() => {
     setIsMounted(true);
@@ -21,34 +16,19 @@ export default function HomePage() {
     document.head.appendChild(link);
   }, []);
 
-  // 💳 Redirección segura a Lemon Squeezy inyectando el ID de Supabase bajo llave
-  const handleCheckout = async () => {
-    try {
-      // 🕵️ Recuperamos la sesión activa del usuario actual en Supabase
-      const { data: { session } } = await supabase.auth.getSession();
+  // 🧙‍♂️ MÉTODO MAGO DE OZ: Tu botón abre la suscripción y te lleva a la pantalla de espera
+  const handleCheckout = () => {
+    /* CONSEGUIR ESTA URL EN TU PANEL DE PAYPAL:
+       En la lista de tus suscripciones/planes en PayPal, dale clic a tu plan 'P-2G8977490J925452WNIL7QAA'
+       y busca la opción "Copy Link" o "Share URL". Te dará un enlace directo de PayPal.
+    */
+    const PAYPAL_DIRECT_URL = `https://www.paypal.com/billing/plans/sub/P-2G8977490J925452WNIL7QAA`; 
 
-      // 🚨 CONTROL DE FLUJO SEGURO: Si no ha iniciado sesión, lo mandamos primero a autenticarse
-      if (!session || !session.user) {
-        window.location.href = '/login';
-        return;
-      }
+    // Abre la pasarela de PayPal segura en una pestaña nueva
+    window.open(PAYPAL_DIRECT_URL, '_blank');
 
-      const userId = session.user.id;
-      const userEmail = session.user.email || '';
-
-      /* 🚀 REEMPLAZA ESTA URL por tu link de checkout de Lemon Squeezy cuando crees el producto.
-         Agregamos los parámetros nativos de Lemon Squeezy para pasar el correo y los metadatos de Supabase:
-         - checkout[email]=correo
-         - passthrough=id_usuario (Este vuelve intacto al Webhook)
-      */
-      const LEMON_SQUEEZY_PRODUCT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/TU_PRODUCT_ID_AQUI?checkout[email]=${encodeURIComponent(userEmail)}&passthrough=${encodeURIComponent(userId)}`;
-
-      // Redirige al flujo de pago seguro
-      window.location.href = LEMON_SQUEEZY_PRODUCT_URL;
-      
-    } catch (err) {
-      console.error("Error al procesar los datos de sesión para el checkout:", err);
-    }
+    // Redirige tu landing a la pantalla de éxito/sincronización premium
+    window.location.href = '/checkout/success';
   };
 
   if (!isMounted) return <div className="min-h-screen bg-[#f9fafb]" />;
@@ -121,7 +101,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* HERO SECTION - 🛡️ CAMBIOS APLICADOS PARA CUMPLIMIENTO */}
+      {/* HERO SECTION */}
       <main className="flex-1 w-full max-w-[700px] flex flex-col justify-center py-16">
         <div className="mb-6">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tighter leading-tight text-[#000f37]">
@@ -244,7 +224,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Pro Plan */}
+            {/* Pro Plan - ✨ BOTÓN ORIGINAL RESTAURADO */}
             <div className="bg-white border-2 border-[#000f37] p-8 rounded-xl relative flex flex-col justify-between">
               <div className="absolute -top-3 right-6 bg-[#2d65f6] text-white text-xs px-4 py-1 rounded-full font-medium">
                 {lang === 'es' ? "RECOMENDADO" : "RECOMMENDED"}
@@ -272,7 +252,7 @@ export default function HomePage() {
               
               <button 
                 onClick={handleCheckout}
-                className="block w-full text-center mt-10 bg-[#000f37] text-white py-4 font-semibold rounded-xl hover:bg-black border-none cursor-pointer outline-none"
+                className="block w-full text-center mt-10 bg-[#000f37] text-white py-4 font-semibold rounded-xl hover:bg-black border-none cursor-pointer outline-none transition-all"
               >
                 {lang === 'es' ? "Obtener Acceso Ilimitado" : "Unlock Unlimited Access"}
               </button>
@@ -280,14 +260,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* FAQS - 🛡️ REFORMULADAS PARA CUMPLIMIENTO */}
+        {/* FAQS */}
         <section className="mt-20 border-t border-[#e5e7eb] pt-12 pb-8">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
             {lang === 'es' ? "Preguntas Frecuentes" : "FAQs"}
           </h3>
 
           <div className="flex flex-col border-b border-[#e5e7eb]">
-            
             <details className="group py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
@@ -305,25 +284,6 @@ export default function HomePage() {
                 )}
               </p>
             </details>
-
-            <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
-              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
-                <h4 className="text-base font-semibold tracking-wide text-left">
-                  {lang === 'es' ? "¿Cómo maneja los datos textuales?" : "How does it handle textual data?"}
-                </h4>
-                <svg className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
-              </summary>
-              <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
-                {lang === 'es' ? (
-                  "El motor de software ejecuta filtros dispensacionales automáticos para asegurar que los resultados reflejen con precisión las divisiones históricas de las escrituras."
-                ) : (
-                  "The software engine executes automated dispensational filters to ensure that data outputs accurately map to historical scripture divisions."
-                )}
-              </p>
-            </details>
-
           </div>
         </section>
 

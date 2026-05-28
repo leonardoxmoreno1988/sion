@@ -7,7 +7,6 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from "../context/Languagecontext";
-import { usePaddleInstance } from "@/components/PaddleProvider"; // 💳 Importamos el hook nativo de Paddle v2
 
 interface ChatMessage {
   id: string;
@@ -29,7 +28,7 @@ export default function PatmosChat() {
   const { t, lang, setLanguage } = useLanguage(); 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null); // 🕵️ Guardamos el ID de Supabase para inyectarlo en las transacciones
+  const [userId, setUserId] = useState<string | null>(null); // 🕵️ Guardamos el ID de Supabase
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -42,15 +41,13 @@ export default function PatmosChat() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   
-  // 🔒 ESTADOS: Control del Paywall automático y ciclo de vida de Paddle v2
+  // 🔒 ESTADOS: Control del Paywall del Mago de Oz y ciclo de vida de suscripción
   const [hasCredits, setHasCredits] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
-  const [paddleCustomerId, setPaddleCustomerId] = useState<string | null>(null); // 💳 Requerido para el Portal de Facturación
 
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const paddle = usePaddleInstance(); // 🚀 Consumimos la instancia activa global de Paddle v2
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -129,7 +126,7 @@ export default function PatmosChat() {
         console.error("Error fetching history:", err);
       }
 
-      // 🛡️ COMPROBACIÓN CENTRALIZADA DEL BYPASS DE ADMINISTRADOR
+      // 🛡️ COMPROBACIÓN DEL BYPASS DE ADMINISTRADOR Y BASE DE DATOS
       if (emailSession === 'lenn.moreno@gmail.com') {
         setIsPremium(true);
         setHasCredits(true);
@@ -138,14 +135,13 @@ export default function PatmosChat() {
         try {
           const { data: subscription } = await supabase
             .from('subscriptions')
-            .select('status, paddle_customer_id')
+            .select('status')
             .eq('user_id', session.user.id)
             .maybeSingle();
 
           if (subscription) {
             const currentStatus = subscription.status;
             setSubscriptionStatus(currentStatus);
-            setPaddleCustomerId(subscription.paddle_customer_id);
 
             if (currentStatus === 'active' || currentStatus === 'trialing') {
               setIsPremium(true);
@@ -158,8 +154,8 @@ export default function PatmosChat() {
                   id: 'system-past-due', 
                   role: 'assistant', 
                   content: lang === 'es' 
-                    ? "⚠️ **Alerta de Suscripción:** Falló el pago de su factura de renovación o su cuenta está pausada. El acceso ha sido restringido temporalmente. Por favor, visite el portal de **Facturación** arriba para actualizar su método de pago."
-                    : "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed or your account is paused. Access has been temporarily restricted. Please visit the **Billing** portal above to update your payment method." 
+                    ? "⚠️ **Alerta de Suscripción:** Falló el pago de su factura de renovación o su cuenta está pausada. El acceso ha sido restringido temporalmente. Por favor, comuníquese con soporte para actualizar su método de pago."
+                    : "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed or your account is paused. Access has been temporarily restricted. Please contact support to update your payment method." 
                 }
               ]);
             } else {
@@ -225,40 +221,24 @@ export default function PatmosChat() {
     }
   };
 
-  // 💳 MANEJADOR DE COMPRA PARA PADDLE V2 NATIVO (Paywall)
-  const handlePaddleCheckout = () => {
-    if (!paddle) {
-      console.warn("Paddle.js no se ha inicializado por completo.");
-      return;
-    }
+  // 🧙‍♂️ MANEJADOR DE COMPRA REFORMULADO PARA EL MAGO DE OZ (PayPal Recurrente)
+  const handlePayPalCheckout = () => {
+    const PAYPAL_DIRECT_URL = "https://www.paypal.com/billing/plans/sub/P-2G8977490J925452WNIL7QAA"; 
 
-    const PATMOS_PRICE_ID = "pri_01ksjj24ksyxjm70nsqqapaht6"; 
+    // Abre el cobro seguro en una pestaña nueva limpia
+    window.open(PAYPAL_DIRECT_URL, '_blank');
 
-    paddle.Checkout.open({
-      items: [
-        {
-          priceId: PATMOS_PRICE_ID,
-          quantity: 1
-        }
-      ],
-      customer: userEmail ? { email: userEmail } : undefined,
-      customData: {
-        supabase_user_id: userId 
-      },
-      settings: {
-        displayMode: "overlay",
-        theme: isDarkMode ? "dark" : "light",
-        locale: "en"
-      }
-    });
+    // Redirige la ventana actual del chat a la pantalla premium de espera y sincronización
+    window.location.href = '/checkout/success';
   };
 
-  // 📄 PORTAL DE AUTOSERVICIO (Billing Directo unificado a tu estructura de rutas)
+  // 📄 PORTAL DE FACTURACIÓN TEMPORAL (Mago de Oz)
   const handleOpenBillingPortal = (e: React.MouseEvent) => {
     e.preventDefault();
-    
-    // Dispara la apertura del endpoint seguro del backend en una pestaña limpia
-    window.open('/api/portal/paddle', '_blank');
+    alert(lang === 'es' 
+      ? "Para gestionar o cancelar su suscripción, por favor inicie sesión en su panel personal de PayPal o comuníquese con soporte@patmosresearch.com" 
+      : "To manage or cancel your subscription, please log in to your personal PayPal dashboard or contact support@patmosresearch.com"
+    );
   };
 
   const handleLogout = async () => {
@@ -738,7 +718,7 @@ export default function PatmosChat() {
               </select>
             </div>
 
-            {/* 📄 PORTAL DE AUTOSERVICIO CONECTADO A TU NUEVA RUTA DE API */}
+            {/* 📄 PORTAL DE GESTIÓN (Mago de Oz) */}
             {(isPremium || subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') && (
               <button 
                 onClick={handleOpenBillingPortal}
@@ -925,7 +905,7 @@ export default function PatmosChat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Caja de Input + Banner del Paywall NATIVO DE PADDLE */}
+        {/* Caja de Input + Banner del Paywall UNIFICADO A PAYPAL */}
         <div style={{ width: '100%', maxWidth: '650px', padding: '20px 0 40px 0' }}>
           
           {!hasCredits && (
@@ -969,9 +949,9 @@ export default function PatmosChat() {
                 </p>
               </div>
               
-              {/* 💳 Botón conectado de forma reactiva y limpia a la instancia segura de Paddle */}
+              {/* 💳 Botón con tu estética limpia conectado al link directo de PayPal */}
               <button 
-                onClick={handlePaddleCheckout}
+                onClick={handlePayPalCheckout}
                 style={{
                   backgroundColor: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#ef4444' : '#fff',
                   color: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#fff' : '#000f37',
