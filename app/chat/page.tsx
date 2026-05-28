@@ -221,9 +221,10 @@ export default function PatmosChat() {
     }
   };
 
-  // 🧙‍♂️ MANEJADOR DE COMPRA REFORMULADO PARA EL MAGO DE OZ (PayPal Recurrente)
+  // 🧙‍♂️ MANEJADOR DE COMPRA REFORMULADO PARA EL MAGO DE OZ (PayPal Recurrente Público)
   const handlePayPalCheckout = () => {
-    const PAYPAL_DIRECT_URL = "https://www.paypal.com/billing/plans/sub/P-2G8977490J925452WNIL7QAA"; 
+    // 🔗 URL pública de checkout corregida para el cliente externo
+    const PAYPAL_DIRECT_URL = "https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2G8977490J925452WNIL7QAA"; 
 
     // Abre el cobro seguro en una pestaña nueva limpia
     window.open(PAYPAL_DIRECT_URL, '_blank');
@@ -457,7 +458,8 @@ export default function PatmosChat() {
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '15px 6px' : '15px 10px', position: 'relative' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px', marginBottom: '12px', position: 'relative' }}>
+          {/* Cambiado 'justifycontent' por 'justifyContent' */}
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px', marginBottom: '12px', position: 'relative' }}>
             <p style={{ fontSize: isMobile ? '9px' : '11px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', margin: 0, fontFamily: 'serif' }}>
               {lang === 'es' ? "Registros Históricos" : "Historical Records"}
             </p>
@@ -949,7 +951,7 @@ export default function PatmosChat() {
                 </p>
               </div>
               
-              {/* 💳 Botón con tu estética limpia conectado al link directo de PayPal */}
+              {/* 💳 Botón con tu estética limpia conectado al link directo público de PayPal */}
               <button 
                 onClick={handlePayPalCheckout}
                 style={{
