@@ -18,7 +18,8 @@ export default function HomePage() {
 
   // 🧙‍♂️ MÉTODO MAGO DE OZ: Tu botón abre la suscripción y te lleva a la pantalla de espera
   const handleCheckout = () => {
-    const PAYPAL_DIRECT_URL = `https://www.paypal.com/billing/plans/sub/P-2G8977490J925452WNIL7QAA`; 
+    // 🔗 URL de suscripción pública de PayPal corregida para tus compradores externos
+    const PAYPAL_DIRECT_URL = `https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2G8977490J925452WNIL7QAA`; 
 
     // Abre la pasarela de PayPal segura en una pestaña nueva
     window.open(PAYPAL_DIRECT_URL, '_blank');
@@ -119,7 +120,7 @@ export default function HomePage() {
 
         <p className="text-lg leading-relaxed text-[#374151] mt-6 max-w-2xl">
           {lang === 'es' ? (
-            <>Software diseñado para el escrutniv literal, dispensacional y pretribulacional de las Escrituras. Sin traducciones modernas ni interpretaciones externas.</>
+            <>Software diseñado para el escrutinio literal, dispensacional y pretribulacional de las Escrituras. Sin traducciones modernas ni interpretaciones externas.</>
           ) : (
             <>Software engine designed for the literal, dispensational, and pre-tribulational study of Scripture.<br/>No modern translations. Pure manuscript analysis.</>
           )}
@@ -282,7 +283,7 @@ export default function HomePage() {
               </p>
             </details>
 
-            {/* FAQ 2 (Nueva pregunta técnica para balance visual y auditoría de Lemon) */}
+            {/* FAQ 2 */}
             <details className="group py-4 border-t border-[#e5e7eb] [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
@@ -307,7 +308,6 @@ export default function HomePage() {
 
       {/* FOOTER */}
       <footer className="w-full max-w-[700px] border-t border-[#e5e7eb] py-8 flex flex-col items-center gap-4">
-        {/* Enlaces con text-[11px] y sin tracking extendido */}
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] font-bold uppercase text-[#6b7280]">
           <Link href="/terms" className="hover:text-[#000f37] transition-colors duration-200 normal-case">
             {lang === 'es' ? "Términos de Servicio" : "Terms of Service"}
