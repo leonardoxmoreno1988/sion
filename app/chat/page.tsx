@@ -160,15 +160,15 @@ export default function PatmosChat() {
               ]);
             } else {
               setIsPremium(false);
-              setHasCredits(currentHistory.length < 15);
+              setHasCredits(currentHistory.length < 3);
             }
           } else {
             setIsPremium(false);
-            setHasCredits(currentHistory.length < 15);
+            setHasCredits(currentHistory.length < 3);
           }
         } catch (subErr) {
           console.error("Error checking subscription tier:", subErr);
-          setHasCredits(currentHistory.length < 15);
+          setHasCredits(currentHistory.length < 3);
         }
       }
 
@@ -209,7 +209,7 @@ export default function PatmosChat() {
           setHasCredits(true);
           setSubscriptionStatus('active');
         } else if (!isPremium && subscriptionStatus !== 'past_due' && subscriptionStatus !== 'paused') {
-          setHasCredits(data.length < 15);
+          setHasCredits(data.length < 3);
         }
         
         if (data.length > 0 && !activeSessionId) {

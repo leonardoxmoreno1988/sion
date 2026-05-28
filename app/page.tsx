@@ -136,7 +136,7 @@ export default function HomePage() {
         </div>
 
         <p className="text-sm text-gray-500 mt-4">
-          {lang === 'es' ? "Uso básico: 3 consultas por día • Patrocinio: Ilimitado por $7/mes" : "Basic access: 15 queries per day • Supporter Tier: Unlimited for $7/month"}
+          {lang === 'es' ? "Uso básico: 3 consultas por día • Patrocinio: Ilimitado por $7/mes" : "Basic access: 3 queries per day • Supporter Tier: Unlimited for $7/month"}
         </p>
 
         {/* Imagen */}
@@ -208,7 +208,7 @@ export default function HomePage() {
                   {lang === 'es' ? "Perfecto para indexación y análisis diario." : "Perfect for testing and daily analysis."}
                 </p>
                 <ul className="mt-8 space-y-3 text-sm">
-                  <li className="flex items-center gap-2">✓ {lang === 'es' ? "15 consultas de texto por día" : "15 text queries per day"}</li>
+                  <li className="flex items-center gap-2">✓ {lang === 'es' ? "3 consultas de texto por día" : "3 text queries per day"}</li>
                   <li className="flex items-center gap-2">✓ {lang === 'es' ? "Estructura completa KJV" : "Full KJV structure mappings"}</li>
                   <li className="flex items-center gap-2">✓ {lang === 'es' ? "Filtrado pretribulacional" : "Pre-trib filters"}</li>
                 </ul>
