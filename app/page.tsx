@@ -292,13 +292,13 @@ export default function HomePage() {
       {/* FOOTER */}
       <footer className="w-full max-w-[700px] border-t border-[#e5e7eb] py-8 flex flex-col items-center gap-4">
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-[#6b7280]">
-          <Link href="/terms" className="hover:text-[#000f37] transition-colors duration-200">
+          <Link href="/terms" className="hover:text-[#000f37] transition-colors duration-200 normal-case">
             {lang === 'es' ? "Términos de Servicio" : "Terms of Service"}
           </Link>
-          <Link href="/privacy" className="hover:text-[#000f37] transition-colors duration-200">
+          <Link href="/privacy" className="hover:text-[#000f37] transition-colors duration-200 normal-case">
             {lang === 'es' ? "Política de Privacidad" : "Privacy Policy"}
           </Link>
-          <Link href="/refund" className="hover:text-[#000f37] transition-colors duration-200">
+          <Link href="/refund" className="hover:text-[#000f37] transition-colors duration-200 normal-case">
             {lang === 'es' ? "Reembolsos y Cancelación" : "Refund Policy"}
           </Link>
         </div>
