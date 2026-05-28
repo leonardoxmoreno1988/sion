@@ -18,10 +18,6 @@ export default function HomePage() {
 
   // 🧙‍♂️ MÉTODO MAGO DE OZ: Tu botón abre la suscripción y te lleva a la pantalla de espera
   const handleCheckout = () => {
-    /* CONSEGUIR ESTA URL EN TU PANEL DE PAYPAL:
-       En la lista de tus suscripciones/planes en PayPal, dale clic a tu plan 'P-2G8977490J925452WNIL7QAA'
-       y busca la opción "Copy Link" o "Share URL". Te dará un enlace directo de PayPal.
-    */
     const PAYPAL_DIRECT_URL = `https://www.paypal.com/billing/plans/sub/P-2G8977490J925452WNIL7QAA`; 
 
     // Abre la pasarela de PayPal segura en una pestaña nueva
@@ -123,7 +119,7 @@ export default function HomePage() {
 
         <p className="text-lg leading-relaxed text-[#374151] mt-6 max-w-2xl">
           {lang === 'es' ? (
-            <>Software diseñado para el escrutinio literal, dispensacional y pretribulacional de las Escrituras. Sin traducciones modernas ni interpretaciones externas.</>
+            <>Software diseñado para el escrutniv literal, dispensacional y pretribulacional de las Escrituras. Sin traducciones modernas ni interpretaciones externas.</>
           ) : (
             <>Software engine designed for the literal, dispensational, and pre-tribulational study of Scripture.<br/>No modern translations. Pure manuscript analysis.</>
           )}
@@ -224,7 +220,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Pro Plan - ✨ BOTÓN ORIGINAL RESTAURADO */}
+            {/* Pro Plan */}
             <div className="bg-white border-2 border-[#000f37] p-8 rounded-xl relative flex flex-col justify-between">
               <div className="absolute -top-3 right-6 bg-[#2d65f6] text-white text-xs px-4 py-1 rounded-full font-medium">
                 {lang === 'es' ? "RECOMENDADO" : "RECOMMENDED"}
@@ -267,7 +263,8 @@ export default function HomePage() {
           </h3>
 
           <div className="flex flex-col border-b border-[#e5e7eb]">
-            <details className="group py-4 [&_summary::-webkit-details-marker]:hidden">
+            {/* FAQ 1 */}
+            <details className="group py-4 border-t border-[#e5e7eb] [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
                   {lang === 'es' ? "¿Qué tipo de software es Patmos?" : "What kind of software is Patmos?"}
@@ -284,6 +281,25 @@ export default function HomePage() {
                 )}
               </p>
             </details>
+
+            {/* FAQ 2 (Nueva pregunta técnica para balance visual y auditoría de Lemon) */}
+            <details className="group py-4 border-t border-[#e5e7eb] [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
+                <h4 className="text-base font-semibold tracking-wide text-left">
+                  {lang === 'es' ? "¿Cómo se procesan e indexan los datos de las consultas?" : "How are query data requests processed and indexed?"}
+                </h4>
+                <svg className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+              </summary>
+              <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+                {lang === 'es' ? (
+                  "Todas las operaciones computacionales se ejecutan del lado del servidor a través de nuestra arquitectura de base de datos dedicada. El sistema realiza contrastes en tiempo real sobre esquemas de datos relacionales para entregar matrices analíticas sólidas de manera inmediata."
+                ) : (
+                  "All computational query operations are executed server-side via our isolated relational database structures. The system performs real-time cross-referencing over structured data schemas to deliver instant analytical insights reliably."
+                )}
+              </p>
+            </details>
           </div>
         </section>
 
@@ -291,7 +307,8 @@ export default function HomePage() {
 
       {/* FOOTER */}
       <footer className="w-full max-w-[700px] border-t border-[#e5e7eb] py-8 flex flex-col items-center gap-4">
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-[#6b7280]">
+        {/* Enlaces con text-[11px] y sin tracking extendido */}
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] font-bold uppercase text-[#6b7280]">
           <Link href="/terms" className="hover:text-[#000f37] transition-colors duration-200 normal-case">
             {lang === 'es' ? "Términos de Servicio" : "Terms of Service"}
           </Link>
@@ -304,7 +321,7 @@ export default function HomePage() {
         </div>
 
         <p className="text-[10px] text-[#94a3b8] uppercase tracking-wider text-center">
-          © {new Date().getFullYear()} Patmos. {lang === 'es' ? "Todos los derechos reservados." : "All Rights Reserved."}
+          © {new Date().getFullYear()} Patmos Research. {lang === 'es' ? "Todos los derechos reservados." : "All Rights Reserved."}
         </p>
       </footer>
     </div>
