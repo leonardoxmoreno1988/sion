@@ -136,7 +136,7 @@ export default function HomePage() {
         </div>
 
         <p className="text-sm text-gray-500 mt-4">
-          {lang === 'es' ? "Uso básico: 15 consultas por día • Patrocinio: Ilimitado por $7/mes" : "Basic access: 15 queries per day • Supporter Tier: Unlimited for $7/month"}
+          {lang === 'es' ? "Uso básico: 3 consultas por día • Patrocinio: Ilimitado por $7/mes" : "Basic access: 15 queries per day • Supporter Tier: Unlimited for $7/month"}
         </p>
 
         {/* Imagen */}

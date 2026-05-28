@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 
           if (countError) throw countError;
 
-          if (count !== null && count >= 15) {
+          if (count !== null && count >= 3) {
             return new NextResponse('Inquiry Locked. Subscription required to expand the Manuscript pipeline.', { status: 402 });
           }
         }
