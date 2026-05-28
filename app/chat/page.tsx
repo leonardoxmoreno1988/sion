@@ -127,7 +127,7 @@ export default function PatmosChat() {
       }
 
       // 🛡️ COMPROBACIÓN DEL BYPASS DE ADMINISTRADOR Y BASE DE DATOS
-      if (emailSession === 'lenn.moreno@gmail.com') {
+      if (emailSession === 'leonardo@ritualypropaganda.com') {
         setIsPremium(true);
         setHasCredits(true);
         setSubscriptionStatus('active');
@@ -204,7 +204,7 @@ export default function PatmosChat() {
         const data = await res.json();
         setHistory(data);
         
-        if (userEmail === 'lenn.moreno@gmail.com') {
+        if (userEmail === 'leonardo@ritualypropaganda.com.com') {
           setIsPremium(true);
           setHasCredits(true);
           setSubscriptionStatus('active');
