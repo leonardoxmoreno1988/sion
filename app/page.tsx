@@ -304,7 +304,7 @@ export default function HomePage() {
         </div>
 
         <p className="text-[10px] text-[#94a3b8] uppercase tracking-wider text-center">
-          © {new Date().getFullYear()} Patmos Research. {lang === 'es' ? "Todos los derechos reservados." : "All Rights Reserved."}
+          © {new Date().getFullYear()} Patmos. {lang === 'es' ? "Todos los derechos reservados." : "All Rights Reserved."}
         </p>
       </footer>
     </div>
