@@ -149,12 +149,12 @@ export default function HomePage() {
         {/* BENEFITS SECTION */}
         <section className="mt-0 border-t border-[#e5e7eb] pt-12">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
-            {lang === 'es' ? "Creado Exclusivamente para Creyentes de la Biblia" : "Built Exclusively for Bible Believers"}
+            {lang === 'es' ? "Creado Exclusivamente para Creyentes de la Reina Valera 1865 y la KJV" : "Built Exclusively for Bible Believers"}
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
             <div>
-              <h4 className="font-semibold text-lg">{lang === 'es' ? "Solo la KJV" : "KJV Only"}</h4>
+              <h4 className="font-semibold text-lg">{lang === 'es' ? "Solo RV1865 Y KJV" : "KJV Only"}</h4>
               <p className="text-[#4b5563] mt-3 leading-relaxed">
                 {lang === 'es' 
                   ? "Cada consulta de datos se procesa directa y exclusivamente sobre la Versión Autorizada King James." 
@@ -178,7 +178,7 @@ export default function HomePage() {
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-lg">{lang === 'es' ? "Trazando Bien la Palabra" : "Rightly Dividing the Word"}</h4>
+              <h4 className="font-semibold text-lg">{lang === 'es' ? "Administrando Bien la Palabra" : "Rightly Dividing the Word"}</h4>
               <p className="text-[#4b5563] mt-3 leading-relaxed">
                 {lang === 'es' 
                   ? "Diseñado estructuralmente para sostener la distinción dispensacional entre Israel y la Iglesia." 
@@ -236,7 +236,7 @@ export default function HomePage() {
             
                 <p className="mt-4 text-sm leading-relaxed text-[#4b5563]">
                   {lang === 'es' 
-                    ? "Su apoyo ayuda a mantener a Patmos independiente y enfocado únicamente en herramientas de análisis de la KJV." 
+                    ? "Su apoyo ayuda a mantener a Patmos independiente y enfocado únicamente en herramientas de análisis de la Reina Valera." 
                     : "Your support helps keep Patmos independent and focused only on analytical KJV software tools."}
                 </p>
                 
@@ -276,7 +276,7 @@ export default function HomePage() {
               </summary>
               <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Es una plataforma de software de investigación teológica basada en datos estructurados que procesa, indexa y mapea patrones textuales dentro de la Santa Biblia Autorizada King James (Salmos 12:6-7)."
+                  "Es una plataforma de software de investigación teológica basada en datos estructurados que procesa, indexa y mapea patrones textuales dentro de la Biblia Reina Valera y la King James (Salmos 12:6-7)."
                 ) : (
                   "It is a data-driven theological research software platform that processes, indexes, and maps textual patterns strictly within the Authorized King James Holy Bible (Psalms 12:6-7)."
                 )}
