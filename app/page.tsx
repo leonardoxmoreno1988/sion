@@ -112,7 +112,7 @@ export default function HomePage() {
 
         <p className="text-2xl font-medium text-[#000f37] max-w-xl">
           {lang === 'es' ? (
-            <>Análisis indexado y preciso extraído exclusivamente de la <span className="font-semibold">Biblia</span>.</>
+            <>Análisis indexado y preciso extraído exclusivamente de la <span className="font-semibold">Reina Valera 1865 y la KJV</span>.</>
           ) : (
             <>Precise, cross-referenced insights drawn exclusively from the <span className="font-semibold">Authorized King James Version</span>.</>
           )}
@@ -149,7 +149,7 @@ export default function HomePage() {
         {/* BENEFITS SECTION */}
         <section className="mt-0 border-t border-[#e5e7eb] pt-12">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
-            {lang === 'es' ? "Creado Exclusivamente para Creyentes de la Reina Valera 1865 y la KJV" : "Built Exclusively for Bible Believers"}
+            {lang === 'es' ? "Creado para Creyentes de la Biblia" : "Built Exclusively for Bible Believers"}
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
@@ -157,7 +157,7 @@ export default function HomePage() {
               <h4 className="font-semibold text-lg">{lang === 'es' ? "Solo RV1865 Y KJV" : "KJV Only"}</h4>
               <p className="text-[#4b5563] mt-3 leading-relaxed">
                 {lang === 'es' 
-                  ? "Cada consulta de datos se procesa directa y exclusivamente sobre la Versión Autorizada King James." 
+                  ? "Cada consulta de datos se procesa directa y exclusivamente sobre la Versión King James y la Reina Valera 1865." 
                   : "Every data query maps directly and exclusively to the Authorized King James Version."}
               </p>
             </div>
