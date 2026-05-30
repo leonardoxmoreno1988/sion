@@ -228,7 +228,7 @@ export default function HomePage() {
               </div>
               
               <div>
-                <h4 className="text-xl font-semibold">{lang === 'es' ? "Patrocinador" : "Become a Supporter"}</h4>
+                <h4 className="text-xl font-semibold">{lang === 'es' ? "Apoya a Patmos" : "Support Patmos"}</h4>
                 <div className="mt-4 flex items-baseline">
                   <span className="text-5xl font-bold">$7</span>
                   <span className="ml-2 text-gray-500">{lang === 'es' ? "/ mes" : "/ month"}</span>
