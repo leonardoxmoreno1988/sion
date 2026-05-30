@@ -28,7 +28,7 @@ export default function PatmosChat() {
   const { t, lang, setLanguage } = useLanguage(); 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null); // 🕵️ Guardamos el ID de Supabase
+  const [userId, setUserId] = useState<string | null>(null); 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [history, setHistory] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -41,7 +41,7 @@ export default function PatmosChat() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   
-  // 🔒 ESTADOS: Control del Paywall del Mago de Oz y ciclo de vida de suscripción
+  // 🔒 ESTADOS: Control del Paywall sincronizado con estados HTTP
   const [hasCredits, setHasCredits] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
@@ -160,15 +160,16 @@ export default function PatmosChat() {
               ]);
             } else {
               setIsPremium(false);
-              setHasCredits(currentHistory.length < 3);
+              // Dejamos que la API en la primera consulta determine el conteo estricto del día UTC
+              setHasCredits(true); 
             }
           } else {
             setIsPremium(false);
-            setHasCredits(currentHistory.length < 3);
+            setHasCredits(true);
           }
         } catch (subErr) {
           console.error("Error checking subscription tier:", subErr);
-          setHasCredits(currentHistory.length < 3);
+          setHasCredits(true);
         }
       }
 
@@ -204,12 +205,10 @@ export default function PatmosChat() {
         const data = await res.json();
         setHistory(data);
         
-        if (userEmail === 'leonardo@ritualypropaganda.com.com') {
+        if (userEmail === 'leonardo@ritualypropaganda.com') {
           setIsPremium(true);
           setHasCredits(true);
           setSubscriptionStatus('active');
-        } else if (!isPremium && subscriptionStatus !== 'past_due' && subscriptionStatus !== 'paused') {
-          setHasCredits(data.length < 3);
         }
         
         if (data.length > 0 && !activeSessionId) {
@@ -221,19 +220,12 @@ export default function PatmosChat() {
     }
   };
 
-  // 🧙‍♂️ MANEJADOR DE COMPRA REFORMULADO PARA EL MAGO DE OZ (PayPal Recurrente Público)
   const handlePayPalCheckout = () => {
-    // 🔗 URL pública de checkout corregida para el cliente externo
     const PAYPAL_DIRECT_URL = "https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2G8977490J925452WNIL7QAA"; 
-
-    // Abre el cobro seguro en una pestaña nueva limpia
     window.open(PAYPAL_DIRECT_URL, '_blank');
-
-    // Redirige la ventana actual del chat a la pantalla premium de espera y sincronización
     window.location.href = '/checkout/success';
   };
 
-  // 📄 PORTAL DE FACTURACIÓN TEMPORAL (Mago de Oz)
   const handleOpenBillingPortal = (e: React.MouseEvent) => {
     e.preventDefault();
     alert(lang === 'es' 
@@ -350,6 +342,7 @@ export default function PatmosChat() {
     }, 500);
   };
 
+  // 🛠️ EDICIÓN CRÍTICA: MANEJADOR DE ENVÍO INTEGRADO AL SEGURO DE ESTADOS 429 JSON
   const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customInput.trim() || isLoading || !hasCredits) return;
@@ -379,8 +372,21 @@ export default function PatmosChat() {
         body: JSON.stringify({ messages: updatedMessages.map(m => ({ role: m.role, content: m.content })) })
       });
 
+      // 🛡️ INTERCEPTOR DEL PAYWALL ASÍNCRONO BLINDADO
+      if (response.status === 429) {
+        const errorData = await response.json();
+        if (errorData.error === 'LIMIT_REACHED') {
+          setHasCredits(false); // Dispara instantáneamente el Banner de la captura de pantalla
+          
+          // Removemos el mensaje vacío provisional del bot para limpiar la interfaz del chat
+          setMessages((prev) => prev.filter(m => m.id !== assistantMessageId));
+          setIsLoading(false);
+          return;
+        }
+      }
+
       if (!response.ok || !response.body) {
-        throw new Error("Failed to contact the Dogmatic Arsenal.");
+        throw new Error("Failed to contact the Dogmatic Engine.");
       }
 
       const reader = response.body.getReader();
@@ -411,7 +417,7 @@ export default function PatmosChat() {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMessageId 
-            ? { ...m, content: lang === 'es' ? "Aconteció un error en el flujo de transmisión del Arsenal." : "An error occurred in the Arsenal transmission stream pipeline." } 
+            ? { ...m, content: lang === 'es' ? "Aconteció un error en el flujo de transmisión del motor de investigación." : "An error occurred in the research engine transmission stream pipeline." } 
             : m
         )
       );
@@ -458,8 +464,7 @@ export default function PatmosChat() {
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '15px 6px' : '15px 10px', position: 'relative' }}>
-          {/* Cambiado 'justifycontent' por 'justifyContent' */}
-<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px', marginBottom: '12px', position: 'relative' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px', marginBottom: '12px', position: 'relative' }}>
             <p style={{ fontSize: isMobile ? '9px' : '11px', textTransform: 'uppercase', color: theme.textMuted, letterSpacing: '1.5px', paddingLeft: '10px', margin: 0, fontFamily: 'serif' }}>
               {lang === 'es' ? "Registros Históricos" : "Historical Records"}
             </p>
@@ -678,7 +683,6 @@ export default function PatmosChat() {
               )}
             </button>
 
-            {/* 🌐 DROPDOWN SELECTOR DE IDIOMA CON ICONO MAPAMUNDI */}
             <div style={{ 
               display: 'inline-flex', 
               alignItems: 'center', 
@@ -720,7 +724,6 @@ export default function PatmosChat() {
               </select>
             </div>
 
-            {/* 📄 PORTAL DE GESTIÓN (Mago de Oz) */}
             {(isPremium || subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') && (
               <button 
                 onClick={handleOpenBillingPortal}
@@ -745,7 +748,6 @@ export default function PatmosChat() {
               </button>
             )}
 
-            {/* 🚪 SALIR */}
             <button 
               onClick={handleLogout}
               style={{
@@ -951,7 +953,6 @@ export default function PatmosChat() {
                 </p>
               </div>
               
-              {/* 💳 Botón con tu estética limpia conectado al link directo público de PayPal */}
               <button 
                 onClick={handlePayPalCheckout}
                 style={{
