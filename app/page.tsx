@@ -224,7 +224,7 @@ export default function HomePage() {
             {/* Pro Plan */}
             <div className="bg-white border-2 border-[#000f37] p-8 rounded-xl relative flex flex-col justify-between">
               <div className="absolute -top-3 right-6 bg-[#2d65f6] text-white text-xs px-4 py-1 rounded-full font-medium">
-                {lang === 'es' ? "RECOMENDADO" : "RECOMMENDED"}
+                {lang === 'es' ? "PLAN PRO" : "PRO PLAN"}
               </div>
               
               <div>
