@@ -372,24 +372,26 @@ export default function PatmosChat() {
         body: JSON.stringify({ messages: updatedMessages.map(m => ({ role: m.role, content: m.content })) })
       });
 
-      // 🛡️ INTERCEPTOR DEL PAYWALL ASÍNCRONO BLINDADO
+      // 🛡️ INTERCEPTOR SIMPLIFICADO E INDESTRUCTIBLE: Si es 429, es bloqueo seguro.
       if (response.status === 429) {
-        const errorData = await response.json();
-        if (errorData.error === 'LIMIT_REACHED') {
-          setHasCredits(false); // Dispara instantáneamente el Banner de la captura de pantalla
-          
-          // Removemos el mensaje vacío provisional del bot para limpiar la interfaz del chat
-          setMessages((prev) => prev.filter(m => m.id !== assistantMessageId));
-          setIsLoading(false);
-          return;
-        }
+        setIsLoading(false); // Apaga el indicador de carga primero
+        setHasCredits(false); // Levanta el banner de PayPal instantáneamente
+        
+        // Limpiamos la lista de mensajes eliminando de forma definitiva la burbuja del bot
+        // y la última pregunta del usuario si prefieres que la pantalla quede limpia, 
+        // o al menos garantizamos que la burbuja provisional del bot no exista.
+        setMessages((prev) => prev.filter(m => m.id !== assistantMessageId)); 
+        
+        return; // Detiene la ejecución en seco de forma segura
       }
 
+      // Si no es un estado exitoso (200) y tampoco es el bloqueo controlado (429)
       if (!response.ok || !response.body) {
         throw new Error("Failed to contact the Dogmatic Engine.");
       }
 
       const reader = response.body.getReader();
+      // ... (el resto de tu bucle while done de streaming sigue exactamente igual abajo)
       const decoder = new TextDecoder();
       let done = false;
       let accumulatedText = "";
