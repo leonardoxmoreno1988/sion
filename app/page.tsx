@@ -209,7 +209,7 @@ export default function HomePage() {
                 </p>
                 <ul className="mt-8 space-y-3 text-sm">
                   <li className="flex items-center gap-2">✓ {lang === 'es' ? "3 consultas de texto por día" : "3 text queries per day"}</li>
-                  <li className="flex items-center gap-2">✓ {lang === 'es' ? "Estructura completa KJV" : "Full KJV structure mappings"}</li>
+                  <li className="flex items-center gap-2">✓ {lang === 'es' ? "Estructura completa RV1865+KJV" : "Full KJV structure mappings"}</li>
                   <li className="flex items-center gap-2">✓ {lang === 'es' ? "Filtrado pretribulacional" : "Pre-trib filters"}</li>
                 </ul>
               </div>
