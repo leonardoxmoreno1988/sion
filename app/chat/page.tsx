@@ -997,7 +997,7 @@ export default function PatmosChat() {
                   ? (lang === 'es' ? "Escudriñad las escrituras..." : "Search the scriptures...") 
                   : ((subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') 
                       ? (lang === 'es' ? "CONSULTA BLOQUEADA — FACTURA VENCIDA" : "INQUIRY LOCKED — PAST DUE INVOICE") 
-                      : (lang === 'es' ? "CONSULTA BLOQUEADA — ADQUIERA EL NIVEL WATCHMAN" : "INQUIRY LOCKED — UPGRADE TO THE WATCHMAN TIER"))
+                      : (lang === 'es' ? "PREGUNTAS AGOTADAS — ADQUIERA EL PLAN PRO" : "QUESTIONS ARE CLOSED — UPGRADE TO THE SUPPORTER PRO PLAN"))
               }
               value={customInput}
               onChange={(e) => setCustomInput(e.target.value)} 
