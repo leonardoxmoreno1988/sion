@@ -1024,7 +1024,7 @@ export default function PatmosChat() {
             </button>
           </form>
           <p style={{ textAlign: 'center', fontSize: '11px', color: theme.textMuted, marginTop: '15px', textTransform: 'uppercase', letterSpacing: '1.5px', fontFamily: 'serif' }}>
-            {lang === 'es' ? "Basado en Trazar Bien la Palabra de Verdad" : "Based on Rightly Dividing the Word of Truth"}
+            {lang === 'es' ? "Basado en Administrar Bien la Palabra de Verdad" : "Based on Rightly Dividing the Word of Truth"}
           </p>
         </div>
       </main>
