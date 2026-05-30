@@ -160,7 +160,6 @@ export default function PatmosChat() {
               ]);
             } else {
               setIsPremium(false);
-              // Dejamos que la API en la primera consulta determine el conteo estricto del día UTC
               setHasCredits(true); 
             }
           } else {
@@ -342,7 +341,7 @@ export default function PatmosChat() {
     }, 500);
   };
 
-  // 🛠️ EDICIÓN CRÍTICA: MANEJADOR DE ENVÍO INTEGRADO AL SEGURO DE ESTADOS 429 JSON
+  // 🛠️ MANEJADOR DE ENVÍO INTEGRADO AL SEGURO DE ESTADOS 429 JSON
   const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customInput.trim() || isLoading || !hasCredits) return;
@@ -365,8 +364,11 @@ export default function PatmosChat() {
       { id: assistantMessageId, role: 'assistant', content: "" }
     ]);
 
+    // Declaramos la variable de respuesta fuera para darle alcance al catch de TypeScript
+    let response: Response | undefined = undefined;
+
     try {
-      const response = await fetch('/api/chat', {
+      response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: updatedMessages.map(m => ({ role: m.role, content: m.content })) })
@@ -374,24 +376,17 @@ export default function PatmosChat() {
 
       // 🛡️ INTERCEPTOR SIMPLIFICADO E INDESTRUCTIBLE: Si es 429, es bloqueo seguro.
       if (response.status === 429) {
-        setIsLoading(false); // Apaga el indicador de carga primero
-        setHasCredits(false); // Levanta el banner de PayPal instantáneamente
-        
-        // Limpiamos la lista de mensajes eliminando de forma definitiva la burbuja del bot
-        // y la última pregunta del usuario si prefieres que la pantalla quede limpia, 
-        // o al menos garantizamos que la burbuja provisional del bot no exista.
+        setIsLoading(false); 
+        setHasCredits(false); 
         setMessages((prev) => prev.filter(m => m.id !== assistantMessageId)); 
-        
-        return; // Detiene la ejecución en seco de forma segura
+        return; 
       }
 
-      // Si no es un estado exitoso (200) y tampoco es el bloqueo controlado (429)
       if (!response.ok || !response.body) {
         throw new Error("Failed to contact the Dogmatic Engine.");
       }
 
       const reader = response.body.getReader();
-      // ... (el resto de tu bucle while done de streaming sigue exactamente igual abajo)
       const decoder = new TextDecoder();
       let done = false;
       let accumulatedText = "";
@@ -416,6 +411,12 @@ export default function PatmosChat() {
 
     } catch (error) {
       console.error("Patmos Pipeline Native Error:", error);
+      
+      // Escudo protector: si es un error provocado por el bloqueo 429, abortamos el catch en seco
+      if (response && response.status === 429) {
+        return;
+      }
+
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMessageId 
@@ -423,7 +424,7 @@ export default function PatmosChat() {
             : m
         )
       );
-    } finally {
+    } layout: {
       setIsLoading(false);
     }
   };
