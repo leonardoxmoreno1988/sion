@@ -1,7 +1,7 @@
 // app/login/page.tsx
 'use client';
 
-import { useState, Suspense } from 'react'; 
+import { useState, Suspense, useEffect } from 'react'; 
 import { createBrowserClient } from '@supabase/ssr'; 
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -9,6 +9,49 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 
 function LoginForm() {
+  // 🌐 DETECCIÓN DE IDIOMA: Por defecto español para proteger a tus suscriptores mayores
+  const [lang, setLang] = useState<'es' | 'en'>('es');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && navigator.language && navigator.language.startsWith('en')) {
+      setLang('en');
+    }
+  }, []);
+
+  // DICCIONARIO BILINGÜE COMPLETO
+  const t = {
+    es: {
+      signIn: 'INGRESAR',
+      signUp: 'CREAR CUENTA',
+      emailPlaceholder: 'CORREO ELECTRÓNICO',
+      passwordPlaceholder: 'CONTRASEÑA',
+      emptyFields: 'Por favor ingresa tanto el correo como la contraseña.',
+      processing: 'PROCESANDO...',
+      connecting: 'CONECTANDO...',
+      or: 'O',
+      continueGoogle: 'CONTINUAR CON GOOGLE',
+      hasAccount: '¿Ya tienes una cuenta?',
+      noAccount: '¿No tienes una cuenta?',
+      checkEmail: 'Revisa tu correo electrónico para confirmar tu registro.',
+      errorPrefix: 'Error: '
+    },
+    en: {
+      signIn: 'SIGN IN',
+      signUp: 'SIGN UP',
+      emailPlaceholder: 'EMAIL ADDRESS',
+      passwordPlaceholder: 'PASSWORD',
+      emptyFields: 'Please enter both email and password.',
+      processing: 'PROCESSING...',
+      connecting: 'CONNECTING...',
+      or: 'OR',
+      continueGoogle: 'CONTINUAR CON GOOGLE', // Mantenido en mayúsculas estilo marca u opcional 'CONTINUE WITH GOOGLE'
+      hasAccount: 'Already have an account?',
+      noAccount: "Don't have an account?",
+      checkEmail: 'Check your email to confirm the registry.',
+      errorPrefix: 'Error: '
+    }
+  };
+
   // 🔄 ESTADO DINÁMICO: false = Modo Sign In (Default) | true = Modo Sign Up
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -29,7 +72,7 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setMessage("Please enter both email and password.");
+      setMessage(t[lang].emptyFields);
       return;
     }
 
@@ -44,16 +87,26 @@ function LoginForm() {
         options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${nextRoute}` },
       });
       if (error) {
-        setMessage(`Error: ${error.message}`);
+        // Traducción amigable de los errores comunes de Supabase para los mayores
+        let errorMsg = error.message;
+        if (lang === 'es') {
+          if (errorMsg.includes('User already registered')) errorMsg = 'Este correo ya está registrado. Intenta ingresar en su lugar.';
+          if (errorMsg.includes('Password should be at least')) errorMsg = 'La contraseña debe tener al menos 6 caracteres.';
+        }
+        setMessage(`${t[lang].errorPrefix}${errorMsg}`);
       } else {
-        setMessage('Check your email to confirm the registry.');
+        setMessage(t[lang].checkEmail);
       }
       setLoading(false);
     } else {
       // Flujo dedicado de Autenticación (Sign In)
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        setMessage(`Error: ${error.message}`);
+        let errorMsg = error.message;
+        if (lang === 'es') {
+          if (errorMsg.includes('Invalid login credentials')) errorMsg = 'Correo o contraseña incorrectos. Verifica tus datos.';
+        }
+        setMessage(`${t[lang].errorPrefix}${errorMsg}`);
         setLoading(false);
       } else {
         router.push(nextRoute); 
@@ -86,10 +139,10 @@ function LoginForm() {
 
   return (
     <div>
-      {/* 🏛️ CORRECCIÓN: Título dinámico alineado a la izquierda (text-left) */}
+      {/* 🏛️ CORRECCIÓN: Título dinámico bilingüe alineado a la izquierda */}
       <div className="text-left mt-6 px-1">
-        <h2 className="text-xl font-bold tracking-wide text-[#000f37]">
-          {isSignUp ? 'Sign Up' : 'Sign In'}
+        <h2 className="text-xl font-bold tracking-wide text-[#000f37] uppercase">
+          {isSignUp ? t[lang].signUp : t[lang].signIn}
         </h2>
       </div>
 
@@ -98,7 +151,7 @@ function LoginForm() {
           <div>
             <input
               type="email"
-              placeholder="EMAIL ADDRESS"
+              placeholder={t[lang].emailPlaceholder}
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -108,7 +161,7 @@ function LoginForm() {
           <div>
             <input
               type="password"
-              placeholder="PASSWORD"
+              placeholder={t[lang].passwordPlaceholder}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -124,22 +177,22 @@ function LoginForm() {
         )}
 
         <div className="flex flex-col gap-4 pt-2">
-          {/* 🔘 CORRECCIÓN: Botón Principal con ratio corner a 6px (rounded-[6px]) */}
+          {/* 🔘 CORRECCIÓN: Botón Principal con ratio corner a 6px */}
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-[#000f37] py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white rounded-[6px] transition-all hover:bg-[#000f37]/90 disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            {loading ? 'PROCESSING...' : (isSignUp ? 'SIGN UP' : 'SIGN IN')}
+            {loading ? t[lang].processing : (isSignUp ? t[lang].signUp : t[lang].signIn)}
           </button>
 
           <div className="flex items-center my-1">
             <div className="flex-1 h-[1px] bg-[#000f37]/10" />
-            <span className="px-3 text-[9px] text-[#000f37]/60 tracking-widest font-bold uppercase">OR</span>
+            <span className="px-3 text-[9px] text-[#000f37]/60 tracking-widest font-bold uppercase">{t[lang].or}</span>
             <div className="flex-1 h-[1px] bg-[#000f37]/10" />
           </div>
 
-          {/* 🔘 CORRECCIÓN: Botón Google con ratio corner a 6px (rounded-[6px]) */}
+          {/* 🔘 CORRECCIÓN: Botón Google con ratio corner a 6px */}
           <button
             type="button"
             onClick={handleGoogleLogin}
@@ -152,31 +205,31 @@ function LoginForm() {
               <path fill="#FBBC05" d="M5.32 14.24A7.16 7.16 0 0 1 5 12c0-.79.13-1.57.32-2.34V6.51H1.21A11.94 11.94 0 0 0 0 12c0 1.92.45 3.74 1.21 5.39l4.11-3.15z"/>
               <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.18 2.12 1.21 6.51l4.11 3.15c.94-2.85 3.57-4.91 6.68-4.91z"/>
             </svg>
-            {loading ? 'CONNECTING...' : 'CONTINUE WITH GOOGLE'}
+            {loading ? t[lang].connecting : (lang === 'en' ? 'CONTINUE WITH GOOGLE' : 'CONTINUAR CON GOOGLE')}
           </button>
           
-          {/* ENLACES DE CONMUTACIÓN */}
+          {/* ENLACES DE CONMUTACIÓN BILINGÜES */}
           <div className="text-center mt-3">
             {isSignUp ? (
               <p className="text-sm text-gray-400 font-medium tracking-wide">
-                Already have an account?{' '}
+                {t[lang].hasAccount}{' '}
                 <button
                   type="button"
                   onClick={toggleAuthMode}
-                  className="text-[#000f37] font-bold underline hover:no-underline bg-transparent border-none p-0 outline-none cursor-pointer ms-1"
+                  className="text-[#000f37] font-bold underline hover:no-underline bg-transparent border-none p-0 outline-none cursor-pointer ms-1 uppercase text-xs"
                 >
-                  Sign in.
+                  {lang === 'es' ? 'Ingresar.' : 'Sign in.'}
                 </button>
               </p>
             ) : (
               <p className="text-sm text-gray-400 font-medium tracking-wide">
-                Don't have an account?{' '}
+                {t[lang].noAccount}{' '}
                 <button
                   type="button"
                   onClick={toggleAuthMode}
-                  className="text-[#000f37] font-bold underline hover:no-underline bg-transparent border-none p-0 outline-none cursor-pointer ms-1"
+                  className="text-[#000f37] font-bold underline hover:no-underline bg-transparent border-none p-0 outline-none cursor-pointer ms-1 uppercase text-xs"
                 >
-                  Sign up.
+                  {lang === 'es' ? 'Registrarse.' : 'Sign up.'}
                 </button>
               </p>
             )}
