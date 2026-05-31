@@ -45,16 +45,17 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // 2. Control de Seguridad (Paywall Guard con doble blindaje para Administrador)
+    // 2. Control de Seguridad (Paywall Guard con reinicio automático diario UTC y pre-bloqueo)
     let isPremiumUser = false;
 
     // 🚀 COMPUERTA DE ADMINISTRADOR BLINDADA:
-    // Al evaluar directamente sobre la raíz de 'user', evitamos que consultas de red tardías pisen el estado.
     if (user.email === 'leonardo@ritualypropaganda.com') {
       isPremiumUser = true;
     }
 
-    // Solo si NO eres el administrador, procedemos a realizar las consultas restrictivas a Supabase
+    // Variable para rastrear el ID del registro creado en el pre-bloqueo preventivo
+    let preInsertedHistoryId: string | null = null;
+
     if (!isPremiumUser) {
       try {
         const { data: subscription } = await supabase
@@ -63,19 +64,48 @@ export async function POST(req: Request) {
           .eq('user_id', user.id)
           .maybeSingle();
 
-        // 🔥 SOLUCIÓN TYPESCRIPT: Forzamos evaluación booleana estricta (true/false) para evitar fugas de tipo null
+        // Forzamos evaluación booleana estricta para evitar fugas de tipo null
         isPremiumUser = !!subscription && (subscription.status === 'active' || subscription.status === 'trialing');
 
         if (!isPremiumUser) {
+          // ⏰ CÁLCULO ESTRICTO DE LA MEDIANOCHE UTC (Para el reinicio automático cada 24 horas)
+          const inicioDiaUTC = new Date();
+          inicioDiaUTC.setUTCHours(0, 0, 0, 0); // Forzamos las 00:00:00 del día actual en tiempo universal
+
+          // Contamos ÚNICAMENTE las consultas hechas desde que empezó el día de hoy en formato UTC
           const { count, error: countError } = await supabase
             .from('chat_history')
             .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id);
+            .eq('user_id', user.id)
+            .gte('created_at', inicioDiaUTC.toISOString());
 
           if (countError) throw countError;
 
+          // 🛡️ CORRECCIÓN DE UMBRAL:
+          // Si el conteo es igual o mayor a 3, significa que ya agostó sus 3 cartuchos diarios oficiales.
           if (count !== null && count >= 3) {
-            return new NextResponse('Inquiry Locked. Subscription required to expand the Manuscript pipeline.', { status: 402 });
+            return NextResponse.json(
+              { error: 'LIMIT_REACHED', message: 'Has alcanzado tus 3 consultas gratuitas de hoy. Regresa mañana o suscríbete para continuar con la investigación.' },
+              { status: 429 }
+            );
+          }
+
+          // 🛡️ PRE-BLOQUEO PREVENTIVO: Insertamos la fila ANTES de llamar a OpenAI
+          // Esto congela los créditos del usuario al instante y destruye el fraude de abrir pestañas concurrentes.
+          const { data: insertedRow, error: insertError } = await supabase
+            .from('chat_history')
+            .insert({
+              user_id: user.id,
+              user_query: lastMessage,
+              bot_response: '[Procesando consulta...]',
+              created_at: new Date().toISOString()
+            })
+            .select('id')
+            .single();
+
+          if (insertError) throw insertError;
+          if (insertedRow) {
+            preInsertedHistoryId = insertedRow.id;
           }
         }
       } catch (gateError) {
@@ -156,7 +186,7 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
     // Inyectamos el System Prompt como primer message estructurado para asegurar dominancia absoluta
     openaiMessages.unshift({ role: 'system', content: PATMOS_SYSTEM_PROMPT.trim() });
 
-    // 6. 🚀 PROCESAMIENTO DEL STREAM ESTABLE CON AUTO-GUARDADO SEGURO
+    // 6. 🚀 PROCESAMIENTO DEL STREAM ESTABLE CON ACTUALIZACIÓN DE HISTORIAL DE FORMA SEGURA
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
@@ -185,17 +215,29 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
           const cleanSavedResponse = completeBotResponse.trim();
 
           if (cleanSavedResponse) {
-            supabase
-              .from('chat_history')
-              .insert({
-                user_id: user.id,
-                user_query: lastMessage,
-                bot_response: cleanSavedResponse,
-                created_at: new Date().toISOString()
-              })
-              .then(({ error }) => {
-                if (error) console.error('⚠️ Error al auto-guardar historial:', error);
-              });
+            if (isPremiumUser || !preInsertedHistoryId) {
+              // Si es usuario de pago o el administrador, hacemos un insert directo regular al final
+              supabase
+                .from('chat_history')
+                .insert({
+                  user_id: user.id,
+                  user_query: lastMessage,
+                  bot_response: cleanSavedResponse,
+                  created_at: new Date().toISOString()
+                })
+                .then(({ error }) => {
+                  if (error) console.error('⚠️ Error al auto-guardar historial premium:', error);
+                });
+            } else {
+              // Si es usuario gratuito, actualizamos (UPDATE) la fila de pre-bloqueo con la respuesta real de la IA
+              supabase
+                .from('chat_history')
+                .update({ bot_response: cleanSavedResponse })
+                .eq('id', preInsertedHistoryId)
+                .then(({ error }) => {
+                  if (error) console.error('⚠️ Error al actualizar el registro del pre-bloqueo:', error);
+                });
+            }
           }
 
           controller.close();
@@ -203,7 +245,7 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
           console.error('🚨 ERROR EN EL MANIPULADOR DEL STREAM DE OPENAI:', streamError);
           
           const rawErrorString = JSON.stringify(streamError, null, 2) || streamError?.message || 'Unknown OpenAI Exception';
-          const errorMessage = `\n\n*[Error del Arsenal]*\nStatus Code: ${streamError?.status}\nRaw Payload: ${rawErrorString}`;
+          const errorMessage = `\n\n*[Error del Motor]*\nStatus Code: ${streamError?.status}\nRaw Payload: ${rawErrorString}`;
           
           controller.enqueue(encoder.encode(errorMessage));
           controller.close();
@@ -220,6 +262,6 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
 
   } catch (error: any) {
     console.error('❌ Patmos Research API Route Critical Crash (OpenAI Engine):', error);
-    return new NextResponse('Internal Error within the OpenAI Dogmatic Arsenal.', { status: 500 });
+    return new NextResponse('Internal Error within the OpenAI Dogmatic Engine.', { status: 500 });
   }
 }
