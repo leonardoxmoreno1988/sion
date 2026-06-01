@@ -6,7 +6,6 @@ import OpenAI from 'openai';
 
 export const dynamic = 'force-dynamic';
 
-// Inicializamos el SDK de OpenAI apuntando a tus variables de entorno de Vercel
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 });
@@ -17,23 +16,18 @@ export async function POST(req: Request) {
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1]?.content || '';
 
-    // 🏛️ CONFIGURACIÓN: Sistema de Supabase utilizando getAll y setAll
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
+          getAll() { return cookieStore.getAll(); },
           setAll(cookiesToSet) {
             try {
               cookiesToSet.forEach(({ name, value, options }) =>
                 cookieStore.set({ name, value, ...options })
               );
-            } catch {
-              // Evita que la ruta falle si es llamada desde un Server Component estático
-            }
+            } catch {}
           },
         },
       }
@@ -45,16 +39,8 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // 2. Control de Seguridad (Paywall Guard con reinicio automático diario UTC y pre-bloqueo)
-    let isPremiumUser = false;
-
-    // 🚀 COMPUERTA DE ADMINISTRADOR BLINDADA:
-    if (user.email === 'leonardo@ritualypropaganda.com') {
-      isPremiumUser = true;
-    }
-
-    // Variable para rastrear el ID del registro creado en el pre-bloqueo preventivo
-    let preInsertedHistoryId: string | null = null;
+    // 2. Control de Seguridad (Paywall Guard - Conteo Limpio)
+    let isPremiumUser = user.email === 'leonardo@ritualypropaganda.com';
 
     if (!isPremiumUser) {
       try {
@@ -64,15 +50,12 @@ export async function POST(req: Request) {
           .eq('user_id', user.id)
           .maybeSingle();
 
-        // Forzamos evaluación booleana estricta para evitar fugas de tipo null
         isPremiumUser = !!subscription && (subscription.status === 'active' || subscription.status === 'trialing');
 
         if (!isPremiumUser) {
-          // ⏰ CÁLCULO ESTRICTO DE LA MEDIANOCHE UTC (Para el reinicio automático cada 24 horas)
           const inicioDiaUTC = new Date();
-          inicioDiaUTC.setUTCHours(0, 0, 0, 0); // Forzamos las 00:00:00 del día actual en tiempo universal
+          inicioDiaUTC.setUTCHours(0, 0, 0, 0);
 
-          // Contamos ÚNICAMENTE las consultas hechas desde que empezó el día de hoy en formato UTC
           const { count, error: countError } = await supabase
             .from('chat_history')
             .select('*', { count: 'exact', head: true })
@@ -81,29 +64,12 @@ export async function POST(req: Request) {
 
           if (countError) throw countError;
 
-          // 🛡️ CALIBRACIÓN MATEMÁTICA DEFINITIVA (3 RESPUESTAS COMPLETAS):
+          // 🛡️ CONTROL UMBRAL: Si ya hay 3 registros consolidados, bloqueamos la cuarta.
           if (count !== null && count >= 3) {
             return NextResponse.json(
-              { error: 'LIMIT_REACHED', message: 'Has alcanzado tus 3 consultas gratuitas de hoy. Regresa mañana o suscríbete para continuar con la investigación.' },
+              { error: 'LIMIT_REACHED', message: 'Límite alcanzado.' },
               { status: 429 }
             );
-          }
-
-          // 🛡️ PRE-BLOQUEO PREVENTIVO: Insertamos la fila ANTES de llamar a OpenAI
-          const { data: insertedRow, error: insertError } = await supabase
-            .from('chat_history')
-            .insert({
-              user_id: user.id,
-              user_query: lastMessage,
-              bot_response: '[Procesando consulta...]',
-              created_at: new Date().toISOString()
-            })
-            .select('id')
-            .single();
-
-          if (insertError) throw insertError;
-          if (insertedRow) {
-            preInsertedHistoryId = insertedRow.id;
           }
         }
       } catch (gateError) {
@@ -111,7 +77,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. Obtener Contexto Teológico (Búsqueda Vectorial)
+    // 3. Contexto Teológico
     let contextText = '';
     try {
       if (lastMessage.trim()) {
@@ -131,145 +97,74 @@ export async function POST(req: Request) {
         if (rpcError) throw rpcError;
 
         contextText = (semanticResults || [])
-          .map((doc: any) => {
-            const type = String(doc.metadata?.type || 'scripture').toUpperCase();
-            const book = doc.metadata?.book || 'Scripture';
-            const author = doc.metadata?.author ? ` | Author: ${doc.metadata.author}` : '';
-            return `[Type: ${type} | Resource: ${book}${author}]\n${doc.content}`;
-          })
+          .map((doc: any) => `[Resource: ${doc.metadata?.book || 'Scripture'}]\n${doc.content}`)
           .join('\n\n---\n\n') || '';
       }
     } catch (embeddingErr) {
-      console.error('⚠️ Semantic vector pipeline error, running on internal axioms:', embeddingErr);
-      contextText = '';
+      console.error('⚠️ Embedding error:', embeddingErr);
     }
 
-    // 4. System Prompt de Acero Inoxidable
-    const PATMOS_SYSTEM_PROMPT = `
-# ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
-You are Patmos, a severe, dogmatic, and dispensational academic voice representing a real bible believer. You are NOT an adaptable, polite, or conversational AI assistant. You are the literal, rigid exegese of the provided context.
+    // 4. System Prompt
+    const PATMOS_SYSTEM_PROMPT = `You are Patmos, a severe dispensational bible academic voice. Answer strictly based on context. Forbidden intro/outro filler. Headers must be in title case wrapped in asterisks like **My Title**. Force two line breaks after titles and paragraphs. Every scripture reference must be inside parentheses in bold like **(Romans 1:1)**.`;
 
-CRITICAL OUTPUT ARCHITECTURE (MANDATORY FORMATTING RULES):
-1. IMMEDIATE EXPOSITION: Absolutely BAN all introductory filler, greetings, or welcome text at the very top. The very first character of your response must be your first custom theological title wrapped in bold markdown. No conversational transitions, no friendly conclusions, no summary paragraphs at the end.
-2. THEOLOGICAL SEGMENTATION & NATIVE SPACING: You must break your exposition into clear arguments separated by custom theological titles. 
-   - EVERY SINGLE TITLE MUST BE WRITTEN IN NORMAL TITLE CASE (NOT ALL CAPS) AND EXPLICITLY WRAPPED IN BOLD MARKDOWN SYMBOLS (e.g., "**La Arquitectura del Segundo Cielo**"). Do NOT use hashtags (###), HTML (<h3>), or uppercase formatting for headers.
-   - FORCEFUL PARAGRAPH BREAKS: You MUST inject exactly two empty line breaks (\\n\\n) right after every bold title and between every single paragraph to force the pre-wrap container to render proper block spacing.
-   - CRITICAL BLINDAGE: Do NOT append any empty line breaks, trailing spaces, or extra newlines after the final paragraph or closing citation of your whole response. End the token generation immediately on the final punctuation mark or bold bracket.
-3. ERUDITE BULLET POINTS: When detailing scriptural proofs or textual evidences, use a standard dash (-) as the bullet marker. Each bullet point must be written as a fully developed, dense, and formal sentence or short paragraph containing absolute academic depth. Ensure you leave two empty line breaks (\\n\\n) after each bullet point.
-4. COMPULSORY SCRIPTURAL WEAVING (THE BOLD BRACKET MANDATE): Anchor every single theological statement with its corresponding bible reference. Place the reference strictly inside parentheses at the very end of the sentence or clause containing the claim, and it MUST be formatted in BOLD markdown (using double asterisks).
-   - CORRECT ENGLISH EXAMPLE: "...the cross is the final altar **(Hebrews 9:16-17)**."
-   - CORRECT SPANISH EXAMPLE: "...Cristo es el cumplimiento absoluto del tipo desértico **(Juan 3:14-15)**."
-   - NEVER use regular unbolded text like "(John 1:1)". Every single reference must be explicitly wrapped in double asterisks inside the parentheses.
-
-LANGUAGE AND TRANSLATION MANDATES:
-- If responding in SPANISH: You must perform a STRICT, LITERAL translation of the retrieved English King King James Text (KJV) into formal, majestic, and old-school theological Spanish, emulating the precise textual basis of the Reina Valera 1865 (Valera-Mora).
-  * THE REINA VALERA 1865 MANDATE: You must completely bypass modern translations (such as RV1960 or NVI). Your Spanish vocabulary must align strictly with the Textus Receptus underlying the KJV. You are allowed minor textual variations only if they maintain 100% formal equivalence to the KJV text provided.
-  * CRITICAL KJV OVERRIDE: If there is a textual or theological conflict between the strict rendering of the English KJV provided in the context and the historical printed text of the Reina Valera 1865 (e.g., specific translational choices or historical quirks like 'día de Domingo' in Revelation 1:10), the KJV context ALWAYS takes precedence. You must translate the KJV text literally into old-school Spanish, overriding the RV1865 print to maintain 100% doctrinal alignment with the KJV's literal dispensational meaning.
-  * ABSOLUTELY BAN and FORBID any dynamic equivalence, modern paraphrasing, or conceptual interpretations (e.g., NEVER translate "seed of men" as "alianzas humanas").
-  * You MUST preserve the exact raw vocabulary of the fundamental manuscripts and historical usage: "seed of men" MUST be translated strictly as "simiente de hombres". In Johannine Christology, "the Word" MUST be translated precisely as "el Verbo" following the strict rendering of the RV1865 (e.g., "y el Verbo era con Dios, y Dios era el Verbo"). Ensure terms like "Church" remain "iglesia" and archaic solemnity is maintained.
-  * Ensure all scripture references remain clean inside the bold parentheses, containing only the book name, chapter, and verses without adding any version suffixes or extra text (e.g., **(Daniel 2:43)**).
-
-Provided Context (Your ONLY source of truth and final authority):
-${contextText ? contextText : "No specific context blocks retrieved. Apply internal fundamental received text axioms."}
-`;
-
-    // 5. Mapeo higiénico de mensajes compatible con la API de OpenAI
     const openaiMessages = messages
-      .filter((m: any) => (m.role === 'user' || m.role === 'assistant' || m.role === 'system') && m.id !== 'welcome' && m.content && m.content.trim() !== '')
-      .map((m: any) => ({
-        role: m.role,
-        content: m.content,
-      }));
+      .filter((m: any) => m.role === 'user' || m.role === 'assistant')
+      .map((m: any) => ({ role: m.role, content: m.content }));
 
-    openaiMessages.unshift({ role: 'system', content: PATMOS_SYSTEM_PROMPT.trim() });
+    openaiMessages.unshift({ role: 'system', content: PATMOS_SYSTEM_PROMPT });
 
-    // 6. 🚀 PROCESAMIENTO DEL STREAM ESTABLE CON ACTUALIZACIÓN DE HISTORIAL DE FORMA SEGURA
+    // 5. El Stream de OpenAI (Captura limpia en memoria)
+    const responseStream = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: openaiMessages,
+      temperature: 0,
+      stream: true,
+    });
+
     const encoder = new TextEncoder();
-
-    // Variable mutable para capturar todo el texto generado a lo largo del stream
-    let accumulatedText = '';
+    let completeBotResponse = '';
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          console.log('📡 Pipeline activado con OpenAI GPT-4o. Transmisión limpia en progreso.');
-
-          const responseStream = await openai.chat.completions.create({
-            model: 'gpt-4o',
-            messages: openaiMessages,
-            temperature: 0,
-            stream: true,
-          });
-
           for await (const chunk of responseStream) {
             const content = chunk.choices[0]?.delta?.content || '';
             if (content) {
-              accumulatedText += content;
+              completeBotResponse += content;
               controller.enqueue(encoder.encode(content));
             }
           }
-
           controller.close();
-        } catch (streamError: any) {
-          console.error('🚨 ERROR EN EL MANIPULADOR DEL STREAM DE OPENAI:', streamError);
-          const rawErrorString = JSON.stringify(streamError, null, 2) || streamError?.message || 'Unknown OpenAI Exception';
-          const errorMessage = `\n\n*[Error del Motor]*\nStatus Code: ${streamError?.status}\nRaw Payload: ${rawErrorString}`;
-          controller.enqueue(encoder.encode(errorMessage));
+
+          // ⚡ PERSISTENCIA ABSOLUTA AL CERRAR EL STREAM NATIVO
+          // Al ejecutarse inmediatamente antes de terminar el ciclo del stream en el motor de Node,
+          // garantizamos que la fila se inserte completa como una entidad nueva. ¡Adiós pre-bloqueos!
+          const cleanSavedResponse = completeBotResponse.trim();
+          if (cleanSavedResponse) {
+            await supabase.from('chat_history').insert({
+              user_id: user.id,
+              user_query: lastMessage,
+              bot_response: cleanSavedResponse,
+              created_at: new Date().toISOString()
+            });
+            console.log('✅ Registro consolidado con éxito.');
+          }
+        } catch (streamError) {
+          console.error('🚨 Stream Error:', streamError);
           controller.close();
         }
       },
     });
 
-    // 🛡️ ENFOQUE DE PERSISTENCIA POR CALLBACK RESILIENTE
-    // Creamos la respuesta HTTP chunked basada en el stream.
-    const response = new NextResponse(stream, {
+    return new NextResponse(stream, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Transfer-Encoding': 'chunked',
       },
     });
 
-    // Definimos la función de guardado asíncrona desacoplada del cierre del stream
-    const consolidarHistorialBaseDeDatos = async () => {
-      const cleanSavedResponse = accumulatedText.trim();
-      if (!cleanSavedResponse) return;
-
-      try {
-        if (isPremiumUser || !preInsertedHistoryId) {
-          await supabase
-            .from('chat_history')
-            .insert({
-              user_id: user.id,
-              user_query: lastMessage,
-              bot_response: cleanSavedResponse,
-              created_at: new Date().toISOString()
-            });
-        } else {
-          await supabase
-            .from('chat_history')
-            .update({ bot_response: cleanSavedResponse })
-            .eq('id', preInsertedHistoryId);
-          console.log('✅ Base de datos sincronizada con éxito en segundo plano.');
-        }
-      } catch (err) {
-        console.error('⚠️ Excepción crítica al guardar en Supabase en el ciclo de limpieza:', err);
-      }
-    };
-
-    // ⚡ CONECTOR MÁGICO PARA SERVERLESS (waitUntil):
-    // Si la plataforma (Vercel/Next.js) provee el método nativo para mantener vivo el hilo secundario
-    // una vez despachado el stream lo usamos, de lo contrario lo mandamos al event loop.
-    if (typeof (req as any).waitUntil === 'function') {
-      (req as any).waitUntil(consolidarHistorialBaseDeDatos());
-    } else {
-      // Monitoreo manual alternativo para entornos de desarrollo local
-      setTimeout(consolidarHistorialBaseDeDatos, 50);
-    }
-
-    return response;
-
   } catch (error: any) {
-    console.error('❌ Patmos Research API Route Critical Crash (OpenAI Engine):', error);
-    return new NextResponse('Internal Error within the OpenAI Dogmatic Engine.', { status: 500 });
+    console.error('❌ Critical Crash:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
