@@ -213,13 +213,15 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
             }
           }
 
-          // Saneamos la respuesta completa removiendo espacios antes de guardarla en Supabase
+          // 🛡️ CONSOLIDACIÓN INTERNA DEL STREAM (ANTI-CIERRE FRAGMENTADO):
+          // Saneamos la respuesta completa e impactamos la base de datos AQUÍ ADENTRO,
+          // asegurando que la conexión permanezca abierta y obligando al motor a esperar el commit.
           const cleanSavedResponse = completeBotResponse.trim();
 
           if (cleanSavedResponse) {
             if (isPremiumUser || !preInsertedHistoryId) {
               // Si es usuario de pago o el administrador, hacemos un insert directo regular al final
-              await supabase
+              const { error: insertError } = await supabase
                 .from('chat_history')
                 .insert({
                   user_id: user.id,
@@ -227,10 +229,10 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
                   bot_response: cleanSavedResponse,
                   created_at: new Date().toISOString()
                 });
+              
+              if (insertError) console.error('⚠️ Error al auto-guardar historial premium:', insertError);
             } else {
-              // 🛡️ PERSISTENCIA ASÍNCRONA ROBUSTA:
-              // Forzamos AWAIT estricto. Esto congela la destrucción de la función serverless
-              // hasta que Supabase consolide la respuesta real sobre el marcador provisional.
+              // Si es usuario gratuito, ejecutamos el UPDATE de forma síncrona dentro del ciclo de vida del stream
               const { error: updateError } = await supabase
                 .from('chat_history')
                 .update({ bot_response: cleanSavedResponse })
@@ -238,10 +240,13 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
 
               if (updateError) {
                 console.error('⚠️ Error crítico al actualizar el registro del pre-bloqueo:', updateError);
+              } else {
+                console.log('✅ Historial gratuito consolidado con éxito en la base de datos.');
               }
             }
           }
 
+          // Cerramos el controlador del stream ÚNICAMENTE cuando la base de datos ya haya consolidado el texto real
           controller.close();
         } catch (streamError: any) {
           console.error('🚨 ERROR EN EL MANIPULADOR DEL STREAM DE OPENAI:', streamError);
