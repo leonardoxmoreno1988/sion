@@ -219,26 +219,26 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
           if (cleanSavedResponse) {
             if (isPremiumUser || !preInsertedHistoryId) {
               // Si es usuario de pago o el administrador, hacemos un insert directo regular al final
-              supabase
+              await supabase
                 .from('chat_history')
                 .insert({
                   user_id: user.id,
                   user_query: lastMessage,
                   bot_response: cleanSavedResponse,
                   created_at: new Date().toISOString()
-                })
-                .then(({ error }) => {
-                  if (error) console.error('⚠️ Error al auto-guardar historial premium:', error);
                 });
             } else {
-              // Si es usuario gratuito, actualizamos (UPDATE) la fila de pre-bloqueo con la respuesta real de la IA
-              supabase
+              // 🛡️ PERSISTENCIA ASÍNCRONA ROBUSTA:
+              // Forzamos AWAIT estricto. Esto congela la destrucción de la función serverless
+              // hasta que Supabase consolide la respuesta real sobre el marcador provisional.
+              const { error: updateError } = await supabase
                 .from('chat_history')
                 .update({ bot_response: cleanSavedResponse })
-                .eq('id', preInsertedHistoryId)
-                .then(({ error }) => {
-                  if (error) console.error('⚠️ Error al actualizar el registro del pre-bloqueo:', error);
-                });
+                .eq('id', preInsertedHistoryId);
+
+              if (updateError) {
+                console.error('⚠️ Error crítico al actualizar el registro del pre-bloqueo:', updateError);
+              }
             }
           }
 
