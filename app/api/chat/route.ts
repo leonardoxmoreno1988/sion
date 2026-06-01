@@ -64,10 +64,13 @@ export async function POST(req: Request) {
 
           if (countError) throw countError;
 
-          // 🛡️ CONTROL UMBRAL ESTRICTO: Bloquea en la cuarta pregunta
-          if (count !== null && count >= 3) {
+          // 🛡️ CALIBRACIÓN DE UMBRAL COMPENSADA:
+          // Al cambiar el umbral a >= 4, garantizamos el libre tránsito
+          // de los primeros 3 impactos completos en la interfaz de usuario.
+          // El muro de pago bloqueará estrictamente en el CUARTO intento de envío.
+          if (count !== null && count >= 4) {
             return NextResponse.json(
-              { error: 'LIMIT_REACHED', message: 'Límite alcanzado.' },
+              { error: 'LIMIT_REACHED', message: 'Has alcanzado tus 3 consultas gratuitas de hoy. Regresa mañana o suscríbete para continuar con la investigación.' },
               { status: 429 }
             );
           }
@@ -144,7 +147,7 @@ export async function POST(req: Request) {
               user_query: lastMessage,
               bot_response: cleanSavedResponse,
               created_at: new Date().toISOString()
-                });
+            });
             console.log('✅ Registro consolidado con éxito.');
           }
         } catch (streamError) {
