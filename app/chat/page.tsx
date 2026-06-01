@@ -208,6 +208,9 @@ export default function PatmosChat() {
           setIsPremium(true);
           setHasCredits(true);
           setSubscriptionStatus('active');
+        } else if (!isPremium && subscriptionStatus !== 'past_due' && subscriptionStatus !== 'paused') {
+          // 🛡️ AJUSTE DEL FRONTEND: Permitimos que el input siga abierto hasta que haya 4 o más registros
+          setHasCredits(data.length < 4);
         }
         
         if (data.length > 0 && !activeSessionId) {
@@ -218,7 +221,7 @@ export default function PatmosChat() {
       console.error("Error fetching history:", err);
     }
   };
-
+  
   const handlePayPalCheckout = () => {
     const PAYPAL_DIRECT_URL = "https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2G8977490J925452WNIL7QAA"; 
     window.open(PAYPAL_DIRECT_URL, '_blank');

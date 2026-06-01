@@ -82,9 +82,9 @@ export async function POST(req: Request) {
           if (countError) throw countError;
 
           // 🛡️ CALIBRACIÓN DEL UMBRAL PARA 3 RESPUESTAS COMPLETAS:
-          // Al evaluar 'count >= 3', permitimos que las consultas 1, 2 y 3 pasen limpias (ya que sus conteos previos serán 0, 1 y 2).
-          // Cuando el usuario intente enviar la CUARTA consulta, el conteo matutino ya será 3. El muro se cierra aquí.
-          if (count !== null && count >= 3) {
+          // Al cambiar el umbral a 'count >= 4', garantizamos el libre tránsito de los primeros 3 impactos.
+          // El muro de pago blindará los tokens del servidor bloqueando estrictamente en el CUARTO intento.
+          if (count !== null && count >= 4) {
             return NextResponse.json(
               { error: 'LIMIT_REACHED', message: 'Has alcanzado tus 3 consultas gratuitas de hoy. Regresa mañana o suscríbete para continuar con la investigación.' },
               { status: 429 }
