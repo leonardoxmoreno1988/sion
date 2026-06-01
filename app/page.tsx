@@ -112,7 +112,7 @@ export default function HomePage() {
 
         <p className="text-2xl font-medium text-[#000f37] max-w-xl">
           {lang === 'es' ? (
-            <>Análisis indexado y preciso extraído exclusivamente de la <span className="font-semibold">Reina Valera 1865 y la KJV</span>.</>
+            <>Archivo indexado y preciso extraído exclusivamente de la <span className="font-semibold">Reina Valera 1865 y la KJV</span>.</>
           ) : (
             <>Precise, cross-referenced insights drawn exclusively from the <span className="font-semibold">Authorized King James Version</span>.</>
           )}
