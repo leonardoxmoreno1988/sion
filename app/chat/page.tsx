@@ -160,15 +160,17 @@ export default function PatmosChat() {
               ]);
             } else {
               setIsPremium(false);
-              setHasCredits(true); 
+              // 🛡️ CALIBRACIÓN INICIAL: Comprobamos el largo del historial real al montar el componente
+              setHasCredits(currentHistory.length < 4);
             }
           } else {
             setIsPremium(false);
-            setHasCredits(true);
+            // 🛡️ CALIBRACIÓN INICIAL: Caso sin registro de suscripción previo
+            setHasCredits(currentHistory.length < 4);
           }
         } catch (subErr) {
           console.error("Error checking subscription tier:", subErr);
-          setHasCredits(true);
+          setHasCredits(currentHistory.length < 4);
         }
       }
 
@@ -221,7 +223,7 @@ export default function PatmosChat() {
       console.error("Error fetching history:", err);
     }
   };
-  
+
   const handlePayPalCheckout = () => {
     const PAYPAL_DIRECT_URL = "https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2G8977490J925452WNIL7QAA"; 
     window.open(PAYPAL_DIRECT_URL, '_blank');
