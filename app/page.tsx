@@ -105,7 +105,7 @@ export default function HomePage() {
             {lang === 'es' ? (
               <>Motor de Investigación y Análisis Bíblico</>
             ) : (
-              <>Advanced Scripture<br/>Research & Analytics</>
+              <>Biblical Research &<br/>Analysis Engine</>
             )}
           </h1>
         </div>
