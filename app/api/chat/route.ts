@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       return new NextResponse('Unauthorized access to the Archive.', { status: 401 });
     }
 
-    // 2. Control de Seguridad (Paywall Guard - Conteo Limpio)
+    // 2. Control de Seguridad (Paywall Guard - Conteo Diario Limpio por Supabase)
     let isPremiumUser = user.email === 'leonardo@ritualypropaganda.com';
 
     if (!isPremiumUser) {
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
           if (countError) throw countError;
 
-          // 🛡️ CONTROL UMBRAL: Si ya hay 3 registros consolidados, bloqueamos la cuarta.
+          // 🛡️ CONTROL UMBRAL ESTRICTO: Bloquea en la cuarta pregunta
           if (count !== null && count >= 3) {
             return NextResponse.json(
               { error: 'LIMIT_REACHED', message: 'Límite alcanzado.' },
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. Contexto Teológico
+    // 3. Contexto Teológico (Búsqueda Vectorial nativa en Supabase RPC)
     let contextText = '';
     try {
       if (lastMessage.trim()) {
@@ -136,9 +136,7 @@ export async function POST(req: Request) {
           }
           controller.close();
 
-          // ⚡ PERSISTENCIA ABSOLUTA AL CERRAR EL STREAM NATIVO
-          // Al ejecutarse inmediatamente antes de terminar el ciclo del stream en el motor de Node,
-          // garantizamos que la fila se inserte completa como una entidad nueva. ¡Adiós pre-bloqueos!
+          // ⚡ PERSISTENCIA TOTAL AL FINALIZAR EL STREAM
           const cleanSavedResponse = completeBotResponse.trim();
           if (cleanSavedResponse) {
             await supabase.from('chat_history').insert({
@@ -146,7 +144,7 @@ export async function POST(req: Request) {
               user_query: lastMessage,
               bot_response: cleanSavedResponse,
               created_at: new Date().toISOString()
-            });
+                });
             console.log('✅ Registro consolidado con éxito.');
           }
         } catch (streamError) {
