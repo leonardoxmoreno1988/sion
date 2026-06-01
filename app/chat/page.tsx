@@ -160,17 +160,15 @@ export default function PatmosChat() {
               ]);
             } else {
               setIsPremium(false);
-              // 🛡️ CALIBRACIÓN INICIAL: Comprobamos el largo del historial real al montar el componente
-              setHasCredits(currentHistory.length < 4);
+              setHasCredits(true); 
             }
           } else {
             setIsPremium(false);
-            // 🛡️ CALIBRACIÓN INICIAL: Caso sin registro de suscripción previo
-            setHasCredits(currentHistory.length < 4);
+            setHasCredits(true);
           }
         } catch (subErr) {
           console.error("Error checking subscription tier:", subErr);
-          setHasCredits(currentHistory.length < 4);
+          setHasCredits(true);
         }
       }
 
@@ -210,9 +208,8 @@ export default function PatmosChat() {
           setIsPremium(true);
           setHasCredits(true);
           setSubscriptionStatus('active');
-        } else if (!isPremium && subscriptionStatus !== 'past_due' && subscriptionStatus !== 'paused') {
-          // 🛡️ AJUSTE DEL FRONTEND: Permitimos que el input siga abierto hasta que haya 4 o más registros
-          setHasCredits(data.length < 4);
+        } else {
+          setHasCredits(true); 
         }
         
         if (data.length > 0 && !activeSessionId) {
@@ -369,7 +366,6 @@ export default function PatmosChat() {
       { id: assistantMessageId, role: 'assistant', content: "" }
     ]);
 
-    // Declaramos la variable de respuesta fuera para darle alcance al catch de TypeScript
     let response: Response | undefined = undefined;
 
     try {
@@ -417,7 +413,6 @@ export default function PatmosChat() {
     } catch (error) {
       console.error("Patmos Pipeline Native Error:", error);
       
-      // Escudo protector: si es un error provocado por el bloqueo 429, abortamos el catch en seco
       if (response && response.status === 429) {
         return;
       }
@@ -429,7 +424,7 @@ export default function PatmosChat() {
             : m
         )
       );
-    } layout: {
+    } finally {
       setIsLoading(false);
     }
   };
