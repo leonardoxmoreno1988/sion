@@ -81,8 +81,9 @@ export async function POST(req: Request) {
 
           if (countError) throw countError;
 
-          // 🛡️ CORRECCIÓN DE UMBRAL:
-          // Si el conteo es igual o mayor a 3, significa que ya agostó sus 3 cartuchos diarios oficiales.
+          // 🛡️ CALIBRACIÓN DEL UMBRAL PARA 3 RESPUESTAS COMPLETAS:
+          // Al evaluar 'count >= 3', permitimos que las consultas 1, 2 y 3 pasen limpias (ya que sus conteos previos serán 0, 1 y 2).
+          // Cuando el usuario intente enviar la CUARTA consulta, el conteo matutino ya será 3. El muro se cierra aquí.
           if (count !== null && count >= 3) {
             return NextResponse.json(
               { error: 'LIMIT_REACHED', message: 'Has alcanzado tus 3 consultas gratuitas de hoy. Regresa mañana o suscríbete para continuar con la investigación.' },
@@ -164,7 +165,7 @@ CRITICAL OUTPUT ARCHITECTURE (MANDATORY FORMATTING RULES):
    - NEVER use regular unbolded text like "(John 1:1)". Every single reference must be explicitly wrapped in double asterisks inside the parentheses.
 
 LANGUAGE AND TRANSLATION MANDATES:
-- If responding in SPANISH: You must perform a STRICT, LITERAL translation of the retrieved English King James Text (KJV) into formal, majestic, and old-school theological Spanish, emulating the precise textual basis of the Reina Valera 1865 (Valera-Mora).
+- If responding in SPANISH: You must perform a STRICT, LITERAL translation of the retrieved English King King James Text (KJV) into formal, majestic, and old-school theological Spanish, emulating the precise textual basis of the Reina Valera 1865 (Valera-Mora).
   * THE REINA VALERA 1865 MANDATE: You must completely bypass modern translations (such as RV1960 or NVI). Your Spanish vocabulary must align strictly with the Textus Receptus underlying the KJV. You are allowed minor textual variations only if they maintain 100% formal equivalence to the KJV text provided.
   * CRITICAL KJV OVERRIDE: If there is a textual or theological conflict between the strict rendering of the English KJV provided in the context and the historical printed text of the Reina Valera 1865 (e.g., specific translational choices or historical quirks like 'día de Domingo' in Revelation 1:10), the KJV context ALWAYS takes precedence. You must translate the KJV text literally into old-school Spanish, overriding the RV1865 print to maintain 100% doctrinal alignment with the KJV's literal dispensational meaning.
   * ABSOLUTELY BAN and FORBID any dynamic equivalence, modern paraphrasing, or conceptual interpretations (e.g., NEVER translate "seed of men" as "alianzas humanas").
