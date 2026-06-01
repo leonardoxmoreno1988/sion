@@ -81,10 +81,11 @@ export async function POST(req: Request) {
 
           if (countError) throw countError;
 
-          // 🛡️ CALIBRACIÓN DEL UMBRAL PARA 3 RESPUESTAS COMPLETAS:
-          // Al cambiar el umbral a 'count >= 4', garantizamos el libre tránsito de los primeros 3 impactos.
-          // El muro de pago blindará los tokens del servidor bloqueando estrictamente en el CUARTO intento.
-          if (count !== null && count >= 4) {
+          // 🛡️ CALIBRACIÓN MATEMÁTICA DEFINITIVA (3 RESPUESTAS COMPLETAS):
+          // Evaluamos con 'count >= 3'. Las preguntas 1, 2 y 3 fluirán sin problemas (conteos de 0, 1 y 2).
+          // En cuanto el usuario intente ejecutar su CUARTO impacto, la base de datos detectará las 3 respuestas
+          // previas consolidadas y le cerrará el grifo con un código 429 en seco.
+          if (count !== null && count >= 3) {
             return NextResponse.json(
               { error: 'LIMIT_REACHED', message: 'Has alcanzado tus 3 consultas gratuitas de hoy. Regresa mañana o suscríbete para continuar con la investigación.' },
               { status: 429 }
