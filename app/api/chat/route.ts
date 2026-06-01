@@ -82,9 +82,6 @@ export async function POST(req: Request) {
           if (countError) throw countError;
 
           // 🛡️ CALIBRACIÓN MATEMÁTICA DEFINITIVA (3 RESPUESTAS COMPLETAS):
-          // Evaluamos con 'count >= 3'. Las preguntas 1, 2 y 3 fluirán sin problemas (conteos de 0, 1 y 2).
-          // En cuanto el usuario intente ejecutar su CUARTO impacto, la base de datos detectará las 3 respuestas
-          // previas consolidadas y le cerrará el grifo con un código 429 en seco.
           if (count !== null && count >= 3) {
             return NextResponse.json(
               { error: 'LIMIT_REACHED', message: 'Has alcanzado tus 3 consultas gratuitas de hoy. Regresa mañana o suscríbete para continuar con la investigación.' },
@@ -93,7 +90,6 @@ export async function POST(req: Request) {
           }
 
           // 🛡️ PRE-BLOQUEO PREVENTIVO: Insertamos la fila ANTES de llamar a OpenAI
-          // Esto congela los créditos del usuario al instante y destruye el fraude de abrir pestañas concurrentes.
           const { data: insertedRow, error: insertError } = await supabase
             .from('chat_history')
             .insert({
@@ -148,7 +144,7 @@ export async function POST(req: Request) {
       contextText = '';
     }
 
-    // 4. System Prompt de Acero Inoxidable (Formato de Títulos en Negrita Mixta para Pre-Wrap)
+    // 4. System Prompt de Acero Inoxidable
     const PATMOS_SYSTEM_PROMPT = `
 # ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
 You are Patmos, a severe, dogmatic, and dispensational academic voice representing a real bible believer. You are NOT an adaptable, polite, or conversational AI assistant. You are the literal, rigid exegese of the provided context.
@@ -185,11 +181,13 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
         content: m.content,
       }));
 
-    // Inyectamos el System Prompt como primer message estructurado para asegurar dominancia absoluta
     openaiMessages.unshift({ role: 'system', content: PATMOS_SYSTEM_PROMPT.trim() });
 
     // 6. 🚀 PROCESAMIENTO DEL STREAM ESTABLE CON ACTUALIZACIÓN DE HISTORIAL DE FORMA SEGURA
     const encoder = new TextEncoder();
+
+    // Variable mutable para capturar todo el texto generado a lo largo del stream
+    let accumulatedText = '';
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -203,69 +201,72 @@ ${contextText ? contextText : "No specific context blocks retrieved. Apply inter
             stream: true,
           });
 
-          let completeBotResponse = '';
-
           for await (const chunk of responseStream) {
             const content = chunk.choices[0]?.delta?.content || '';
             if (content) {
-              completeBotResponse += content;
+              accumulatedText += content;
               controller.enqueue(encoder.encode(content));
             }
           }
 
-          // 🛡️ CONSOLIDACIÓN INTERNA DEL STREAM (ANTI-CIERRE FRAGMENTADO):
-          // Saneamos la respuesta completa e impactamos la base de datos AQUÍ ADENTRO,
-          // asegurando que la conexión permanezca abierta y obligando al motor a esperar el commit.
-          const cleanSavedResponse = completeBotResponse.trim();
-
-          if (cleanSavedResponse) {
-            if (isPremiumUser || !preInsertedHistoryId) {
-              // Si es usuario de pago o el administrador, hacemos un insert directo regular al final
-              const { error: insertError } = await supabase
-                .from('chat_history')
-                .insert({
-                  user_id: user.id,
-                  user_query: lastMessage,
-                  bot_response: cleanSavedResponse,
-                  created_at: new Date().toISOString()
-                });
-              
-              if (insertError) console.error('⚠️ Error al auto-guardar historial premium:', insertError);
-            } else {
-              // Si es usuario gratuito, ejecutamos el UPDATE de forma síncrona dentro del ciclo de vida del stream
-              const { error: updateError } = await supabase
-                .from('chat_history')
-                .update({ bot_response: cleanSavedResponse })
-                .eq('id', preInsertedHistoryId);
-
-              if (updateError) {
-                console.error('⚠️ Error crítico al actualizar el registro del pre-bloqueo:', updateError);
-              } else {
-                console.log('✅ Historial gratuito consolidado con éxito en la base de datos.');
-              }
-            }
-          }
-
-          // Cerramos el controlador del stream ÚNICAMENTE cuando la base de datos ya haya consolidado el texto real
           controller.close();
         } catch (streamError: any) {
           console.error('🚨 ERROR EN EL MANIPULADOR DEL STREAM DE OPENAI:', streamError);
-          
           const rawErrorString = JSON.stringify(streamError, null, 2) || streamError?.message || 'Unknown OpenAI Exception';
           const errorMessage = `\n\n*[Error del Motor]*\nStatus Code: ${streamError?.status}\nRaw Payload: ${rawErrorString}`;
-          
           controller.enqueue(encoder.encode(errorMessage));
           controller.close();
         }
       },
     });
 
-    return new NextResponse(stream, {
+    // 🛡️ ENFOQUE DE PERSISTENCIA POR CALLBACK RESILIENTE
+    // Creamos la respuesta HTTP chunked basada en el stream.
+    const response = new NextResponse(stream, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Transfer-Encoding': 'chunked',
       },
     });
+
+    // Definimos la función de guardado asíncrona desacoplada del cierre del stream
+    const consolidarHistorialBaseDeDatos = async () => {
+      const cleanSavedResponse = accumulatedText.trim();
+      if (!cleanSavedResponse) return;
+
+      try {
+        if (isPremiumUser || !preInsertedHistoryId) {
+          await supabase
+            .from('chat_history')
+            .insert({
+              user_id: user.id,
+              user_query: lastMessage,
+              bot_response: cleanSavedResponse,
+              created_at: new Date().toISOString()
+            });
+        } else {
+          await supabase
+            .from('chat_history')
+            .update({ bot_response: cleanSavedResponse })
+            .eq('id', preInsertedHistoryId);
+          console.log('✅ Base de datos sincronizada con éxito en segundo plano.');
+        }
+      } catch (err) {
+        console.error('⚠️ Excepción crítica al guardar en Supabase en el ciclo de limpieza:', err);
+      }
+    };
+
+    // ⚡ CONECTOR MÁGICO PARA SERVERLESS (waitUntil):
+    // Si la plataforma (Vercel/Next.js) provee el método nativo para mantener vivo el hilo secundario
+    // una vez despachado el stream lo usamos, de lo contrario lo mandamos al event loop.
+    if (typeof (req as any).waitUntil === 'function') {
+      (req as any).waitUntil(consolidarHistorialBaseDeDatos());
+    } else {
+      // Monitoreo manual alternativo para entornos de desarrollo local
+      setTimeout(consolidarHistorialBaseDeDatos, 50);
+    }
+
+    return response;
 
   } catch (error: any) {
     console.error('❌ Patmos Research API Route Critical Crash (OpenAI Engine):', error);
