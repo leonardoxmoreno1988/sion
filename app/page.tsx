@@ -136,7 +136,7 @@ export default function HomePage() {
         </div>
 
         <p className="text-sm text-gray-500 mt-4">
-          {lang === 'es' ? "Uso básico: 3 consultas por día • Plan PRO: Ilimitado por $7/mes" : "Basic access: 3 queries per day • PRO Plan: Unlimited for $7/month"}
+          {lang === 'es' ? "Uso básico: 3 consultas por día • Plan PRO: Ilimitado por $15/mes" : "Basic access: 3 queries per day • PRO Plan: Unlimited for $15/month"}
         </p>
 
         {/* Imagen */}
@@ -230,7 +230,7 @@ export default function HomePage() {
               <div>
                 <h4 className="text-xl font-semibold">{lang === 'es' ? "Apoya a Patmos" : "Support Patmos"}</h4>
                 <div className="mt-4 flex items-baseline">
-                  <span className="text-5xl font-bold">$7</span>
+                  <span className="text-5xl font-bold">$15</span>
                   <span className="ml-2 text-gray-500">{lang === 'es' ? "/ mes" : "/ month"}</span>
                 </div>
             
