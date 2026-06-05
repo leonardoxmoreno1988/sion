@@ -188,6 +188,33 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ⭐ TESTIMONIAL SECTION (Diseño Libre con Avatar y Líneas) */}
+        <section className="mt-20 border-t border-[#e5e7eb] pt-12">
+          <div className="flex flex-col gap-6">
+            <p className="text-xl md:text-2xl font-medium text-[#000f37] leading-relaxed">
+              {lang === 'es' ? (
+                <>“Súper intuitivo y potente. Patmos transforma completamente cómo estudio la Biblia. Esta alternativa es exactamente lo que el estudiante moderno de la Biblia necesita.”</>
+              ) : (
+                <>“Super intuitive and powerful. Patmos completely transforms how I study the Bible. This alternative is exactly what the modern Bible student needs.”</>
+              )}
+            </p>
+            
+            <div className="flex items-center gap-3">
+              {/* Avatar circular con la letra J */}
+              <div className="w-9 h-9 rounded-full bg-[#000f37] text-[#f9fafb] flex items-center justify-center text-sm font-bold tracking-tight select-none shrink-0">
+                J
+              </div>
+              
+              <div className="flex flex-col">
+                <span className="font-bold text-sm text-[#000f37]">Jesus Navarro</span>
+                <span className="text-xs text-[#6b7280] font-medium mt-0.5">
+                  {lang === 'es' ? "Diseñador de Productos y Creyente de la Biblia" : "Product Designer and Bible Believer"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* PRICING SECTION */}
         <section className="mt-20 border-t border-[#e5e7eb] pt-12">
           <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b7280] mb-8">
@@ -304,7 +331,7 @@ export default function HomePage() {
                 {lang === 'es' ? (
                   "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existencia, coidéntico en su naturaleza esencial, coigual en poder soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
                 ) : (
-                  "It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 John 5:7)."
+                  "It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 Juan 5:7)."
                 )}
               </p>
             </details>
@@ -326,7 +353,7 @@ export default function HomePage() {
                 {lang === 'es' ? (
                   "Afirma la deidad absoluta y la perfecta humanidad del Señor Jesucristo en una unión hipostática indivisible. Sostiene Su nacimiento virginal, Su vida sin pecado, Su sacrificio expiatorio y sustitutivo en la cruz mediante el derramamiento de Su sangre preciosa, Su resurrección corporal y Su ascensión gloriosa a la diestra del Padre (Filipenses 2:5-8; 1 Pedro 2:24; Hechos 1:9-11)."
                 ) : (
-                  "It affirms the absolute deity and perfect humanity of the Lord Jesus Christ in one indivisible hypostatic union. It holds to His virgin birth, His sinless life, His substitutionary atoning sacrifice on the cross through the shedding of His precious blood, His bodily resurrection, and His glorious ascension to the right hand of the Father (Philippians 2:5-8; 1 Peter 2:24; Acts 1:9-11)."
+                  "It affirms the absolute deity and perfect humanity of the Lord Jesus Christ in one indivisible hypostatic union. It holds to His virgin birth, His sinless life, His substitutionary atoning sacrifice on the cross through the shedding of His precious blood, His bodily resurrection, and His glorious ascension to the right hand of the Father (Philippians 2:5-8; 1 Pedro 2:24; Acts 1:9-11)."
                 )}
               </p>
             </details>
