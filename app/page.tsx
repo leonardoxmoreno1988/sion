@@ -105,7 +105,7 @@ export default function HomePage() {
             {lang === 'es' ? (
               <>Motor de Investigación y Análisis Bíblico</>
             ) : (
-              <>Biblical Research &<br/>Analysis Engine</>
+              <>Biblical KJV Research &<br/>Analysis Engine</>
             )}
           </h1>
         </div>
@@ -122,7 +122,7 @@ export default function HomePage() {
           {lang === 'es' ? (
             <>Software diseñado para el escrutinio literal, dispensacional y pretribulacional de las Escrituras. Sin traducciones modernas ni interpretaciones genéricas.</>
           ) : (
-            <>Software engine designed for the literal, dispensational, and pre-tribulational study of Scripture.<br/>No modern translations. Pure manuscript analysis.</>
+            <>Software engine designed for the literal, dispensational, and pre-tribulational study of Scripture.<br/>No modern translations. Pure bible analysis.</>
           )}
         </p>
 
@@ -193,9 +193,9 @@ export default function HomePage() {
           <div className="flex flex-col gap-6">
             <p className="text-xl md:text-2xl font-medium text-[#000f37] leading-relaxed">
               {lang === 'es' ? (
-                <>“Súper intuitivo y potente. Patmos transforma completamente cómo estudio la Biblia. Esta alternativa es exactamente lo que el estudiante moderno de la Biblia necesita.”</>
+                <>“Súper intuitivo y potente. Patmos transforma completamente cómo estudio la Biblia. Esta alternativa es exactamente lo que el estudiante de la Biblia necesita.”</>
               ) : (
-                <>“Super intuitive and powerful. Patmos completely transforms how I study the Bible. This alternative is exactly what the modern Bible student needs.”</>
+                <>“Super intuitive and powerful. Patmos completely transforms how I study the Bible. This alternative is exactly what the Bible student needs.”</>
               )}
             </p>
             
