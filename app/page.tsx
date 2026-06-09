@@ -41,8 +41,11 @@ export default function HomePage() {
       return;
     }
 
-    // URL Maestra de tu checkout de Lemon Squeezy inyectando el ID de Supabase de forma dinámica
-    const LEMON_SQUEEZY_URL = `https://patmos.lemonsqueezy.com/checkout/buy/438380b4-ff9b-4072-b7fd-be4c83f5f939?checkout[custom][user_id]=${userId}`; 
+    // 🚨 REEMPLAZA EL TEXTO "PEGA_AQUI_TU_ID_DE_VARIANTE" POR EL CÓDIGO DE TU PRODUCTO DE LEMON SQUEEZY
+    const LEMON_SQUEEZY_VARIANTE = "1126683"; 
+    
+    // URL Maestra corregida con el subdominio oficial e inyección del ID de Supabase en custom data
+    const LEMON_SQUEEZY_URL = `https://patmosresearch.lemonsqueezy.com/checkout/buy/${LEMON_SQUEEZY_VARIANTE}?checkout[custom][user_id]=${userId}`; 
 
     // Abre la pasarela de Lemon Squeezy en una pestaña nueva para el pago
     window.open(LEMON_SQUEEZY_URL, '_blank');
@@ -211,7 +214,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ⭐ TESTIMONIAL SECTION (Diseño Libre con Avatar y Líneas) */}
+        {/* ⭐ TESTIMONIAL SECTION */}
         <section className="mt-20 border-t border-[#e5e7eb] pt-12">
           <div className="flex flex-col gap-6">
             <p className="text-xl md:text-2xl font-medium text-[#000f37] leading-relaxed">
@@ -223,7 +226,6 @@ export default function HomePage() {
             </p>
             
             <div className="flex items-center gap-3">
-              {/* Avatar circular con la letra J */}
               <div className="w-9 h-9 rounded-full bg-[#000f37] text-[#f9fafb] flex items-center justify-center text-sm font-bold tracking-tight select-none shrink-0">
                 J
               </div>
@@ -315,16 +317,12 @@ export default function HomePage() {
 
           <div className="flex flex-col border-b border-[#e5e7eb]">
             
-            {/* PREGUNTA 1 */}
             <details className="group py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
                   {lang === 'es' ? "¿Qué enseña Patmos sobre la Biblia?" : "What does Patmos teach about the Bible?"}
                 </h4>
-                <svg 
-                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
-                >
+                <svg className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
@@ -337,38 +335,30 @@ export default function HomePage() {
               </p>
             </details>
 
-            {/* PREGUNTA 2 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
                   {lang === 'es' ? "¿Qué enseña Patmos sobre Dios?" : "What does Patmos teach about God?"}
                 </h4>
-                <svg 
-                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
-                >
+                <svg className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
               <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existencia, coidéntico en su naturaleza esencial, coigual en poder soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
+                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existencia, coidéntico en su naturaleza essencial, coigual en poder soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
                 ) : (
                   "It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 Juan 5:7)."
                 )}
               </p>
             </details>
 
-            {/* PREGUNTA 3 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
                   {lang === 'es' ? "¿Qué enseña Patmos sobre Jesucristo?" : "What does Patmos teach about Jesus Christ?"}
                 </h4>
-                <svg 
-                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
-                >
+                <svg className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
@@ -381,16 +371,12 @@ export default function HomePage() {
               </p>
             </details>
 
-            {/* PREGUNTA 4 */}
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-[#000f37]">
                 <h4 className="text-base font-semibold tracking-wide text-left">
                   {lang === 'es' ? "¿Qué enseña Patmos sobre los Tiempos y Dispensaciones?" : "What does Patmos teach about Times and Dispensations?"}
                 </h4>
-                <svg 
-                  className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"
-                >
+                <svg className="size-4 text-[#4b5563] group-open:-rotate-180 transition-transform duration-300 ease-in-out shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
