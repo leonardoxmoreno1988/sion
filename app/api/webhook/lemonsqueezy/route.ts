@@ -38,7 +38,6 @@ export async function POST(req: Request) {
       const subscriptionId = body.data.id;        // El ID único de suscripción en Lemon Squeezy
       
       // 🎯 CAPTURA DEL ID PERSONALIZADO BLINDADA:
-      // Extraemos el user_id asegurando compatibilidad total con la estructura del JSON devuelto
       const userIdFromSupabase = 
         body.meta?.custom_data?.user_id || 
         body.meta?.custom_data?.["user_id"] ||
@@ -51,18 +50,45 @@ export async function POST(req: Request) {
 
       console.log(`⏳ Procesando activación PRO para el Usuario ID de Supabase: ${userIdFromSupabase} (Sub ID: ${subscriptionId})`);
 
-      // 🔄 ACTUALIZACIÓN / INSERCIÓN INTELIGENTE EN SUPABASE:
-      // Si la fila no existe, .upsert() la crea. Si ya existe por el plan básico, modifica el estatus a activo.
-      const { error } = await supabaseAdmin
-        .from('subscriptions') 
-        .upsert({ 
-          user_id: userIdFromSupabase,
-          status: 'active', 
-          lemonsqueezy_sub_id: subscriptionId 
-        }, { onConflict: 'user_id' }); 
+      // 1️⃣ BUSCAR SI EL USUARIO YA TIENE UNA FILA EN LA TABLA SUBSCRIPTIONS
+      const { data: existingSub, error: fetchError } = await supabaseAdmin
+        .from('subscriptions')
+        .select('id')
+        .eq('user_id', userIdFromSupabase)
+        .maybeSingle();
 
-      if (error) {
-        console.error('❌ Error al escribir en la tabla subscriptions en Supabase:', error.message);
+      if (fetchError) {
+        console.error('❌ Error al buscar suscripción existente:', fetchError.message);
+        return new NextResponse('Error consultando la base de datos', { status: 500 });
+      }
+
+      let dbResult;
+
+      if (existingSub) {
+        // 2️⃣ SI YA EXISTE: Hacemos un update normal sobre la fila asignada a su ID
+        console.log(`🔄 El usuario ya existe en la tabla. Actualizando a estatus activo...`);
+        dbResult = await supabaseAdmin
+          .from('subscriptions')
+          .update({ 
+            status: 'active', 
+            lemonsqueezy_sub_id: subscriptionId 
+          })
+          .eq('user_id', userIdFromSupabase);
+      } else {
+        // 3️⃣ SI NO EXISTE: Hacemos un insert limpio desde cero
+        console.log(`✨ Usuario nuevo. Insertando registro PRO en la tabla...`);
+        dbResult = await supabaseAdmin
+          .from('subscriptions')
+          .insert({ 
+            user_id: userIdFromSupabase,
+            status: 'active', 
+            lemonsqueezy_sub_id: subscriptionId 
+          });
+      }
+
+      // Validar si ocurrió un error en cualquiera de las dos operaciones de escritura
+      if (dbResult.error) {
+        console.error('❌ Error al escribir en la tabla subscriptions en Supabase:', dbResult.error.message);
         return new NextResponse('Error actualizando la base de datos', { status: 500 });
       }
 
