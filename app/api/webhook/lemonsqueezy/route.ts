@@ -28,8 +28,8 @@ export async function POST(req: Request) {
     }
 
     const body = JSON.parse(rawBody);
-    const eventName = body.meta.event_name;
-    const attributes = body.data.attributes;
+    const eventName = body.meta?.event_name;
+    const attributes = body.data?.attributes;
 
     console.log(`🔔 Evento recibido de Lemon Squeezy: [${eventName}]`);
 
@@ -37,29 +37,32 @@ export async function POST(req: Request) {
     if (eventName === 'subscription_created') {
       const subscriptionId = body.data.id;        // El ID único de suscripción en Lemon Squeezy
       
-      // 🎯 CAPTURA DEL ID PERSONALIZADO:
-      // Extraemos el user_id que viaja de forma oculta en los metadatos del checkout
-      const userIdFromSupabase = body.meta.custom_data?.user_id; 
+      // 🎯 CAPTURA DEL ID PERSONALIZADO BLINDADA:
+      // Extraemos el user_id asegurando compatibilidad total con la estructura del JSON devuelto
+      const userIdFromSupabase = 
+        body.meta?.custom_data?.user_id || 
+        body.meta?.custom_data?.["user_id"] ||
+        body.data?.attributes?.custom_data?.user_id;
 
       if (!userIdFromSupabase) {
-        console.error('❌ Error: El webhook no recibió ningún [user_id] en custom_data. Asegúrate de pasarlo en la URL del checkout.');
+        console.error('❌ Error: El webhook no recibió ningún [user_id] en el mapeo de custom_data.');
         return new NextResponse('Falta el ID de usuario', { status: 400 });
       }
 
       console.log(`⏳ Procesando activación PRO para el Usuario ID de Supabase: ${userIdFromSupabase} (Sub ID: ${subscriptionId})`);
 
-      // 🔄 ACTUALIZACIÓN EN SUPABASE:
-      // Modificamos la tabla subscriptions buscando directamente por la columna del ID del usuario
+      // 🔄 ACTUALIZACIÓN / INSERCIÓN INTELIGENTE EN SUPABASE:
+      // Si la fila no existe, .upsert() la crea. Si ya existe por el plan básico, modifica el estatus a activo.
       const { error } = await supabaseAdmin
         .from('subscriptions') 
-        .update({ 
+        .upsert({ 
+          user_id: userIdFromSupabase,
           status: 'active', 
           lemonsqueezy_sub_id: subscriptionId 
-        })
-        .eq('user_id', userIdFromSupabase); // <--- Cambia 'user_id' por el nombre exacto de la columna que almacena el ID del usuario en tu tabla
+        }, { onConflict: 'user_id' }); 
 
       if (error) {
-        console.error('❌ Error al actualizar la tabla subscriptions en Supabase:', error.message);
+        console.error('❌ Error al escribir en la tabla subscriptions en Supabase:', error.message);
         return new NextResponse('Error actualizando la base de datos', { status: 500 });
       }
 
