@@ -3,10 +3,18 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useLanguage } from "./context/Languagecontext"; // 🌐 Conexión al motor de idiomas global
+import { createClient } from '@supabase/supabase-js'; // ⚡ Importamos el cliente de Supabase
+
+// Inicializamos el cliente de Supabase para el cliente
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function HomePage() {
   const { lang, setLanguage } = useLanguage(); // 🌐 Extraemos lang y setLanguage para el dropdown
   const [isMounted, setIsMounted] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null); // 👤 Estado para almacenar el ID del pastor
 
   useEffect(() => {
     setIsMounted(true);
@@ -14,17 +22,32 @@ export default function HomePage() {
     link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
+
+    // 🕵️‍♂️ Obtener el usuario actual logueado en Supabase al cargar la landing
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    checkUser();
   }, []);
 
-  // 🧙‍♂️ MÉTODO MAGO DE OZ: Tu botón abre la suscripción y te lleva a la pantalla de espera
+  // 🍋 MOTOR DE FACTURACIÓN: Redirige al checkout dinámico de Lemon Squeezy
   const handleCheckout = () => {
-    // 🔗 URL de suscripción pública de PayPal corregida para tus compradores externos
-    const PAYPAL_DIRECT_URL = `https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2G8977490J925452WNIL7QAA`; 
+    // Si el pastor NO está logueado, lo mandamos primero a iniciar sesión / registrarse
+    if (!userId) {
+      window.location.href = '/login';
+      return;
+    }
 
-    // Abre la pasarela de PayPal segura en una pestaña nueva
-    window.open(PAYPAL_DIRECT_URL, '_blank');
+    // URL Maestra de tu checkout de Lemon Squeezy inyectando el ID de Supabase de forma dinámica
+    const LEMON_SQUEEZY_URL = `https://patmos.lemonsqueezy.com/checkout/buy/438380b4-ff9b-4072-b7fd-be4c83f5f939?checkout[custom][user_id]=${userId}`; 
 
-    // Redirige tu landing a la pantalla de éxito/sincronización premium
+    // Abre la pasarela de Lemon Squeezy en una pestaña nueva para el pago
+    window.open(LEMON_SQUEEZY_URL, '_blank');
+
+    // Redirige la ventana principal a la pantalla de espera o éxito
     window.location.href = '/checkout/success';
   };
 
@@ -307,7 +330,7 @@ export default function HomePage() {
               </summary>
               <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Sostiene que la autoridad suprema, exclusiva y final para toda fe y ejecución del ministerio es la palabra de Dios infalible y estructuralmente preservada—encarnada estrictamente dentro de la Biblia Reina Valera 1865 y la Versión Autorizada King James para el mundo de habla inglesa. Opera bajo la convicción absoluta de que todas las traducciones modernas introducen distorsiones teológicas y corrupciones sistémicas (Salmos 12:6-7)."
+                  "Sostiene que la autoridad suprema, exclusiva y final para toda faith y ejecución del ministerio es la palabra de Dios infalible y estructuralmente preservada—encarnada estrictamente dentro de la Biblia Reina Valera 1865 y la Versión Autorizada King James para el mundo de habla inglesa. Opera bajo la convicción absoluta de que todas las traducciones modernas introducen distorsiones teológicas y corrupciones sistémicas (Salmos 12:6-7)."
                 ) : (
                   "It holds that the supreme, exclusive, and final authority for all faith and ministry execution is the flawless, structurally preserved word of God—embodied strictly within the Authorized King James Holy Bible for the English-speaking world. It operates on the absolute conviction that all modern translations introduce theological distortions and systemic corruptions (Psalms 12:6-7)."
                 )}

@@ -221,17 +221,20 @@ export default function PatmosChat() {
     }
   };
 
-  const handlePayPalCheckout = () => {
-    const PAYPAL_DIRECT_URL = "https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2G8977490J925452WNIL7QAA"; 
-    window.open(PAYPAL_DIRECT_URL, '_blank');
+  // 🍋 COBRO DINÁMICO CON LEMON SQUEEZY
+  const handleLemonSqueezyCheckout = () => {
+    if (!userId) return;
+    const LEMON_SQUEEZY_URL = `https://patmos.lemonsqueezy.com/checkout/buy/438380b4-ff9b-4072-b7fd-be4c83f5f939?checkout[custom][user_id]=${userId}`; 
+    window.open(LEMON_SQUEEZY_URL, '_blank');
     window.location.href = '/checkout/success';
   };
 
+  // 📋 GESTIÓN DE FACTURACIÓN CON LEMON SQUEEZY
   const handleOpenBillingPortal = (e: React.MouseEvent) => {
     e.preventDefault();
     alert(lang === 'es' 
-      ? "Para gestionar o cancelar su suscripción, por favor inicie sesión en su panel personal de PayPal o comuníquese con soporte@patmosresearch.com" 
-      : "To manage or cancel your subscription, please log in to your personal PayPal dashboard or contact support@patmosresearch.com"
+      ? "Para gestionar, actualizar su tarjeta o cancelar su suscripción, por favor revise el correo electrónico de confirmación enviado por Lemon Squeezy o comuníquese con soporte@patmosresearch.com" 
+      : "To manage, update your payment method, or cancel your subscription, please check the confirmation email sent by Lemon Squeezy or contact support@patmosresearch.com"
     );
   };
 
@@ -343,7 +346,6 @@ export default function PatmosChat() {
     }, 500);
   };
 
-  // 🛠️ MANEJADOR DE ENVÍO INTEGRADO AL SEGURO DE ESTADOS 429 JSON
   const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customInput.trim() || isLoading || !hasCredits) return;
@@ -375,7 +377,6 @@ export default function PatmosChat() {
         body: JSON.stringify({ messages: updatedMessages.map(m => ({ role: m.role, content: m.content })) })
       });
 
-      // 🛡️ INTERCEPTOR SIMPLIFICADO E INDESTRUCTIBLE: Si es 429, es bloqueo seguro.
       if (response.status === 429) {
         setIsLoading(false); 
         setHasCredits(false); 
@@ -912,7 +913,7 @@ export default function PatmosChat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Caja de Input + Banner del Paywall UNIFICADO A PAYPAL */}
+        {/* Caja de Input + Banner del Paywall UNIFICADO A LEMON SQUEEZY */}
         <div style={{ width: '100%', maxWidth: '650px', padding: '20px 0 40px 0' }}>
           
           {!hasCredits && (
@@ -957,7 +958,7 @@ export default function PatmosChat() {
               </div>
               
               <button 
-                onClick={handlePayPalCheckout}
+                onClick={handleLemonSqueezyCheckout}
                 style={{
                   backgroundColor: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#ef4444' : '#fff',
                   color: (subscriptionStatus === 'past_due' || subscriptionStatus === 'paused') ? '#fff' : '#000f37',

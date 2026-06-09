@@ -17,7 +17,7 @@ const ratelimit = new Ratelimit({
   prefix: '@upstash/ratelimit',
 });
 
-// CAMBIO AQUÍ: La función ahora debe llamarse 'proxy' o ser 'export default'
+// Función de procesamiento principal (proxy)
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -57,8 +57,8 @@ export async function proxy(request: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  // Lógica de Rate Limit para APIs
-  if (request.nextUrl.pathname.startsWith('/api/')) {
+  // 🔒 Lógica de Rate Limit para APIs (Excluyendo explícitamente los Webhooks de Lemon Squeezy)
+  if (request.nextUrl.pathname.startsWith('/api/') && !request.nextUrl.pathname.startsWith('/api/webhook/')) {
     const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
     const { success } = await ratelimit.limit(ip);
 
