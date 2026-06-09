@@ -45,7 +45,7 @@ export default function HomePage() {
     const LEMON_SQUEEZY_VARIANTE = "1126683"; 
     
     // URL Maestra corregida con el subdominio oficial e inyección del ID de Supabase en custom data
-    const LEMON_SQUEEZY_URL = `https://patmosresearch.lemonsqueezy.com/checkout/buy/${LEMON_SQUEEZY_VARIANTE}?checkout[custom][user_id]=${userId}`; 
+    const LEMON_SQUEEZY_URL = `https://patmos.lemonsqueezy.com/checkout/buy/438380b4-ff9b-4072-b7fd-be4c83f5f939?checkout[custom][user_id]=${userId}`; 
 
     // Abre la pasarela de Lemon Squeezy en una pestaña nueva para el pago
     window.open(LEMON_SQUEEZY_URL, '_blank');
