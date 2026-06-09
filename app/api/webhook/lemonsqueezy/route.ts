@@ -75,11 +75,12 @@ export async function POST(req: Request) {
           })
           .eq('user_id', userIdFromSupabase);
       } else {
-        // 3️⃣ SI NO EXISTE: Hacemos un insert limpio desde cero
-        console.log(`✨ Usuario nuevo. Insertando registro PRO en la tabla...`);
+        // 3️⃣ SI NO EXISTE: Hacemos un insert limpio inyectando el ID generado
+        console.log(`✨ Usuario nuevo. Insertando registro PRO en la tabla con ID único...`);
         dbResult = await supabaseAdmin
           .from('subscriptions')
           .insert({ 
+            id: crypto.randomUUID(), // Resuelve el problema del not-null constraint
             user_id: userIdFromSupabase,
             status: 'active', 
             lemonsqueezy_sub_id: subscriptionId 
