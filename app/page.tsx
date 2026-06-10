@@ -41,11 +41,15 @@ export default function HomePage() {
       return;
     }
 
-    // 🚨 REEMPLAZA EL TEXTO "PEGA_AQUI_TU_ID_DE_VARIANTE" POR EL CÓDIGO DE TU PRODUCTO DE LEMON SQUEEZY
-    const LEMON_SQUEEZY_VARIANTE = "1126683"; 
+    // Ruta de producto / Custom Checkout oficial de Lemon Squeezy
+    const BASE_PRODUCT_URL = "https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef";
     
-    // URL Maestra corregida con el subdominio oficial e inyección del ID de Supabase en custom data
-    const LEMON_SQUEEZY_URL = `https://patmos.lemonsqueezy.com/checkout/buy/438380b4-ff9b-4072-b7fd-be4c83f5f939?checkout[custom][user_id]=${userId}`; 
+    // Construimos los parámetros de consulta de forma segura para evitar doble codificación de corchetes
+    const params = new URLSearchParams();
+    params.append('checkout[custom][user_id]', userId);
+
+    // Adjuntamos la query string procesada nativamente por el navegador
+    const LEMON_SQUEEZY_URL = `${BASE_PRODUCT_URL}?${params.toString()}`;
 
     // Abre la pasarela de Lemon Squeezy en una pestaña nueva para el pago
     window.open(LEMON_SQUEEZY_URL, '_blank');
@@ -326,13 +330,13 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
-              <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+              <div className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Sostiene que la autoridad suprema, exclusiva y final para toda faith y ejecución del ministerio es la palabra de Dios infalible y estructuralmente preservada—encarnada estrictamente dentro de la Biblia Reina Valera 1865 y la Versión Autorizada King James para el mundo de habla inglesa. Opera bajo la convicción absoluta de que todas las traducciones modernas introducen distorsiones teológicas y corrupciones sistémicas (Salmos 12:6-7)."
+                  "Sostiene que la autoridad suprema, exclusiva y final para toda fe y ejecución del ministerio es la palabra de Dios infalible y estructuralmente preservada—encarnada estrictamente dentro de la Biblia Reina Valera 1865 y la Versión Autorizada King James para el mundo de habla inglesa. Opera bajo la convicción absoluta de que todas las traducciones modernas introducen distorsiones teológicas y corrupciones sistémicas."
                 ) : (
-                  "It holds that the supreme, exclusive, and final authority for all faith and ministry execution is the flawless, structurally preserved word of God—embodied strictly within the Authorized King James Holy Bible for the English-speaking world. It operates on the absolute conviction that all modern translations introduce theological distortions and systemic corruptions (Psalms 12:6-7)."
+                  "It holds that the supreme, exclusive, and final authority for all faith and ministry execution is the flawless, structurally preserved word of God—embodied strictly within the Authorized King James Holy Bible for the English-speaking world. It operates on the absolute conviction that all modern translations introduce theological distortions and systemic corruptions."
                 )}
-              </p>
+              </div>
             </details>
 
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
@@ -344,13 +348,13 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
-              <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+              <div className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existencia, coidéntico en su naturaleza essencial, coigual en poder soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
+                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existencia, coidéntico en su naturaleza esencial, coigual en poder sovereign y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas."
                 ) : (
-                  "It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 Juan 5:7)."
+                  "It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections."
                 )}
-              </p>
+              </div>
             </details>
 
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
@@ -362,13 +366,13 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
-              <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+              <div className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Afirma la deidad absoluta y la perfecta humanidad del Señor Jesucristo en una unión hipostática indivisible. Sostiene Su nacimiento virginal, Su vida sin pecado, Su sacrificio expiatorio y sustitutivo en la cruz mediante el derramamiento de Su sangre preciosa, Su resurrección corporal y Su ascensión gloriosa a la diestra del Padre (Filipenses 2:5-8; 1 Pedro 2:24; Hechos 1:9-11)."
+                  "Afirma la deidad absoluta y la perfecta humanidad del Señor Jesucristo en una unión hipostática indivisible. Sostiene Su nacimiento virginal, Su vida sin pecado, Su sacrificio expiatorio y sustitutivo en la cruz mediante el derramamiento de Su sangre preciosa, Su resurrección corporal y Su ascensión gloriosa a la diestra del Padre."
                 ) : (
-                  "It affirms the absolute deity and perfect humanity of the Lord Jesus Christ in one indivisible hypostatic union. It holds to His virgin birth, His sinless life, His substitutionary atoning sacrifice on the cross through the shedding of His precious blood, His bodily resurrection, and His glorious ascension to the right hand of the Father (Philippians 2:5-8; 1 Pedro 2:24; Acts 1:9-11)."
+                  "It affirms the absolute deity and perfect humanity of the Lord Jesus Christ in one indivisible hypostatic union. It holds to His virgin birth, His sinless life, His substitutionary atoning sacrifice on the cross through the shedding of His precious blood, His bodily resurrection, and His glorious ascension to the right hand of the Father."
                 )}
-              </p>
+              </div>
             </details>
 
             <details className="group border-t border-[#e5e7eb] py-4 [&_summary::-webkit-details-marker]:hidden">
@@ -380,13 +384,13 @@ export default function HomePage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </summary>
-              <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
+              <div className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Sostiene una hermenéutica literal y dispensacional estricta, administrando bien la palabra de verdad. Reconoce la separación absoluta entre los planes de Dios para la Iglesia de Cristo y la nación de Israel. Defiende la expectativa inminente del rapto pretribulacional y el posterior establecimiento del reino milenial literal sobre la tierra (2 Timoteo 2:15; Romanos 11:25-26; 1 Tesalonicenses 4:16-17)."
+                  "Sostiene una hermenéutica literal y dispensacional estricta, administrando bien la palabra de verdad. Reconoce la separación absoluta entre los planes de Dios para la Iglesia de Cristo y la nación de Israel. Defiende la expectativa inminente del rapto pretribulacional y el posterior establecimiento del reino milenial literal sobre la tierra."
                 ) : (
-                  "It maintains a strict literal and dispensational hermeneutic, rightly dividing the word of truth. It recognizes the absolute separation between God's distinct programs for the Church of Christ and the nation of Israel. It upholds the imminent pre-tribulation rapture and the subsequent literal millennial reign upon the earth (2 Timothy 2:15; Romans 11:25-26; 1 Thessalonians 4:16-17)."
+                  "It maintains a strict literal and dispensational hermeneutic, rightly dividing the word of truth. It recognizes the absolute separation between God's distinct programs for the Church of Christ and the nation of Israel. It upholds the imminent pre-tribulation rapture and the subsequent literal millennial reign upon the earth."
                 )}
-              </p>
+              </div>
             </details>
 
           </div>
