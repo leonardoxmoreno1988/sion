@@ -12,11 +12,8 @@ export async function POST(req: Request) {
     const rawBody = await req.text();
     const hmacHeader = req.headers.get('x-signature');
 
-    if (!hmacHeader) {
-      return new NextResponse('Falta firma', { status: 401 });
-    }
+    if (!hmacHeader) return new NextResponse('Falta firma', { status: 401 });
 
-    // Validación de firma HMAC
     const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET || '';
     const hmac = crypto.createHmac('sha256', secret);
     const digest = hmac.update(rawBody).digest('hex');
@@ -30,41 +27,46 @@ export async function POST(req: Request) {
     const eventName = body.meta?.event_name;
     const data = body.data?.attributes || {};
 
-    console.log(`🔔 Lemon Squeezy Event: ${eventName}`);
+    console.log(`🔔 Evento: ${eventName}`);
 
     const userId = data.custom_data?.user_id || body.meta?.custom_data?.user_id;
-
     if (!userId) {
-      console.error('❌ No se recibió user_id');
+      console.error('❌ No user_id recibido');
       return new NextResponse('Falta user_id', { status: 400 });
     }
 
     const subscriptionId = body.data?.id;
     const status = data.status || 'active';
 
-    // Upsert (insert o update) más limpio y seguro
+    // Datos para upsert
+    const subscriptionData = {
+      user_id: userId,
+      lemonsqueezy_sub_id: subscriptionId,
+      status: status,
+      price_id: data.first_subscription_item?.price_id?.toString() || data.variant_id?.toString() || 'unknown',
+      current_period_start: data.created_at || new Date().toISOString(),
+      current_period_end: data.renews_at || data.ends_at,
+      cancel_at_period_end: data.cancel_at_period_end || false,
+      ended_at: data.ends_at || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    // UPSERT usando user_id como identificador único
     const { error } = await supabaseAdmin
       .from('subscriptions')
-      .upsert({
-        user_id: userId,
-        lemonsqueezy_sub_id: subscriptionId,
-        status: status,
-        price_id: data.first_subscription_item?.price_id?.toString() || data.variant_id?.toString(),
-        current_period_start: data.created_at,
-        current_period_end: data.renews_at || data.ends_at,
-        updated_at: new Date().toISOString(),
-      }, { 
-        onConflict: 'user_id' 
+      .upsert(subscriptionData, { 
+        onConflict: 'user_id',
+        ignoreDuplicates: false 
       });
 
     if (error) {
-      console.error('❌ Error al actualizar suscripción:', error.message);
-      return new NextResponse('Error en base de datos', { status: 500 });
+      console.error('❌ Error upsert:', error.message);
+      return new NextResponse('Error DB', { status: 500 });
     }
 
-    console.log(`✅ Suscripción ${status} procesada correctamente para usuario: ${userId}`);
+    console.log(`✅ Suscripción ${status} procesada para usuario ${userId}`);
 
-    return NextResponse.json({ received: true, event: eventName }, { status: 200 });
+    return NextResponse.json({ received: true, event: eventName });
 
   } catch (error: any) {
     console.error('Webhook Error:', error);
