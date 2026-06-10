@@ -221,19 +221,24 @@ export default function PatmosChat() {
     }
   };
 
-  // 🍋 COBRO DINÁMICO CON LEMON SQUEEZY EN EL CHAT (CORREGIDO)
-  const handleLemonSqueezyCheckout = () => {
-    if (!userId) return;
-    
-    // ID universal real de tu producto en Lemon Squeezy
-    const LEMON_SQUEEZY_VARIANTE = "1126683"; 
-    
-    // URL maestra corregida con subdominio e inyección dinámica del id del usuario logueado
-    const LEMON_SQUEEZY_URL = `https://patmos.lemonsqueezy.com/checkout/buy/1131840?checkout[custom][user_id]=${userId}`;
-    
-    window.open(LEMON_SQUEEZY_URL, '_blank');
-    window.location.href = '/checkout/success';
-  };
+  // 🍋 LEMON SQUEEZY CHECKOUT - VERSIÓN FINAL (Chat Page)
+const handleLemonSqueezyCheckout = () => {
+  if (!userId) {
+    alert(lang === 'es' ? "Error: Usuario no identificado" : "Error: User not identified");
+    return;
+  }
+
+  const CHECKOUT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef?checkout[custom][user_id]=${userId}`;
+
+  window.open(CHECKOUT_URL, '_blank');
+
+  setTimeout(() => {
+    alert(lang === 'es'
+      ? "Abriendo checkout seguro de Lemon Squeezy...\n\nUna vez completes el pago, tu suscripción se activará automáticamente."
+      : "Opening secure Lemon Squeezy checkout...\n\nYour PRO subscription will activate automatically after payment."
+    );
+  }, 400);
+};
 
   // 📋 GESTIÓN DE FACTURACIÓN CON LEMON SQUEEZY
   const handleOpenBillingPortal = (e: React.MouseEvent) => {
