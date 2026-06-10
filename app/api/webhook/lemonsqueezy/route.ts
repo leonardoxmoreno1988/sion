@@ -29,7 +29,6 @@ export async function POST(req: Request) {
 
     const body = JSON.parse(rawBody);
     const eventName = body.meta?.event_name;
-    const attributes = body.data?.attributes;
 
     console.log(`🔔 Evento recibido de Lemon Squeezy: [${eventName}]`);
 
@@ -37,6 +36,13 @@ export async function POST(req: Request) {
     if (eventName === 'subscription_created') {
       const subscriptionId = body.data.id;        // El ID único de suscripción en Lemon Squeezy
       
+      // 🏷️ CAPTURA DEL PRICE_ID/VARIANT_ID DESDE LEMON SQUEEZY:
+      // Extraemos el identificador del precio cobrado para cumplir con el not-null constraint de Supabase
+      const priceIdFromLemon = 
+        body.data?.attributes?.first_subscription_item?.price_id || 
+        body.data?.attributes?.variant_id?.toString() || 
+        "1126683"; // Respaldo con tu ID de producto real por si viene vacío
+
       // 🎯 CAPTURA DEL ID PERSONALIZADO BLINDADA:
       const userIdFromSupabase = 
         body.meta?.custom_data?.user_id || 
@@ -48,7 +54,7 @@ export async function POST(req: Request) {
         return new NextResponse('Falta el ID de usuario', { status: 400 });
       }
 
-      console.log(`⏳ Procesando activación PRO para el Usuario ID de Supabase: ${userIdFromSupabase} (Sub ID: ${subscriptionId})`);
+      console.log(`⏳ Procesando activación PRO para el Usuario ID de Supabase: ${userIdFromSupabase} (Sub ID: ${subscriptionId}, Price ID: ${priceIdFromLemon})`);
 
       // 1️⃣ BUSCAR SI EL USUARIO YA TIENE UNA FILA EN LA TABLA SUBSCRIPTIONS
       const { data: existingSub, error: fetchError } = await supabaseAdmin
@@ -65,25 +71,27 @@ export async function POST(req: Request) {
       let dbResult;
 
       if (existingSub) {
-        // 2️⃣ SI YA EXISTE: Hacemos un update normal sobre la fila asignada a su ID
-        console.log(`🔄 El usuario ya existe en la tabla. Actualizando a estatus activo...`);
+        // 2️⃣ SI YA EXISTE: Hacemos un update normal incluyendo la columna price_id requerida
+        console.log(`🔄 El usuario ya existe en la tabla. Actualizando a estatus activo con su price_id...`);
         dbResult = await supabaseAdmin
           .from('subscriptions')
           .update({ 
             status: 'active', 
-            lemonsqueezy_sub_id: subscriptionId 
+            lemonsqueezy_sub_id: subscriptionId,
+            price_id: priceIdFromLemon // 👈 Evita el Not-Null Constraint en el UPDATE
           })
           .eq('user_id', userIdFromSupabase);
       } else {
-        // 3️⃣ SI NO EXISTE: Hacemos un insert limpio inyectando el ID generado
-        console.log(`✨ Usuario nuevo. Insertando registro PRO en la tabla con ID único...`);
+        // 3️⃣ SI NO EXISTE: Hacemos un insert limpio proveyendo id y price_id
+        console.log(`✨ Usuario nuevo. Insertando registro PRO con ID único y price_id...`);
         dbResult = await supabaseAdmin
           .from('subscriptions')
           .insert({ 
-            id: crypto.randomUUID(), // Resuelve el problema del not-null constraint
+            id: crypto.randomUUID(), 
             user_id: userIdFromSupabase,
             status: 'active', 
-            lemonsqueezy_sub_id: subscriptionId 
+            lemonsqueezy_sub_id: subscriptionId,
+            price_id: priceIdFromLemon // 👈 Evita el Not-Null Constraint en el INSERT
           });
       }
 
