@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       return new NextResponse('Error DB', { status: 500 });
     }
 
-    console.log(`✅ Suscripción ${status} actualizada correctamente para usuario: ${userId}`);
+    console.log(`✅ Suscripción de Patmos ${status} actualizada correctamente para usuario: ${userId}`);
 
     return NextResponse.json({ received: true });
 
