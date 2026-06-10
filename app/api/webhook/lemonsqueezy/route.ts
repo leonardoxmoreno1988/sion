@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const digest = hmac.update(rawBody).digest('hex');
 
     if (digest !== hmacHeader) {
-      console.error('❌ Firma HMAC inválida');
+      console.error('❌ Firma inválida');
       return new NextResponse('Firma inválida', { status: 401 });
     }
 
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const eventName = body.meta?.event_name;
     const data = body.data?.attributes || {};
 
-    console.log(`🔔 Evento: ${eventName}`);
+    console.log(`🔔 Evento recibido: ${eventName}`);
 
     const userId = data.custom_data?.user_id || body.meta?.custom_data?.user_id;
     if (!userId) {
@@ -38,35 +38,30 @@ export async function POST(req: Request) {
     const subscriptionId = body.data?.id;
     const status = data.status || 'active';
 
-    // Datos para upsert
-    const subscriptionData = {
-      user_id: userId,
-      lemonsqueezy_sub_id: subscriptionId,
-      status: status,
-      price_id: data.first_subscription_item?.price_id?.toString() || data.variant_id?.toString() || 'unknown',
-      current_period_start: data.created_at || new Date().toISOString(),
-      current_period_end: data.renews_at || data.ends_at,
-      cancel_at_period_end: data.cancel_at_period_end || false,
-      ended_at: data.ends_at || null,
-      updated_at: new Date().toISOString(),
-    };
-
-    // UPSERT usando user_id como identificador único
     const { error } = await supabaseAdmin
       .from('subscriptions')
-      .upsert(subscriptionData, { 
-        onConflict: 'user_id',
-        ignoreDuplicates: false 
+      .upsert({
+        user_id: userId,
+        lemonsqueezy_sub_id: subscriptionId,
+        status: status,
+        price_id: data.first_subscription_item?.price_id?.toString() || data.variant_id?.toString() || 'lemon-default',
+        current_period_start: data.created_at || new Date().toISOString(),
+        current_period_end: data.renews_at || data.ends_at,
+        cancel_at_period_end: data.cancel_at_period_end || false,
+        ended_at: data.ends_at || null,
+        updated_at: new Date().toISOString(),
+      }, { 
+        onConflict: 'user_id' 
       });
 
     if (error) {
-      console.error('❌ Error upsert:', error.message);
+      console.error('Error en upsert:', error.message);
       return new NextResponse('Error DB', { status: 500 });
     }
 
-    console.log(`✅ Suscripción ${status} procesada para usuario ${userId}`);
+    console.log(`✅ Suscripción ${status} actualizada correctamente para usuario: ${userId}`);
 
-    return NextResponse.json({ received: true, event: eventName });
+    return NextResponse.json({ received: true });
 
   } catch (error: any) {
     console.error('Webhook Error:', error);
