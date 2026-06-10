@@ -33,26 +33,24 @@ export default function HomePage() {
     checkUser();
   }, []);
 
-  // 🍋 MOTOR DE FACTURACIÓN: Redirige al checkout dinámico de Lemon Squeezy
-  const handleCheckout = () => {
-    // Si el pastor NO está logueado, lo mandamos primero a iniciar sesión / registrarse
-    if (!userId) {
-      window.location.href = '/login';
-      return;
-    }
+  // 🍋 LEMON SQUEEZY CHECKOUT - VERSIÓN FINAL
+const handleCheckout = () => {
+  if (!userId) {
+    window.location.href = '/login';
+    return;
+  }
 
-    // 🚨 REEMPLAZA EL TEXTO "PEGA_AQUI_TU_ID_DE_VARIANTE" POR EL CÓDIGO DE TU PRODUCTO DE LEMON SQUEEZY
-    const LEMON_SQUEEZY_VARIANTE = "1126683"; 
-    
-    // URL Maestra corregida con el subdominio oficial e inyección del ID de Supabase en custom data
-    const LEMON_SQUEEZY_URL = `https://patmos.lemonsqueezy.com/checkout/buy/438380b4-ff9b-4072-b7fd-be4c83f5f939?checkout[custom][user_id]=${userId}`; 
+  const CHECKOUT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef?checkout[custom][user_id]=${userId}`;
 
-    // Abre la pasarela de Lemon Squeezy en una pestaña nueva para el pago
-    window.open(LEMON_SQUEEZY_URL, '_blank');
+  window.open(CHECKOUT_URL, '_blank');
 
-    // Redirige la ventana principal a la pantalla de espera o éxito
-    window.location.href = '/checkout/success';
-  };
+  setTimeout(() => {
+    alert(lang === 'es'
+      ? "Abriendo checkout seguro de Lemon Squeezy...\n\nUna vez completes el pago, tu suscripción PRO se activará automáticamente."
+      : "Opening secure Lemon Squeezy checkout...\n\nYour PRO subscription will activate automatically after payment."
+    );
+  }, 400);
+};
 
   if (!isMounted) return <div className="min-h-screen bg-[#f9fafb]" />;
 
