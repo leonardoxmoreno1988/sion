@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       const priceIdFromLemon = 
         attributes?.first_subscription_item?.price_id || 
         attributes?.variant_id?.toString() || 
-        "1126683";
+        "1131840";
 
       // 📅 CAPTURA DE FECHAS DE PERIODO BLINDADAS (Evita Not-Null Constraint):
       // Si Lemon Squeezy no las envía en el formato esperado, calculamos la fecha actual y +30 días.
