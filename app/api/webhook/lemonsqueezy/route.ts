@@ -35,26 +35,39 @@ export async function POST(req: Request) {
     // ⚡ LÓGICA DE NEGOCIO: Cuando se crea una suscripción exitosa en la pasarela
     if (eventName === 'subscription_created') {
       const subscriptionId = body.data.id;        // El ID único de suscripción en Lemon Squeezy
+      const attributes = body.data?.attributes;
       
       // 🏷️ CAPTURA DEL PRICE_ID/VARIANT_ID DESDE LEMON SQUEEZY:
-      // Extraemos el identificador del precio cobrado para cumplir con el not-null constraint de Supabase
       const priceIdFromLemon = 
-        body.data?.attributes?.first_subscription_item?.price_id || 
-        body.data?.attributes?.variant_id?.toString() || 
-        "1126683"; // Respaldo con tu ID de producto real por si viene vacío
+        attributes?.first_subscription_item?.price_id || 
+        attributes?.variant_id?.toString() || 
+        "1126683";
+
+      // 📅 CAPTURA DE FECHAS DE PERIODO BLINDADAS (Evita Not-Null Constraint):
+      // Si Lemon Squeezy no las envía en el formato esperado, calculamos la fecha actual y +30 días.
+      const nowISO = new Date().toISOString();
+      const nextMonthISO = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+      const currentPeriodStart = attributes?.renews_at 
+        ? new Date(attributes.created_at).toISOString() 
+        : nowISO;
+        
+      const currentPeriodEnd = attributes?.renews_at 
+        ? new Date(attributes.renews_at).toISOString() 
+        : nextMonthISO;
 
       // 🎯 CAPTURA DEL ID PERSONALIZADO BLINDADA:
       const userIdFromSupabase = 
         body.meta?.custom_data?.user_id || 
         body.meta?.custom_data?.["user_id"] ||
-        body.data?.attributes?.custom_data?.user_id;
+        attributes?.custom_data?.user_id;
 
       if (!userIdFromSupabase) {
         console.error('❌ Error: El webhook no recibió ningún [user_id] en el mapeo de custom_data.');
         return new NextResponse('Falta el ID de usuario', { status: 400 });
       }
 
-      console.log(`⏳ Procesando activación PRO para el Usuario ID de Supabase: ${userIdFromSupabase} (Sub ID: ${subscriptionId}, Price ID: ${priceIdFromLemon})`);
+      console.log(`⏳ Procesando activación PRO para el Usuario ID de Supabase: ${userIdFromSupabase} (Sub ID: ${subscriptionId})`);
 
       // 1️⃣ BUSCAR SI EL USUARIO YA TIENE UNA FILA EN LA TABLA SUBSCRIPTIONS
       const { data: existingSub, error: fetchError } = await supabaseAdmin
@@ -71,19 +84,21 @@ export async function POST(req: Request) {
       let dbResult;
 
       if (existingSub) {
-        // 2️⃣ SI YA EXISTE: Hacemos un update normal incluyendo la columna price_id requerida
-        console.log(`🔄 El usuario ya existe en la tabla. Actualizando a estatus activo con su price_id...`);
+        // 2️⃣ SI YA EXISTE: Hacemos un update normal incluyendo todas las columnas requeridas
+        console.log(`🔄 El usuario ya existe en la tabla. Actualizando a estatus activo...`);
         dbResult = await supabaseAdmin
           .from('subscriptions')
           .update({ 
             status: 'active', 
             lemonsqueezy_sub_id: subscriptionId,
-            price_id: priceIdFromLemon // 👈 Evita el Not-Null Constraint en el UPDATE
+            price_id: priceIdFromLemon,
+            current_period_start: currentPeriodStart,
+            current_period_end: currentPeriodEnd
           })
           .eq('user_id', userIdFromSupabase);
       } else {
-        // 3️⃣ SI NO EXISTE: Hacemos un insert limpio proveyendo id y price_id
-        console.log(`✨ Usuario nuevo. Insertando registro PRO con ID único y price_id...`);
+        // 3️⃣ SI NO EXISTE: Hacemos un insert limpio proveyendo id, price_id y periodos
+        console.log(`✨ Usuario nuevo. Insertando registro PRO completo...`);
         dbResult = await supabaseAdmin
           .from('subscriptions')
           .insert({ 
@@ -91,7 +106,9 @@ export async function POST(req: Request) {
             user_id: userIdFromSupabase,
             status: 'active', 
             lemonsqueezy_sub_id: subscriptionId,
-            price_id: priceIdFromLemon // 👈 Evita el Not-Null Constraint en el INSERT
+            price_id: priceIdFromLemon,
+            current_period_start: currentPeriodStart,
+            current_period_end: currentPeriodEnd
           });
       }
 
