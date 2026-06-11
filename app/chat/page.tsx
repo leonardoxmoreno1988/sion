@@ -248,24 +248,23 @@ export default function PatmosChat() {
     }
   };
 
-    // 🍋 LEMON SQUEEZY OVERLAY - VERSIÓN PROFESIONAL (Chat)
-const handleLemonSqueezyCheckout = () => {
-  if (!userId) {
-    alert(lang === 'es' ? "Error: Usuario no identificado" : "Error: User not identified");
-    return;
-  }
+    // 🍋 LEMON SQUEEZY OVERLAY - VERSIÓN ULTRA-FORZADA (Chat)
+  const handleLemonSqueezyCheckout = () => {
+    if (!userId) {
+      alert(lang === 'es' ? "Error: Usuario no identificado" : "Error: User not identified");
+      return;
+    }
 
-  // 1. Usamos el ID real de producción numérico
-  const CHECKOUT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef?checkout[custom][user_id]=${userId}&embed=1`;
+    const CHECKOUT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef?checkout[custom][user_id]=${userId}&embed=1`;
 
-  // 2. Ejecutar Overlay dinámico
-  if (window.LemonSqueezy?.Url) {
-    window.LemonSqueezy.Url.open(CHECKOUT_URL);
-  } else {
-    // Respaldo por si el script falla en cargar
-    window.open(CHECKOUT_URL, '_blank');
-  }
-};
+    // 🎯 Forzado nativo: Usamos el método global directo si está disponible
+    if (typeof window !== 'undefined' && window.LemonSqueezy?.Url) {
+      window.LemonSqueezy.Url.open(CHECKOUT_URL);
+    } else {
+      // Respaldo inmediato si el script aún no termina de cargar de fondo
+      window.open(CHECKOUT_URL, '_blank');
+    }
+  };
 
   // 📋 GESTIÓN DE FACTURACIÓN CON LEMON SQUEEZY
   const handleOpenBillingPortal = (e: React.MouseEvent) => {
