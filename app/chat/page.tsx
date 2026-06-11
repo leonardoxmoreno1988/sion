@@ -96,6 +96,9 @@ export default function PatmosChat() {
   }, [lang]);
 
   useEffect(() => {
+    // Declaramos la variable del canal afuera para poder desuscribirnos en la limpieza
+    let realtimeChannel: any = null;
+
     const initPage = async () => {
       const link = document.createElement('link');
       link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap';
@@ -133,7 +136,31 @@ export default function PatmosChat() {
         console.error("Error fetching history:", err);
       }
 
-      // 🛡️ COMPROBACIÓN DEL BYPASS DE ADMINISTRADOR Y BASE DE DATOS
+      // Función aislada para evaluar el estado de la suscripción de forma limpia
+      const evaluateSubscriptionStatus = (status: string | null) => {
+        setSubscriptionStatus(status);
+        if (status === 'active' || status === 'trialing') {
+          setIsPremium(true);
+          setHasCredits(true);
+        } else if (status === 'past_due' || status === 'paused') {
+          setIsPremium(false);
+          setHasCredits(false);
+          setMessages([
+            { 
+              id: 'system-past-due', 
+              role: 'assistant', 
+              content: lang === 'es' 
+                ? "⚠️ **Alerta de Suscripción:** Falló el pago de su factura de renovación o su cuenta está pausada. El acceso ha sido restringido temporalmente. Por favor, comuníquese con soporte para actualizar su método de pago."
+                : "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed or your account is paused. Access has been temporarily restricted. Please contact support to update your payment method." 
+            }
+          ]);
+        } else {
+          setIsPremium(false);
+          setHasCredits(true); 
+        }
+      };
+
+      // 🛡️ COMPROBACIÓN INICIAL DEL BYPASS DE ADMINISTRADOR Y BASE DE DATOS
       if (emailSession === 'leonardo@ritualypropaganda.com') {
         setIsPremium(true);
         setHasCredits(true);
@@ -147,28 +174,7 @@ export default function PatmosChat() {
             .maybeSingle();
 
           if (subscription) {
-            const currentStatus = subscription.status;
-            setSubscriptionStatus(currentStatus);
-
-            if (currentStatus === 'active' || currentStatus === 'trialing') {
-              setIsPremium(true);
-              setHasCredits(true);
-            } else if (currentStatus === 'past_due' || currentStatus === 'paused') {
-              setIsPremium(false);
-              setHasCredits(false);
-              setMessages([
-                { 
-                  id: 'system-past-due', 
-                  role: 'assistant', 
-                  content: lang === 'es' 
-                    ? "⚠️ **Alerta de Suscripción:** Falló el pago de su factura de renovación o su cuenta está pausada. El acceso ha sido restringido temporalmente. Por favor, comuníquese con soporte para actualizar su método de pago."
-                    : "⚠️ **Subscription Alert:** Your recent renewal invoice settlement failed or your account is paused. Access has been temporarily restricted. Please contact support to update your payment method." 
-                }
-              ]);
-            } else {
-              setIsPremium(false);
-              setHasCredits(true); 
-            }
+            evaluateSubscriptionStatus(subscription.status);
           } else {
             setIsPremium(false);
             setHasCredits(true);
@@ -177,6 +183,26 @@ export default function PatmosChat() {
           console.error("Error checking subscription tier:", subErr);
           setHasCredits(true);
         }
+
+        // 📡 ⚡ CONFIGURACIÓN DE SUPABASE REALTIME (Escucha Activa)
+        // Se suscribe a cualquier UPDATE en la tabla 'subscriptions' que pertenezca a este usuario específico
+        realtimeChannel = supabase
+          .channel(`public:subscriptions:user_id=eq.${session.user.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'subscriptions',
+              filter: `user_id=eq.${session.user.id}`,
+            },
+            (payload) => {
+              console.log('⚡ Cambio detectado en tiempo real en Supabase:', payload.new);
+              const newStatus = payload.new.status;
+              evaluateSubscriptionStatus(newStatus);
+            }
+          )
+          .subscribe();
       }
 
       const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, currentSession) => {
@@ -191,12 +217,25 @@ export default function PatmosChat() {
         setIsDarkMode(true);
       }
 
+      // Retorno de limpieza (Cleanup) unificado
       return () => {
         authSub.unsubscribe();
         window.removeEventListener('resize', checkDevice);
+        if (realtimeChannel) {
+          supabase.removeChannel(realtimeChannel);
+        }
       };
     };
-    initPage();
+
+    // Variable para capturar la función de limpieza que devuelva initPage
+    let cleanupFn: (() => void) | undefined;
+    initPage().then(res => {
+      if (typeof res === 'function') cleanupFn = res;
+    });
+
+    return () => {
+      if (cleanupFn) cleanupFn();
+    };
   }, [lang]);
 
     // Cargar script de Lemon Squeezy para Overlay e inicializarlo
