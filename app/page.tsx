@@ -66,7 +66,7 @@ export default function HomePage() {
     }
 
     // Usando el ID de producción numérico real y el modificador embed=1
-    const CHECKOUT_URL = `https://checkout.lemonsqueezy.com/buy/1131840?checkout[custom][user_id]=${userId}&embed=1`;
+    const CHECKOUT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef?checkout[custom][user_id]=${userId}&embed=1`;
 
     if (window.LemonSqueezy?.Url) {
       window.LemonSqueezy.Url.open(CHECKOUT_URL);

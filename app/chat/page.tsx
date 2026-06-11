@@ -256,7 +256,7 @@ const handleLemonSqueezyCheckout = () => {
   }
 
   // 1. Usamos el ID real de producción numérico
-  const CHECKOUT_URL = `https://checkout.lemonsqueezy.com/buy/1131840?checkout[custom][user_id]=${userId}&embed=1`;
+  const CHECKOUT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef?checkout[custom][user_id]=${userId}&embed=1`;
 
   // 2. Ejecutar Overlay dinámico
   if (window.LemonSqueezy?.Url) {
