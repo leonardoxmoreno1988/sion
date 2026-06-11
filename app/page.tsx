@@ -22,11 +22,18 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Cargar script de Lemon Squeezy para Overlay
+  // 🍋 Cargar script de Lemon Squeezy para Overlay e inicializarlo
   useEffect(() => {
     const script = document.createElement('script');
     script.src = "https://app.lemonsqueezy.com/js/lemon.js";
     script.defer = true;
+    
+    script.onload = () => {
+      if (window.LemonSqueezy) {
+        window.LemonSqueezy.Setup();
+      }
+    };
+
     document.head.appendChild(script);
 
     return () => {
@@ -51,14 +58,15 @@ export default function HomePage() {
     checkUser();
   }, []);
 
-  // 🍋 LEMON SQUEEZY OVERLAY - VERSIÓN PROFESIONAL
+  // 🍋 LEMON SQUEEZY OVERLAY - VERSIÓN PROFESIONAL UNIFICADA
   const handleCheckout = () => {
     if (!userId) {
       window.location.href = '/login';
       return;
     }
 
-    const CHECKOUT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef?checkout[custom][user_id]=${userId}`;
+    // Usando el ID de producción numérico real y el modificador embed=1
+    const CHECKOUT_URL = `https://checkout.lemonsqueezy.com/buy/1131840?checkout[custom][user_id]=${userId}&embed=1`;
 
     if (window.LemonSqueezy?.Url) {
       window.LemonSqueezy.Url.open(CHECKOUT_URL);
@@ -345,7 +353,7 @@ export default function HomePage() {
               </summary>
               <p className="mt-4 text-base leading-relaxed text-[#4b5563] pr-6 transition-all duration-300">
                 {lang === 'es' ? (
-                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existencia, coidéntico en su naturaleza essencial, coigual en poder soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
+                  "Reconoce a una Deidad suprema y triuna, que existe eternamente en tres Personas distintas: el Padre, la Palabra y el Espíritu Santo. Sostiene que cada miembro de la Trinidad es coeterno en existencia, coidéntico en su naturaleza essencial, coigual en power soberano y perfectamente integrado dentro de los mismos atributos absolutos y perfecciones divinas (Deuteronomio 6:4; 1 Timoteo 1:17; 1 Juan 5:7)."
                 ) : (
                   "It recognizes one supreme, triune Godhead, eternally existing across three distinct Persons: the Father, the Word, and the Holy Ghost. It holds that each constituent of the Trinity is co-eternal in existence, co-identical in core nature, co-equal in sovereign power, and perfectly integrated within the absolute self-same attributes and divine perfections (Deuteronomy 6:4; 1 Timothy 1:17; 1 Juan 5:7)."
                 )}
