@@ -199,11 +199,18 @@ export default function PatmosChat() {
     initPage();
   }, [lang]);
 
-    // Cargar script de Lemon Squeezy para Overlay
+    // Cargar script de Lemon Squeezy para Overlay e inicializarlo
   useEffect(() => {
     const script = document.createElement('script');
     script.src = "https://app.lemonsqueezy.com/js/lemon.js";
     script.defer = true;
+    
+    script.onload = () => {
+      if (window.LemonSqueezy) {
+        window.LemonSqueezy.Setup();
+      }
+    };
+
     document.head.appendChild(script);
 
     return () => {
@@ -242,21 +249,23 @@ export default function PatmosChat() {
   };
 
     // 🍋 LEMON SQUEEZY OVERLAY - VERSIÓN PROFESIONAL (Chat)
-  const handleLemonSqueezyCheckout = () => {
-    if (!userId) {
-      alert(lang === 'es' ? "Error: Usuario no identificado" : "Error: User not identified");
-      return;
-    }
+const handleLemonSqueezyCheckout = () => {
+  if (!userId) {
+    alert(lang === 'es' ? "Error: Usuario no identificado" : "Error: User not identified");
+    return;
+  }
 
-    const CHECKOUT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef?checkout[custom][user_id]=${userId}`;
+  // 1. Usamos el ID real de producción numérico
+  const CHECKOUT_URL = `https://checkout.lemonsqueezy.com/buy/1131840?checkout[custom][user_id]=${userId}&embed=1`;
 
-    // Usar Overlay (modal dentro de la página)
-    if (window.LemonSqueezy?.Url) {
-      window.LemonSqueezy.Url.open(CHECKOUT_URL);
-    } else {
-      window.open(CHECKOUT_URL, '_blank');
-    }
-  };
+  // 2. Ejecutar Overlay dinámico
+  if (window.LemonSqueezy?.Url) {
+    window.LemonSqueezy.Url.open(CHECKOUT_URL);
+  } else {
+    // Respaldo por si el script falla en cargar
+    window.open(CHECKOUT_URL, '_blank');
+  }
+};
 
   // 📋 GESTIÓN DE FACTURACIÓN CON LEMON SQUEEZY
   const handleOpenBillingPortal = (e: React.MouseEvent) => {
