@@ -8,6 +8,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLanguage } from "../context/Languagecontext";
 
+// Declaración para Lemon Squeezy Overlay
+declare global {
+  interface Window {
+    LemonSqueezy: any;
+  }
+}
+
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -192,6 +199,19 @@ export default function PatmosChat() {
     initPage();
   }, [lang]);
 
+    // Cargar script de Lemon Squeezy para Overlay
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = "https://app.lemonsqueezy.com/js/lemon.js";
+    script.defer = true;
+    document.head.appendChild(script);
+
+    return () => {
+      const existing = document.querySelector('script[src="https://app.lemonsqueezy.com/js/lemon.js"]');
+      if (existing) existing.remove();
+    };
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     document.body.style.backgroundColor = isDarkMode ? '#020617' : '#f9fafb';
@@ -221,24 +241,22 @@ export default function PatmosChat() {
     }
   };
 
-  // 🍋 LEMON SQUEEZY CHECKOUT - VERSIÓN FINAL (Chat Page)
-const handleLemonSqueezyCheckout = () => {
-  if (!userId) {
-    alert(lang === 'es' ? "Error: Usuario no identificado" : "Error: User not identified");
-    return;
-  }
+    // 🍋 LEMON SQUEEZY OVERLAY - VERSIÓN PROFESIONAL (Chat)
+  const handleLemonSqueezyCheckout = () => {
+    if (!userId) {
+      alert(lang === 'es' ? "Error: Usuario no identificado" : "Error: User not identified");
+      return;
+    }
 
-  const CHECKOUT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef?checkout[custom][user_id]=${userId}`;
+    const CHECKOUT_URL = `https://patmos.lemonsqueezy.com/checkout/buy/4beafe1a-6811-457e-b7b5-02e216f8aeef?checkout[custom][user_id]=${userId}`;
 
-  window.open(CHECKOUT_URL, '_blank');
-
-  setTimeout(() => {
-    alert(lang === 'es'
-      ? "Abriendo checkout seguro de Lemon Squeezy...\n\nUna vez completes el pago, tu suscripción se activará automáticamente."
-      : "Opening secure Lemon Squeezy checkout...\n\nYour PRO subscription will activate automatically after payment."
-    );
-  }, 400);
-};
+    // Usar Overlay (modal dentro de la página)
+    if (window.LemonSqueezy?.Url) {
+      window.LemonSqueezy.Url.open(CHECKOUT_URL);
+    } else {
+      window.open(CHECKOUT_URL, '_blank');
+    }
+  };
 
   // 📋 GESTIÓN DE FACTURACIÓN CON LEMON SQUEEZY
   const handleOpenBillingPortal = (e: React.MouseEvent) => {
