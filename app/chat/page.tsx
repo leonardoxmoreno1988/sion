@@ -305,14 +305,46 @@ export default function PatmosChat() {
     }
   };
 
-  // 📋 GESTIÓN DE FACTURACIÓN CON LEMON SQUEEZY
-  const handleOpenBillingPortal = (e: React.MouseEvent) => {
-    e.preventDefault();
+  // 📋 GESTIÓN DE FACTURACIÓN CON LEMON SQUEEZY (Versión Real de Producción)
+const handleOpenBillingPortal = async (e: React.MouseEvent) => {
+  e.preventDefault();
+  
+  if (!userId) {
+    alert(lang === 'es' ? "Error: Usuario no identificado" : "Error: User not identified");
+    return;
+  }
+
+  try {
+    // Mostramos un feedback rápido en la misma alerta o puedes usar un estado de carga si prefieres
+    console.log("Solicitando enlace al Customer Portal...");
+    
+    const res = await fetch('/api/billing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+
+    if (!res.ok) {
+      throw new Error("No se pudo generar el enlace de facturación.");
+    }
+
+    const { url } = await res.json();
+
+    if (url) {
+      // 🚀 Abre el Customer Portal real de Lemon Squeezy en una pestaña nueva
+      window.open(url, '_blank');
+    } else {
+      throw new Error("URL no recibida.");
+    }
+
+  } catch (err) {
+    console.error("Error al abrir el portal de facturación:", err);
     alert(lang === 'es' 
-      ? "Para gestionar, actualizar su tarjeta o cancelar su suscripción, por favor revise el correo electrónico de confirmación enviado por Lemon Squeezy o comuníquese con soporte@patmosresearch.com" 
-      : "To manage, update your payment method, or cancel your subscription, please check the confirmation email sent by Lemon Squeezy or contact support@patmosresearch.com"
+      ? "No se pudo conectar con su perfil de facturación activo. Si es una cuenta promocional o de administración, el portal está desactivado." 
+      : "Could not sync with your active billing profile. If this is a promotional or admin account, the portal is disabled."
     );
-  };
+  }
+};
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
