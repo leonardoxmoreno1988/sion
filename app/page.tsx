@@ -211,13 +211,13 @@ export default function HomePage() {
           <div className="flex flex-col gap-5">
             
             {/* 5 ESTRELLAS DORADAS ALINEADAS A LA IZQUIERDA */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.8">
               {[...Array(5)].map((_, i) => (
                 <svg 
                   key={i} 
                   width="18" 
                   height="18" 
-                  viewBox="0 0 20 20" 
+                  viewBox="0 0 24 24" 
                   fill="#c49400" /* Color dorado/amber-500 de Tailwind */
                   className="shrink-0"
                 >
