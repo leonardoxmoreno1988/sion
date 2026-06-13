@@ -31,47 +31,22 @@ export async function POST(request: Request) {
       return new NextResponse('No autorizado', { status: 401 });
     }
 
-    // 2. Buscar el customer_id real en Supabase
+    // 2. Buscar si el usuario tiene una suscripción en la base de datos
     const { data: subscription, error: dbError } = await supabase
       .from('subscriptions')
-      .select('lemonsqueezy_sub_id') // Buscamos el ID de la suscripción para pedir el portal
+      .select('lemonsqueezy_sub_id')
       .eq('user_id', userId)
       .maybeSingle();
 
     if (dbError || !subscription || !subscription.lemonsqueezy_sub_id) {
-      console.error('❌ No se encontró suscripción activa para el usuario en la DB');
+      console.error('❌ No se encontró suscripción para el usuario en la DB');
       return new NextResponse('No customer found', { status: 404 });
     }
 
-    // 3. Solicitar el enlace del Customer Portal directamente a la API de Lemon Squeezy
-    const apiKey = process.env.LEMONSQUEEZY_API_KEY; // Necesitas tu API key de Lemon Squeezy en tu .env
-    if (!apiKey) {
-      console.error('❌ Falta LEMONSQUEEZY_API_KEY en las variables de entorno');
-      return new NextResponse('Config Error', { status: 500 });
-    }
-
-    // Llamamos al endpoint oficial de Lemon Squeezy para generar la URL dinámica
-    const lsResponse = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${subscription.lemonsqueezy_sub_id}`, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'application/vnd.api+json',
-        'Content-Type': 'application/vnd.api+json'
-      }
-    });
-
-    if (!lsResponse.ok) {
-      const errData = await lsResponse.text();
-      console.error('❌ Error de Lemon Squeezy API:', errData);
-      return new NextResponse('Lemon Squeezy API Error', { status: 500 });
-    }
-
-    const lsData = await lsResponse.json();
-    // Extraemos la URL del portal del cliente que nos devuelve la API
-    const customerPortalUrl = lsData.data?.attributes?.urls?.customer_portal;
-
-    if (!customerPortalUrl) {
-      return new NextResponse('Portal URL not found', { status: 500 });
-    }
+    // 3. ✨ EL ATAJO DE ORO: Construimos la URL oficial del portal de clientes de Lemon Squeezy
+    // Al redirigirlos a /billing en tu subdominio de Lemon Squeezy, ellos ponen su correo o entran directo si ya iniciaron sesión al pagar.
+    // También puedes usar el hub de facturación general de Lemon Squeezy:
+    const customerPortalUrl = `https://patmos.lemonsqueezy.com/billing`;
 
     return NextResponse.json({ url: customerPortalUrl });
 
