@@ -149,7 +149,7 @@ export default function HomePage() {
           {lang === 'es' ? (
             <>Software diseñado para el escrutinio literal, dispensacional y pretribulacional de las Escrituras. Sin traducciones modernas ni interpretaciones genéricas.</>
           ) : (
-            <>Software engine designed for the literal, dispensational, and pre-tribulational study of Scripture.<br/>No modern translations. Pure bible analysis.</>
+            <>Software engine designed for the literal, dispensational, and pre-tribulational study of Scripture.<br/><br/>No modern translations. Pure Bible analysis.</>
           )}
         </p>
 
