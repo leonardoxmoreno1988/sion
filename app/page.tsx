@@ -90,17 +90,9 @@ export default function HomePage() {
           />
         </Link>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ 
-            display: 'inline-flex', 
-            alignItems: 'center', 
-            border: '1px solid #000f37',
-            padding: '0 6px', 
-            gap: '4px',
-            backgroundColor: 'transparent',
-            height: '24px', 
-            boxSizing: 'border-box'
-          }}>
+        <div className="flex items-center gap-3">
+          {/* Selector de Idioma Optimizado */}
+          <div className="inline-flex items-center border border-[#000f37] px-2 gap-1 bg-transparent h-9 md:h-7 box-sizing-border">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#000f37" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
               <circle cx="12" cy="12" r="10"/>
               <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>
@@ -109,20 +101,10 @@ export default function HomePage() {
             <select 
               value={lang}
               onChange={(e) => setLanguage(e.target.value as 'en' | 'es')}
+              className="bg-transparent border-none outline-none cursor-pointer text-[10px] font-bold uppercase tracking-wider h-full p-0 m-0"
               style={{
-                fontSize: '9px',
-                fontWeight: '700',
                 color: '#000f37',
-                backgroundColor: 'transparent',
-                border: 'none',
-                outline: 'none',
-                cursor: 'pointer',
                 fontFamily: '"Inter", sans-serif',
-                textTransform: 'uppercase',
-                padding: 0,
-                margin: 0,
-                lineHeight: '24px', 
-                height: '100%',
                 WebkitAppearance: 'none', 
                 MozAppearance: 'none'     
               }}
@@ -132,10 +114,10 @@ export default function HomePage() {
             </select>
           </div>
 
+          {/* Botón Iniciar Sesión Optimizado para Móviles (Zona de toque de ~36px en móvil, ~28px en escritorio) */}
           <Link 
             href="/login" 
-            className="text-xs font-bold uppercase tracking-wider border border-[#000f37] text-[#000f37] px-4 py-2 rounded-none transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb] flex items-center"
-            style={{ height: '24px', boxSizing: 'border-box', padding: '0 16px' }}
+            className="text-[10px] font-bold uppercase tracking-widest border border-[#000f37] text-[#000f37] px-4 py-2.5 md:py-1 rounded-none transition-all duration-300 hover:bg-[#000f37] hover:text-[#f9fafb] flex items-center justify-center min-h-[36px] md:min-h-[28px]"
           >
             {lang === 'es' ? "Iniciar Sesión" : "Sign In"}
           </Link>
