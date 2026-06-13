@@ -147,7 +147,7 @@ export default function HomePage() {
 
         <p className="text-lg leading-relaxed text-[#374151] mt-6 max-w-2xl">
           {lang === 'es' ? (
-            <>Software diseñado para el escrutinio literal, dispensacional y pretribulacional de las Escrituras. Sin traducciones modernas ni interpretaciones genéricas.</>
+            <>Software diseñado para el escrutinio literal, dispensacional y pretribulacional de las Escrituras.<br/><br/>Sin traducciones modernas ni interpretaciones genéricas.</>
           ) : (
             <>Software engine designed for the literal, dispensational, and pre-tribulational study of Scripture.<br/><br/>No modern translations. Pure Bible analysis.</>
           )}
