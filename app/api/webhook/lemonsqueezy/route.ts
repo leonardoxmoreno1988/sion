@@ -38,9 +38,14 @@ export async function POST(req: Request) {
     const subscriptionId = body.data?.id;
     const status = data.status || 'active';
 
+    // ✨ SOLUCIÓN AL ERROR: Generamos un UUID en texto para la columna "id" 
+    // Si es un INSERT, usará este nuevo ID. Si es un UPDATE (conflicto por user_id), Postgres ignorará este ID y actualizará el registro existente.
+    const uniqueIdForInsert = crypto.randomUUID();
+
     const { error } = await supabaseAdmin
       .from('subscriptions')
       .upsert({
+        id: uniqueIdForInsert, // 🛡️ Evita el error "null value in column id violates not-null constraint"
         user_id: userId,
         lemonsqueezy_sub_id: subscriptionId,
         status: status,
