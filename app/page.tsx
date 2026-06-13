@@ -71,7 +71,8 @@ export default function HomePage() {
     if (window.LemonSqueezy?.Url) {
       window.LemonSqueezy.Url.open(CHECKOUT_URL);
     } else {
-      window.open(CHECKOUT_URL, '_blank');
+      // 🛡️ CORRECCIÓN: Agregamos 'noopener,noreferrer' para aislar la pestaña de forma segura
+      window.open(CHECKOUT_URL, '_blank', 'noopener,noreferrer');
     }
   };
 
