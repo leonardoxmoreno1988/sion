@@ -55,3 +55,5 @@ ingest_bible.mjs
 ingest_kjv.mjs
 data/
 data_kjv/
+*storybook.log
+storybook-static

@@ -3,7 +3,11 @@
 // 🚀 Cambiado a Alias Absoluto para blindar el build de Vercel
 import { useLanguage } from "../app/context/Languagecontext";
 
-export default function Header() {
+interface HeaderProps {
+  isAuthenticated?: boolean;
+}
+
+export default function Header({ isAuthenticated = false }: HeaderProps) {
   const { lang, t, setLanguage } = useLanguage();
 
   return (
@@ -38,10 +42,15 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Botón de Upgrade */}
-        <button className="bg-zinc-100 text-zinc-950 px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-zinc-200 transition-all">
-          {t.header.upgrade}
-        </button>
+        {isAuthenticated ? (
+          <button className="text-zinc-400 hover:text-zinc-100 px-3 py-1.5 text-sm font-medium transition-all">
+            {t.header.logout}
+          </button>
+        ) : (
+          <button className="bg-zinc-100 text-zinc-950 px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-zinc-200 transition-all">
+            {t.header.upgrade}
+          </button>
+        )}
       </div>
     </header>
   );
