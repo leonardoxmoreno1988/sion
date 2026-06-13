@@ -217,7 +217,7 @@ export default function HomePage() {
                   key={i} 
                   width="18" 
                   height="18" 
-                  viewBox="0 0 24 24" 
+                  viewBox="0 0 20 20" 
                   fill="#c49400" /* Color dorado/amber-500 de Tailwind */
                   className="shrink-0"
                 >
