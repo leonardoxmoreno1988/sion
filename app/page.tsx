@@ -208,8 +208,25 @@ export default function HomePage() {
 
         {/* TESTIMONIAL */}
         <section className="mt-20 border-t border-[#e5e7eb] pt-12">
-          <div className="flex flex-col gap-6">
-            <p className="text-xl md:text-2xl font-medium text-[#000f37] leading-relaxed">
+          <div className="flex flex-col gap-5">
+            
+            {/* 5 ESTRELLAS DORADAS ALINEADAS A LA IZQUIERDA */}
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <svg 
+                  key={i} 
+                  width="18" 
+                  height="18" 
+                  viewBox="0 0 24 24" 
+                  fill="#eab308" /* Color dorado/amber-500 de Tailwind */
+                  className="shrink-0"
+                >
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              ))}
+            </div>
+
+            <p className="text-xl md:text-2xl font-medium text-[#000f37] leading-relaxed italic">
               {lang === 'es' ? (
                 <>“Súper intuitivo y potente. Patmos transforma completamente cómo estudio la Biblia. Esta alternativa es exactamente lo que el estudiante de la Biblia necesita.”</>
               ) : (
