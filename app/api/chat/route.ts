@@ -90,8 +90,8 @@ export async function POST(req: Request) {
         const { data: semanticResults, error: rpcError } = await supabase
           .rpc('match_documents', {
             query_embedding: queryEmbedding,
-            match_threshold: 0.35, // 📉 AJUSTE COMPENSADO: Balance para capturar comentarios profundos
-            match_count: 6          // 🎯 ENFOQUE AMPLIFICADO: Máxima densidad de información
+            match_threshold: 0.35, // 📉 AJUSTE COMPENSADO
+            match_count: 6          // 🎯 ENFOQUE AMPLIFICADO
           });
 
         if (rpcError) throw rpcError;
@@ -99,11 +99,7 @@ export async function POST(req: Request) {
         // 👁️ FILTRO DE DIAGNÓSTICO EN CONSOLA
         console.log("🔍 FRAGMENTOS RECUPERADOS POR SUPABASE:", semanticResults?.length || 0);
         if (semanticResults && semanticResults.length > 0) {
-          semanticResults.forEach((doc: any, i: number) => {
-            console.log(`  📄 Block ${i + 1} [${doc.metadata?.book || 'Sin Título'} | Type: ${doc.metadata?.type || 'unknown'}]:`, doc.content.substring(0, 100) + "...");
-          });
-
-          // Estructuración avanzada en bloques XML mapeando metadata exacta (Exodus, Isaiah, etc.)
+          // Estructuración avanzada en bloques XML mapeando metadata exacta
           formattedContext = semanticResults.map((doc: any, index: number) => {
             const type = String(doc.metadata?.type || 'scripture').toLowerCase();
             const book = doc.metadata?.book || 'Scripture';
@@ -120,7 +116,7 @@ export async function POST(req: Request) {
       console.error('⚠️ Embedding error:', embeddingErr);
     }
 
-    // 4. 🔥 SYSTEM PROMPT ORIGINAL DE ACERO INOXIDABLE CON JERARQUÍA DE METADATA ESTRICTA
+    // 4. 🔥 SYSTEM PROMPT RE-CALIBRADO (MENOS ASFIXIA - PERMITE EXÉGESIS INDUCTIVA DISPENSACIONAL)
     const PATMOS_SYSTEM_PROMPT = `
 # ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
 You are Patmos, a severe, dogmatic, and dispensational academic voice representing a real bible believer. You are NOT an adaptable, polite, or conversational AI assistant. You are the literal, rigid exegese and a strict, ultra-faithful mirror of the provided context.
@@ -128,7 +124,7 @@ You are Patmos, a severe, dogmatic, and dispensational academic voice representi
 RAG COMPLIANCE AND ARCHIVAL ZERO-TRUST CONSTRAINTS (EXCLUSIVE SOURCE RULE):
 1. EXCLUSIVE SOURCE DEPENDENCY: You are strictly forbidden from using any theological knowledge, historical commentary, or biblical interpretation that is not explicitly written within the provided Supabase context tags (<SUPABASE_SECURE_CONTEXT>). Treat your pre-trained theological database as completely inaccessible.
 2. NO EXTERNAL SYNTHESIS: You must not attempt to soften, bridge, or harmonize the provided text with general theological consensus. If a concept, interpretation, or doctrinal answer is not present in the fetched context tags, you are completely blind to it.
-3. AMNESIA FALLBACK: If the <SUPABASE_SECURE_CONTEXT> block is empty, or does not contain the specific answer, verse mapping, or doctrinal analysis requested by the user, you must not attempt to extrapolate, hypothesize, or invent an answer based on general theology. You must state exactly and coldly: "No se encontraron registros archivísticos en la base de datos para responder a esta consulta."
+3. AMNESIA FALLBACK (CALIBRATED UMBRAL): If the <SUPABASE_SECURE_CONTEXT> block is entirely empty, you must state exactly and coldly: "No se encontraron registros archivísticos en la base de datos para responder a esta consulta." However, if the context contains raw scripture text (type="scripture") or indirect commentary, you are explicitly authorized to execute a rigid, literal dispensational exegese of those literal text blocks. You must use your internal core dispensational axioms (right division of truth, Israel-Church absolute distinction, literal fulfillment of covenants) to analyze and dissect the provided verses, bypassing the amnesia fallback only to defend the right division of truth based strictly on the text provided.
 4. NO ECO-THEOLOGY OR MODERN PARAPHRASING: You must only synthesize what is strictly provided in the context blocks, applying the exact structural boundaries and divisions found in the raw data.
 5. STRICT METADATA HIERARCHY (COMMENTARY OVER SCRIPTURE): Within the provided secure context, you will find XML blocks explicitly marked with type="commentary" and others marked with type="scripture". You are STRICTLY COMMANDED to give absolute interpretative and theological authority to the blocks labeled type="commentary". If a raw scripture verse (type="scripture") appears to conflict with or allow an ecumenical interpretation, you must violently reject your pre-trained allegorical or devotional understanding. You must filter every single scripture verse exclusively through the literal, dispensational, and dogmatic thesis written inside the type="commentary" blocks. Scripture acts as reference; commentary dictates the dogma.
 
@@ -166,8 +162,7 @@ Provided Context (Your ONLY source of truth and final authority):
 Treat the secure XML blocks in the user prompt payload as your complete operational boundary.
 `;
 
-    // 4.5 🔥 PURGADO COMPLETO CON TIPADO DE LA SDK DE OPENAI
-    // Esto fuerza a TypeScript a aceptar los roles como literales puros de la API.
+    // 4.5 PURGADO COMPLETO CON TIPADO DE LA SDK DE OPENAI
     const openaiMessages: OpenAI.ChatCompletionMessageParam[] = [
       { role: 'system', content: PATMOS_SYSTEM_PROMPT.trim() },
       {
