@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. Contexto Teológico (Búsqueda Vectorial nativa en Supabase RPC + Formateador XML)
+    // 3. Contexto Teológico (Búsqueda Vectorial nativa en Supabase RPC + Formateador XML Avanzado)
     let formattedContext = '';
     try {
       if (lastMessage.trim()) {
@@ -90,8 +90,8 @@ export async function POST(req: Request) {
         const { data: semanticResults, error: rpcError } = await supabase
           .rpc('match_documents', {
             query_embedding: queryEmbedding,
-            match_threshold: 0.35, // 📉 AJUSTE COMPENSADO: Bajamos a 0.35 para capturar comentarios profundos existentes
-            match_count: 6          // 🎯 ENFOQUE AMPLIFICADO: Permitimos hasta 6 impactos semánticos de alta densidad
+            match_threshold: 0.35, // 📉 AJUSTE COMPENSADO: Balance para capturar comentarios profundos
+            match_count: 6          // 🎯 ENFOQUE AMPLIFICADO: Máxima densidad de información
           });
 
         if (rpcError) throw rpcError;
@@ -100,15 +100,19 @@ export async function POST(req: Request) {
         console.log("🔍 FRAGMENTOS RECUPERADOS POR SUPABASE:", semanticResults?.length || 0);
         if (semanticResults && semanticResults.length > 0) {
           semanticResults.forEach((doc: any, i: number) => {
-            console.log(`  📄 Block ${i + 1} [${doc.metadata?.book || 'Sin Título'}]:`, doc.content.substring(0, 100) + "...");
+            console.log(`  📄 Block ${i + 1} [${doc.metadata?.book || 'Sin Título'} | Type: ${doc.metadata?.type || 'unknown'}]:`, doc.content.substring(0, 100) + "...");
           });
 
-          // Estructuración limpia en bloques XML numerados para mitigar el sesgo pre-entrenado
+          // Estructuración avanzada en bloques XML mapeando metadata exacta (Exodus, Isaiah, etc.)
           formattedContext = semanticResults.map((doc: any, index: number) => {
-            const type = String(doc.metadata?.type || 'scripture').toUpperCase();
+            const type = String(doc.metadata?.type || 'scripture').toLowerCase();
             const book = doc.metadata?.book || 'Scripture';
-            const author = doc.metadata?.author ? ` | Author: ${doc.metadata.author}` : '';
-            return `<ARCHIVE_BLOCK_${index + 1}>\n[Type: ${type} | Resource: ${book}${author}]\n${doc.content}\n</ARCHIVE_BLOCK_${index + 1}>`;
+            const version = doc.metadata?.version || 'KJV';
+            const source = doc.metadata?.source || 'unknown';
+            const range = doc.metadata?.verse_range ? ` | Range: ${doc.metadata.verse_range}` : '';
+            const chapter = doc.metadata?.chapter ? ` | Chapter: ${doc.metadata.chapter}` : '';
+            
+            return `<ARCHIVE_BLOCK_${index + 1} type="${type}" source="${source}">\n[Metadata: Book: ${book} | Version: ${version}${range}${chapter}]\n${doc.content}\n</ARCHIVE_BLOCK_${index + 1}>`;
           }).join('\n\n');
         }
       }
@@ -116,7 +120,7 @@ export async function POST(req: Request) {
       console.error('⚠️ Embedding error:', embeddingErr);
     }
 
-    // 4. 🔥 SYSTEM PROMPT ORIGINAL DE ACERO INOXIDABLE CON CANDADO EXTRA-ESTRICTO DE CONTEXTO
+    // 4. 🔥 SYSTEM PROMPT ORIGINAL DE ACERO INOXIDABLE CON JERARQUÍA DE METADATA ESTRICTA
     const PATMOS_SYSTEM_PROMPT = `
 # ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
 You are Patmos, a severe, dogmatic, and dispensational academic voice representing a real bible believer. You are NOT an adaptable, polite, or conversational AI assistant. You are the literal, rigid exegese and a strict, ultra-faithful mirror of the provided context.
@@ -126,6 +130,7 @@ RAG COMPLIANCE AND ARCHIVAL ZERO-TRUST CONSTRAINTS (EXCLUSIVE SOURCE RULE):
 2. NO EXTERNAL SYNTHESIS: You must not attempt to soften, bridge, or harmonize the provided text with general theological consensus. If a concept, interpretation, or doctrinal answer is not present in the fetched context tags, you are completely blind to it.
 3. AMNESIA FALLBACK: If the <SUPABASE_SECURE_CONTEXT> block is empty, or does not contain the specific answer, verse mapping, or doctrinal analysis requested by the user, you must not attempt to extrapolate, hypothesize, or invent an answer based on general theology. You must state exactly and coldly: "No se encontraron registros archivísticos en la base de datos para responder a esta consulta."
 4. NO ECO-THEOLOGY OR MODERN PARAPHRASING: You must only synthesize what is strictly provided in the context blocks, applying the exact structural boundaries and divisions found in the raw data.
+5. STRICT METADATA HIERARCHY (COMMENTARY OVER SCRIPTURE): Within the provided secure context, you will find XML blocks explicitly marked with type="commentary" and others marked with type="scripture". You are STRICTLY COMMANDED to give absolute interpretative and theological authority to the blocks labeled type="commentary". If a raw scripture verse (type="scripture") appears to conflict with or allow an ecumenical interpretation, you must violently reject your pre-trained allegorical or devotional understanding. You must filter every single scripture verse exclusively through the literal, dispensational, and dogmatic thesis written inside the type="commentary" blocks. Scripture acts as reference; commentary dictates the dogma.
 
 CRITICAL OUTPUT ARCHITECTURE (MANDATORY FORMATTING RULES):
 1. IMMEDIATE EXPOSITION: Absolutely BAN all introductory filler, greetings, or welcome text at the very top. The very first character of your response must be your first custom theological title wrapped in bold markdown. No conversational transitions, no friendly conclusions, no summary paragraphs at the end.
@@ -161,14 +166,13 @@ Provided Context (Your ONLY source of truth and final authority):
 Treat the secure XML blocks in the user prompt payload as your complete operational boundary.
 `;
 
-    // Filtramos el historial histórico para dejar el canal limpio
-    const openaiMessages = messages
-      .filter((m: any) => m.role === 'user' || m.role === 'assistant')
-      .map((m: any) => ({ role: m.role, content: m.content }));
-
-    // Reemplazamos el último mensaje del usuario por la estructura de inyección RAG hiper-restringida
-    if (openaiMessages.length > 0 && openaiMessages[openaiMessages.length - 1].role === 'user') {
-      openaiMessages[openaiMessages.length - 1].content = `
+    // 4.5 🔥 PURGADO COMPLETO CON TIPADO DE LA SDK DE OPENAI
+    // Esto fuerza a TypeScript a aceptar los roles como literales puros de la API.
+    const openaiMessages: OpenAI.ChatCompletionMessageParam[] = [
+      { role: 'system', content: PATMOS_SYSTEM_PROMPT.trim() },
+      {
+        role: 'user',
+        content: `
 [SYSTEM COMMAND: EXECUTE THE WATCHMAN PROTOCOL]
 Review the following strictly confidential internal archives. You must structure your whole response using ONLY the explicit guidelines, names, and theological data contained within these tags. If the tags are empty or do not contain the specific dispensational answer to the query, reply with the Amnesia Fallback clause.
 
@@ -179,16 +183,15 @@ ${formattedContext && formattedContext.trim() !== "" ? formattedContext : ""}
 <USER_QUERY>
 ${lastMessage}
 </USER_QUERY>
-`.trim();
-    }
-
-    openaiMessages.unshift({ role: 'system', content: PATMOS_SYSTEM_PROMPT.trim() });
+`.trim()
+      }
+    ];
 
     // 5. El Stream de OpenAI (Captura limpia en memoria con Temperatura 0)
     const responseStream = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: openaiMessages,
-      temperature: 0, // Mantenemos el determinismo estricto
+      temperature: 0, 
       stream: true,
     });
 
