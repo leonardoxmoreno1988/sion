@@ -88,11 +88,11 @@ export async function POST(req: Request) {
         const queryEmbedding = embeddingResponse.data[0].embedding;
 
         const { data: semanticResults, error: rpcError } = await supabase
-          .rpc('match_documents', {
-            query_embedding: queryEmbedding,
-            match_threshold: 0.35, // 📉 AJUSTE COMPENSADO
-            match_count: 6          // 🎯 ENFOQUE AMPLIFICADO
-          });
+  .rpc('match_documents', {
+    query_embedding: queryEmbedding,
+    match_threshold: 0.30, // 📉 RED DE FONDO: Bajamos a 0.30 para asegurar que el "Manifiesto" y notas profundas entren sí o sí
+    match_count: 15        // 🎯 VOLUMEN MACRO: Subimos a 15 bloques para simular la ventana masiva de NotebookLLM
+  });
 
         if (rpcError) throw rpcError;
 
