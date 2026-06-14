@@ -91,11 +91,11 @@ export async function POST(req: Request) {
         const queryEmbedding = embeddingResponse.data[0].embedding;
 
         const { data: semanticResults, error: rpcError } = await supabase
-          .rpc('match_documents', {
-            query_embedding: queryEmbedding,
-            match_threshold: 0.15,
-            match_count: 14
-          });
+  .rpc('match_documents', {
+    query_embedding: queryEmbedding,
+    match_threshold: 0.55, // 🔥 CALIBRACIÓN INDUSTRIAL: Filtra el ruido y exige alta relevancia semántica
+    match_count: 5          // 🎯 ENFOQUE DE ACERO: Trae solo los 5 fragmentos más letales y ultra-específicos
+  });
 
         if (rpcError) throw rpcError;
 
