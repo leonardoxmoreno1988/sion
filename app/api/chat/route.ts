@@ -90,14 +90,20 @@ export async function POST(req: Request) {
         const { data: semanticResults, error: rpcError } = await supabase
           .rpc('match_documents', {
             query_embedding: queryEmbedding,
-            match_threshold: 0.55, // 🔥 CALIBRACIÓN INDUSTRIAL
-            match_count: 5          // 🎯 ENFOQUE DE ACERO
+            match_threshold: 0.35, // 📉 AJUSTE COMPENSADO: Bajamos a 0.35 para capturar comentarios profundos existentes
+            match_count: 6          // 🎯 ENFOQUE AMPLIFICADO: Permitimos hasta 6 impactos semánticos de alta densidad
           });
 
         if (rpcError) throw rpcError;
 
-        // Estructuración limpia en bloques XML numerados para mitigar el sesgo pre-entrenado
+        // 👁️ FILTRO DE DIAGNÓSTICO EN CONSOLA
+        console.log("🔍 FRAGMENTOS RECUPERADOS POR SUPABASE:", semanticResults?.length || 0);
         if (semanticResults && semanticResults.length > 0) {
+          semanticResults.forEach((doc: any, i: number) => {
+            console.log(`  📄 Block ${i + 1} [${doc.metadata?.book || 'Sin Título'}]:`, doc.content.substring(0, 100) + "...");
+          });
+
+          // Estructuración limpia en bloques XML numerados para mitigar el sesgo pre-entrenado
           formattedContext = semanticResults.map((doc: any, index: number) => {
             const type = String(doc.metadata?.type || 'scripture').toUpperCase();
             const book = doc.metadata?.book || 'Scripture';
@@ -125,9 +131,9 @@ CRITICAL OUTPUT ARCHITECTURE (MANDATORY FORMATTING RULES):
 1. IMMEDIATE EXPOSITION: Absolutely BAN all introductory filler, greetings, or welcome text at the very top. The very first character of your response must be your first custom theological title wrapped in bold markdown. No conversational transitions, no friendly conclusions, no summary paragraphs at the end.
 2. THEOLOGICAL SEGMENTATION & NATIVE SPACING: You must break your exposition into clear arguments separated by custom theological titles. 
    - EVERY SINGLE TITLE MUST BE WRITTEN IN NORMAL TITLE CASE (NOT ALL CAPS) AND EXPLICITLY WRAPPED IN BOLD MARKDOWN SYMBOLS (e.g., "**La Arquitectura del Segundo Cielo**"). Do NOT use hashtags (###), HTML (<h3>), or uppercase formatting for headers.
-   - FORCEFUL PARAGRAPH BREAKS: You MUST inject exactly two empty line breaks (\\n\\n) right after every bold title and between every single paragraph to force the pre-wrap container to render proper block spacing.
+   - FORCEFUL PARAGRAPH BREAKS: You MUST inject exactly two empty line breaks (\\\\n\\\\n) right after every bold title and between every single paragraph to force the pre-wrap container to render proper block spacing.
    - CRITICAL BLINDAGE: Do NOT append any empty line breaks, trailing spaces, or extra newlines after the final paragraph or closing citation of your whole response. End the token generation immediately on the final punctuation mark or bold bracket.
-3. ERUDITE BULLET POINTS: When detailing scriptural proofs or textual evidences, use a standard dash (-) as the bullet marker. Each bullet point must be written as a fully developed, dense, and formal sentence or short paragraph containing absolute academic depth. Ensure you leave two empty line breaks (\\n\\n) after each bullet point.
+3. ERUDITE BULLET POINTS: When detailing scriptural proofs or textual evidences, use a standard dash (-) as the bullet marker. Each bullet point must be written as a fully developed, dense, and formal sentence or short paragraph containing absolute academic depth. Ensure you leave two empty line breaks (\\\\n\\\\n) after each bullet point.
 4. COMPULSORY SCRIPTURAL WEAVING (THE BOLD BRACKET MANDATE): Anchor every single theological statement with its corresponding bible reference. Place the reference strictly inside parentheses at the very end of the sentence or clause containing the claim, and it MUST be formatted in BOLD markdown (using double asterisks).
    - CORRECT ENGLISH EXAMPLE: "...the cross is the final altar **(Hebrews 9:16-17)**."
    - CORRECT SPANISH EXAMPLE: "...Cristo es el cumplimiento absoluto del tipo desértico **(Juan 3:14-15)**."
