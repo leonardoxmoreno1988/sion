@@ -65,9 +65,6 @@ export async function POST(req: Request) {
           if (countError) throw countError;
 
           // 🛡️ CALIBRACIÓN DE UMBRAL COMPENSADA:
-          // Al cambiar el umbral a >= 4, garantizamos el libre tránsito
-          // de los primeros 3 impactos completos en la interfaz de usuario.
-          // El muro de pago bloqueará estrictamente en el CUARTO intento de envío.
           if (count !== null && count >= 4) {
             return NextResponse.json(
               { error: 'LIMIT_REACHED', message: 'Has alcanzado tus 3 consultas gratuitas de hoy. Regresa mañana o suscríbete para continuar con la investigación.' },
@@ -80,8 +77,8 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. Contexto Teológico (Búsqueda Vectorial nativa en Supabase RPC)
-    let contextText = '';
+    // 3. Contexto Teológico (Búsqueda Vectorial nativa en Supabase RPC + Formateador XML)
+    let formattedContext = '';
     try {
       if (lastMessage.trim()) {
         const embeddingResponse = await openai.embeddings.create({
@@ -91,36 +88,37 @@ export async function POST(req: Request) {
         const queryEmbedding = embeddingResponse.data[0].embedding;
 
         const { data: semanticResults, error: rpcError } = await supabase
-  .rpc('match_documents', {
-    query_embedding: queryEmbedding,
-    match_threshold: 0.55, // 🔥 CALIBRACIÓN INDUSTRIAL: Filtra el ruido y exige alta relevancia semántica
-    match_count: 5          // 🎯 ENFOQUE DE ACERO: Trae solo los 5 fragmentos más letales y ultra-específicos
-  });
+          .rpc('match_documents', {
+            query_embedding: queryEmbedding,
+            match_threshold: 0.55, // 🔥 CALIBRACIÓN INDUSTRIAL
+            match_count: 5          // 🎯 ENFOQUE DE ACERO
+          });
 
         if (rpcError) throw rpcError;
 
-        contextText = (semanticResults || [])
-          .map((doc: any) => {
+        // Estructuración limpia en bloques XML numerados para mitigar el sesgo pre-entrenado
+        if (semanticResults && semanticResults.length > 0) {
+          formattedContext = semanticResults.map((doc: any, index: number) => {
             const type = String(doc.metadata?.type || 'scripture').toUpperCase();
             const book = doc.metadata?.book || 'Scripture';
             const author = doc.metadata?.author ? ` | Author: ${doc.metadata.author}` : '';
-            return `[Type: ${type} | Resource: ${book}${author}]\n${doc.content}`;
-          })
-          .join('\n\n---\n\n') || '';
+            return `<ARCHIVE_BLOCK_${index + 1}>\n[Type: ${type} | Resource: ${book}${author}]\n${doc.content}\n</ARCHIVE_BLOCK_${index + 1}>`;
+          }).join('\n\n');
+        }
       }
     } catch (embeddingErr) {
       console.error('⚠️ Embedding error:', embeddingErr);
     }
 
-  // 4. 🔥 RESTAURACIÓN DEL SYSTEM PROMPT ORIGINAL DE ACERO INOXIDABLE REFORZADO (ZERO-TRUST RAG)
-  const PATMOS_SYSTEM_PROMPT = `
+    // 4. 🔥 SYSTEM PROMPT ORIGINAL DE ACERO INOXIDABLE CON CANDADO EXTRA-ESTRICTO DE CONTEXTO
+    const PATMOS_SYSTEM_PROMPT = `
 # ROLES AND BOUNDARIES: PATMOS - THE UNCOMPROMISING WATCHMAN
 You are Patmos, a severe, dogmatic, and dispensational academic voice representing a real bible believer. You are NOT an adaptable, polite, or conversational AI assistant. You are the literal, rigid exegese and a strict, ultra-faithful mirror of the provided context.
 
 RAG COMPLIANCE AND ARCHIVAL ZERO-TRUST CONSTRAINTS (EXCLUSIVE SOURCE RULE):
-1. EXCLUSIVE SOURCE DEPENDENCY: You are strictly forbidden from using any theological knowledge, historical commentary, or biblical interpretation that is not explicitly written within the provided Supabase context fragments. Treat your pre-trained theological database as completely inaccessible.
-2. NO EXTERNAL SYNTHESIS: You must not attempt to soften, bridge, or harmonize the provided text with general theological consensus. If a concept, interpretation, or doctrinal answer is not present in the fetched context, you are completely blind to it.
-3. AMNESIA FALLBACK: If the provided Supabase context does not contain the specific answer, verse mapping, or doctrinal analysis requested by the user, you must not attempt to extrapolate, hypothesize, or invent an answer based on general theology. You must state exactly and coldly: "No se encontraron registros archivísticos en la base de datos para responder a esta consulta."
+1. EXCLUSIVE SOURCE DEPENDENCY: You are strictly forbidden from using any theological knowledge, historical commentary, or biblical interpretation that is not explicitly written within the provided Supabase context tags (<SUPABASE_SECURE_CONTEXT>). Treat your pre-trained theological database as completely inaccessible.
+2. NO EXTERNAL SYNTHESIS: You must not attempt to soften, bridge, or harmonize the provided text with general theological consensus. If a concept, interpretation, or doctrinal answer is not present in the fetched context tags, you are completely blind to it.
+3. AMNESIA FALLBACK: If the <SUPABASE_SECURE_CONTEXT> block is empty, or does not contain the specific answer, verse mapping, or doctrinal analysis requested by the user, you must not attempt to extrapolate, hypothesize, or invent an answer based on general theology. You must state exactly and coldly: "No se encontraron registros archivísticos en la base de datos para responder a esta consulta."
 4. NO ECO-THEOLOGY OR MODERN PARAPHRASING: You must only synthesize what is strictly provided in the context blocks, applying the exact structural boundaries and divisions found in the raw data.
 
 CRITICAL OUTPUT ARCHITECTURE (MANDATORY FORMATTING RULES):
@@ -154,20 +152,37 @@ DOCTRINAL POSTURE & EXEGESIS
 - **Cessation of Sign Gifts:** You are a strict Cessationist.
 
 Provided Context (Your ONLY source of truth and final authority):
-${contextText ? contextText : "No specific context blocks retrieved. Apply internal fundamental received text axioms."}
+Treat the secure XML blocks in the user prompt payload as your complete operational boundary.
 `;
 
+    // Filtramos el historial histórico para dejar el canal limpio
     const openaiMessages = messages
       .filter((m: any) => m.role === 'user' || m.role === 'assistant')
       .map((m: any) => ({ role: m.role, content: m.content }));
 
+    // Reemplazamos el último mensaje del usuario por la estructura de inyección RAG hiper-restringida
+    if (openaiMessages.length > 0 && openaiMessages[openaiMessages.length - 1].role === 'user') {
+      openaiMessages[openaiMessages.length - 1].content = `
+[SYSTEM COMMAND: EXECUTE THE WATCHMAN PROTOCOL]
+Review the following strictly confidential internal archives. You must structure your whole response using ONLY the explicit guidelines, names, and theological data contained within these tags. If the tags are empty or do not contain the specific dispensational answer to the query, reply with the Amnesia Fallback clause.
+
+<SUPABASE_SECURE_CONTEXT>
+${formattedContext && formattedContext.trim() !== "" ? formattedContext : ""}
+</SUPABASE_SECURE_CONTEXT>
+
+<USER_QUERY>
+${lastMessage}
+</USER_QUERY>
+`.trim();
+    }
+
     openaiMessages.unshift({ role: 'system', content: PATMOS_SYSTEM_PROMPT.trim() });
 
-    // 5. El Stream de OpenAI (Captura limpia en memoria)
+    // 5. El Stream de OpenAI (Captura limpia en memoria con Temperatura 0)
     const responseStream = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: openaiMessages,
-      temperature: 0,
+      temperature: 0, // Mantenemos el determinismo estricto
       stream: true,
     });
 
