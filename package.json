@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "bunker:manifesto": "ts-node scripts/ingest-manifesto.ts"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.186",
