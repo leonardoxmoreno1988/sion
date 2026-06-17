@@ -57,3 +57,5 @@ data/
 data_kjv/
 *storybook.log
 storybook-static
+
+_manuscripts/
