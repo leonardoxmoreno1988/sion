@@ -13,7 +13,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 2, 6, 23; /* #020617 (Consistencia con tu modo oscuro de Patmos) */
+    --background-start-rgb: 2, 6, 23;
     --background-end-rgb: 2, 6, 23;
   }
 }
