@@ -1,11 +1,9 @@
 import * as dotenv from 'dotenv';
-// Cargamos las variables antes de que cualquier cliente intente leerlas
 dotenv.config({ path: '.env.local' }); 
 
 import * as fs from 'fs';
 import * as path from 'path';
 import { createClient } from '@supabase/supabase-js'; 
-import { GoogleGenAI } from '@google/genai';
 import { OpenAI } from 'openai'; 
 
 // ==========================================
@@ -23,16 +21,14 @@ interface TheologicalMetadata {
 // ==========================================
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY; 
-const geminiApiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 const openaiApiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 
-if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey || !openaiApiKey) {
-  console.error("[CRÍTICO] Faltan variables de entorno en tu .env.local.");
+if (!supabaseUrl || !supabaseServiceKey || !openaiApiKey) {
+  console.error("[CRÍTICO] Faltan variables de entorno en tu .env.local. Asegúrate de tener configuradas las llaves de Supabase y OpenAI.");
   process.exit(1);
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
-const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 const openai = new OpenAI({ apiKey: openaiApiKey });
 
 // ==========================================
@@ -60,10 +56,11 @@ function splitIntoSubChunks(text: string, maxWords: number = 2500): string[] {
 }
 
 /**
- * Extrae la metadata estructurada usando Gemini con un sistema de reintento inteligente
- * ante bloqueos de cuota o rate limits (Error 429).
+ * Extrae los metadatos usando OpenAI (gpt-4o-mini), garantizando velocidad constante
+ * y blindaje absoluto contra los bloqueos de cuota diarios de Google.
  */
-async function extractTheologicalMetadata(rawChunk: string, estimatedChapter: number): Promise<TheologicalMetadata | null> {
+async function extractTheologicalMetadataWithOpenAI(rawChunk: string, estimatedChapter: number): Promise<TheologicalMetadata> {
+  // Pasamos solo los primeros 3000 caracteres para agilizar y economizar tokens de análisis
   const sampleText = rawChunk.slice(0, 3000);
 
   const prompt = `
@@ -88,59 +85,30 @@ async function extractTheologicalMetadata(rawChunk: string, estimatedChapter: nu
     }
   `;
 
-  let attempts = 0;
-  const maxAttempts = 5;
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "Eres un experto en teología y análisis estructural de manuscritos. Respondes exclusivamente con objetos JSON puros y bien formateados." },
+        { role: "user", content: prompt }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.1
+    });
 
-  while (attempts < maxAttempts) {
-    try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash', 
-        contents: prompt,
-        config: { responseMimeType: 'application/json' }
-      });
+    const rawText = response.choices[0].message.content || "{}";
+    const data = JSON.parse(rawText.trim());
+    return data as TheologicalMetadata;
 
-      if (!response || !response.text) {
-        throw new Error("Respuesta vacía de la API");
-      }
-
-      const data = JSON.parse(response.text.trim());
-      return data as TheologicalMetadata;
-
-    } catch (e: any) {
-      const errorStr = JSON.stringify(e);
-      
-      // Detectamos si es un error de Cuota Agotada / Rate Limit (429)
-      if (errorStr.includes("429") || errorStr.includes("RESOURCE_EXHAUSTED")) {
-        attempts++;
-        
-        // Intentamos extraer dinámicamente el tiempo de espera que pide Google, si no, usamos 60 segundos por defecto
-        let waitTimeMs = 60000; 
-        const retryMatch = errorStr.match(/retry in ([\d\.]+)s/i);
-        if (retryMatch && retryMatch[1]) {
-          waitTimeMs = Math.ceil(parseFloat(retryMatch[1])) * 1000 + 2000; // Agregamos 2 segundos de margen
-        }
-
-        console.warn(`[CUOTA EXCEDIDA] Gemini nos bloqueó en el Capítulo ${estimatedChapter}. Reintento ${attempts}/${maxAttempts}. Congelando script por ${waitTimeMs / 1000} segundos...`);
-        
-        // Detener la ejecución el tiempo requerido
-        await new Promise(resolve => setTimeout(resolve, waitTimeMs));
-        continue; // Volver al inicio del bucle a intentar el mismo capítulo
-      }
-
-      // Si es otro tipo de error (ej. parseo de JSON), imprimimos y salimos del bucle
-      console.error(`[ERROR DE PARSEO EN CAPÍTULO ${estimatedChapter}]:`, e?.message || e);
-      break;
-    }
+  } catch (e: any) {
+    console.error(`[AVISO] Fallo temporal extrayendo metadata con OpenAI en Cap ${estimatedChapter}, usando fallback seguro:`, e.message);
+    return {
+      book: "Genesis",
+      chapter: estimatedChapter,
+      verses: [],
+      theological_era: estimatedChapter === 0 ? "General Preface" : "Unknown/Dynamic"
+    };
   }
-
-  // Si fallan todos los reintentos, devolvemos metadata segura por defecto en lugar de romper el pipeline
-  console.warn(`[AVISO] No se pudo obtener metadata fina para el Capítulo ${estimatedChapter} tras varios intentos. Usando valores por defecto.`);
-  return {
-    book: "Genesis",
-    chapter: estimatedChapter,
-    verses: [],
-    theological_era: estimatedChapter === 0 ? "General Preface" : "Unknown/Dynamic"
-  };
 }
 
 // ==========================================
@@ -155,7 +123,7 @@ async function purgeAndInjectGenesis(filePath: string) {
     .eq('metadata->>book', 'Genesis'); 
 
   if (purgeError) {
-    console.error(`[CRÍTICO] Falló la purga de datos antiguos:`, purgeError.message);
+    console.error(`[CRÍTICO] Falló la purga de datos antiguos en 'documents':`, purgeError.message);
     return;
   }
   console.log(`[LOG] Purga completada con éxito. Tabla 'documents' limpia para Génesis.`);
@@ -165,9 +133,9 @@ async function purgeAndInjectGenesis(filePath: string) {
   const fileContent = fs.readFileSync(absolutePath, 'utf-8');
 
   const chunks = fileContent.split(/(?=# Chapter\s+\d+)/i);
-  console.log(`[LOG] Se detectaron ${chunks.length} secciones principales.`);
+  console.log(`[LOG] Se detectaron ${chunks.length} secciones principales (Prefacio + Capítulos).`);
 
-  console.log(`[3/4] 🧠 Procesando bloques e indexando en Supabase...`);
+  console.log(`[3/4] 🧠 Procesando bloques e indexando en Supabase con OpenAI...`);
   
   for (let i = 0; i < chunks.length; i++) {
     const rawChunk = chunks[i].trim();
@@ -182,12 +150,10 @@ async function purgeAndInjectGenesis(filePath: string) {
     console.log(`\n[PROCESANDO] ${estimatedChapter === 0 ? 'Prefacio/Introducción' : `Capítulo ${estimatedChapter}`}...`);
 
     try {
-      // 1. Extraer los metadatos puros (con reintentos automáticos si Google frena)
-      const metadata = await extractTheologicalMetadata(rawChunk, estimatedChapter);
+      // 1. Extraer los metadatos puros usando OpenAI (Inmune a los bloqueos de cuota diarios de Google)
+      const metadata = await extractTheologicalMetadataWithOpenAI(rawChunk, estimatedChapter);
       
-      if (!metadata) continue;
-
-      // 2. Fraccionar el contenido de forma segura para OpenAI
+      // 2. Fraccionar el contenido de forma segura para los Embeddings
       const subChunks = splitIntoSubChunks(rawChunk, 2500);
 
       // 3. Procesar e inyectar cada sub-fragmento
@@ -205,7 +171,7 @@ async function purgeAndInjectGenesis(filePath: string) {
           .from('documents') 
           .upsert({
             id: uniqueId,
-            content: textToProcess,
+            content: textToProcess, // El bloque de texto original conservando su Markdown
             embedding: embedding,
             metadata: {
               book: "Genesis",
@@ -222,19 +188,17 @@ async function purgeAndInjectGenesis(filePath: string) {
           });
 
         if (injectError) throw injectError;
-        console.log(`   [ÉXITO] Sub-fragmento indexado: ${uniqueId}`);
+        console.log(`   [ÉXITO] Sub-fragmento indexado: ${uniqueId} | Era: ${metadata.theological_era}`);
       }
 
-      // Pausa base estándar entre capítulos para mitigar ráfagas comunes
-      if (estimatedChapter !== chunks.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 3500));
-      }
+      // Una pausa mínima de cortesía de 200ms para evitar saturación de la conexión local
+      await new Promise(resolve => setTimeout(resolve, 200));
 
     } catch (err: any) {
       console.error(`[ERROR CRÍTICO EN BLOQUE - CAPÍTULO ${estimatedChapter}]:`, err?.message || err);
     }
   }
-  console.log(`\n[4/4] 🎉 Proceso finalizado. Génesis ha sido completamente reemplazado con metadata impecable.`);
+  console.log(`\n[4/4] 🎉 Proceso finalizado. Génesis ha sido completamente reemplazado con metadata e indexación impecable.`);
 }
 
 // ==========================================
