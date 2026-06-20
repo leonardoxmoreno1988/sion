@@ -31,7 +31,7 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 async function activarCapitulo() {
   // 🎯 REEMPLAZAR AQUÍ CADA VEZ QUE CAMBIES DE CAPÍTULO
   const TARGET_BOOK = "Genesis";
-  const TARGET_CHAPTER = 10;
+  const TARGET_CHAPTER = 16;
 
   console.log(`📡 Buscando registros sin embedding para: ${TARGET_BOOK} Capítulo ${TARGET_CHAPTER}...`);
 
