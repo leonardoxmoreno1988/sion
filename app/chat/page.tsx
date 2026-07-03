@@ -507,8 +507,12 @@ const handleOpenBillingPortal = async (e: React.MouseEvent) => {
         
         if (value) {
           const chunk = decoder.decode(value, { stream: !done });
-          accumulatedText += chunk;
-
+          
+          // 🛡️ REGEX ANTI-LEAK: Limpia tanto "ARCHIVE_BLOCK_1" como posibles variantes entre paréntesis "(ARCHIVE_BLOCK_1)"
+          const sanitizedChunk = chunk.replace(/\(?ARCHIVE_BLOCK_\d+\)?/gi, "");
+          
+          accumulatedText += sanitizedChunk;
+      
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMessageId ? { ...m, content: accumulatedText } : m
